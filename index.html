@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DNSSEC?</title>
     <style>
+        /* Variabelen voor makkelijke kleurenwissel */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --input-bg: #ffffff;
+            --input-border: #dddddd;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --input-bg: #2d2d2d;
+            --input-border: #444444;
+        }
+
         body {
             margin: 0;
             height: 100vh;
@@ -13,7 +28,23 @@
             justify-content: center;
             align-items: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: white;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Dark mode knop rechtsboven */
+        #theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
         }
 
         .container {
@@ -28,13 +59,15 @@
         input[type="text"] {
             padding: 10px;
             font-size: 1.2rem;
-            border: 2px solid #ddd;
+            border: 2px solid var(--input-border);
             border-radius: 5px;
             width: 300px;
             margin-bottom: 10px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
         }
 
-        button {
+        button#check-btn {
             padding: 10px 20px;
             font-size: 1.2rem;
             background-color: #3498db;
@@ -44,7 +77,7 @@
             cursor: pointer;
         }
 
-        button:hover { background-color: #2980b9; }
+        button#check-btn:hover { background-color: #2980b9; }
 
         #status {
             font-size: 10rem;
@@ -56,22 +89,38 @@
         .nee { color: #e74c3c; }
         .laden { color: #bdc3c7; }
         
-        #details { font-size: 1.2rem; color: #666; min-height: 1.5em; }
+        #details { font-size: 1.2rem; color: #888; min-height: 1.5em; }
     </style>
 </head>
 <body>
+
+    <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
 
     <div class="container">
         <h1>Kijk maar ff</h1>
         
         <input type="text" id="domainInput" placeholder="Vul domein in..." value="">
-        <button onclick="checkDNSSEC()">Yusu?</button>
+        <button id="check-btn" onclick="checkDNSSEC()">Yusu?</button>
 
         <p id="status" class="laden">?</p>
         <p id="details">Voer een domeinnaam in om te controleren.</p>
     </div>
 
     <script>
+        // Functie voor Dark Mode wissel
+        function toggleTheme() {
+            const body = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                btn.textContent = '🌙 Dark Mode';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️ Light Mode';
+            }
+        }
+
         async function checkDNSSEC() {
             const input = document.getElementById('domainInput').value.trim();
             const statusElement = document.getElementById('status');
@@ -105,9 +154,6 @@
                 detailsElement.textContent = "Er ging iets mis.";
             }
         }
-
-        // De regel "window.onload = checkDNSSEC;" is verwijderd, 
-        // zodat hij niet meer automatisch start.
     </script>
 
 </body>
