@@ -54,8 +54,18 @@
             z-index: 5;
         }
 
+        #lukt-het {
+            font-size: 1.2rem;
+            color: #888;
+            height: 1.5em;
+            margin-bottom: 5px;
+            font-style: italic;
+            visibility: hidden;
+        }
+
         h1 {
             font-size: 2.5rem;
+            margin-top: 0;
             margin-bottom: 20px;
         }
 
@@ -95,7 +105,6 @@
         
         #details { font-size: 1.2rem; color: #888; min-height: 1.5em; }
 
-        /* De irritante knop styling */
         #troll-btn {
             position: fixed;
             bottom: 20px;
@@ -139,6 +148,7 @@
     <div id="rocket">🚀</div>
 
     <div class="container">
+        <div id="lukt-het">Lukt het? 🎯</div>
         <h1>Kijk maar ff</h1>
         <input type="text" id="domainInput" placeholder="Vul domein in..." value="">
         <button id="check-btn" onclick="checkDNSSEC()">Yusu?</button>
@@ -146,7 +156,6 @@
         <p id="details">Check ff dan.</p>
     </div>
 
-    <!-- De knop die wegrent -->
     <a href="https://www.sidn.nl/moderne-internetstandaarden/dnssec" 
        target="_blank" 
        id="troll-btn" 
@@ -154,6 +163,8 @@
        onclick="moveButton(this)">Wat is DNSSEC?</a>
 
     <script>
+        let missCount = 0;
+
         function toggleTheme() {
             const body = document.documentElement;
             const btn = document.getElementById('theme-toggle');
@@ -167,7 +178,12 @@
         }
 
         function moveButton(btn) {
-            // Bereken willekeurige posities binnen het venster
+            missCount++;
+            
+            if (missCount >= 10) {
+                document.getElementById('lukt-het').style.visibility = 'visible';
+            }
+
             const padding = 50;
             const maxX = window.innerWidth - btn.offsetWidth - padding;
             const maxY = window.innerHeight - btn.offsetHeight - padding;
