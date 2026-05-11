@@ -95,7 +95,23 @@
         
         #details { font-size: 1.2rem; color: #888; min-height: 1.5em; }
 
-        /* Raket verkleind en gepositioneerd */
+        /* De irritante knop styling */
+        #troll-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-decoration: none;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            background-color: #95a5a6;
+            color: white;
+            border-radius: 5px;
+            transition: all 0.1s ease;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
         #rocket {
             position: absolute;
             bottom: -100px;
@@ -108,27 +124,13 @@
         }
 
         @keyframes launch {
-            0% {
-                bottom: -100px;
-                opacity: 0;
-                transform: translateX(-50%) scale(1);
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                bottom: 110vh;
-                opacity: 0;
-                transform: translateX(-50%) scale(1.1);
-            }
+            0% { bottom: -100px; opacity: 0; transform: translateX(-50%) scale(1); }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { bottom: 110vh; opacity: 0; transform: translateX(-50%) scale(1.1); }
         }
 
-        .launching {
-            animation: launch 2s ease-in forwards;
-        }
+        .launching { animation: launch 2s ease-in forwards; }
     </style>
 </head>
 <body>
@@ -138,13 +140,18 @@
 
     <div class="container">
         <h1>Kijk maar ff</h1>
-        
         <input type="text" id="domainInput" placeholder="Vul domein in..." value="">
         <button id="check-btn" onclick="checkDNSSEC()">Yusu?</button>
-
         <p id="status" class="laden">?</p>
         <p id="details">Check ff dan.</p>
     </div>
+
+    <!-- De knop die wegrent -->
+    <a href="https://www.sidn.nl/moderne-internetstandaarden/dnssec" 
+       target="_blank" 
+       id="troll-btn" 
+       onmouseover="moveButton(this)" 
+       onclick="moveButton(this)">Wat is DNSSEC?</a>
 
     <script>
         function toggleTheme() {
@@ -157,6 +164,21 @@
                 body.setAttribute('data-theme', 'dark');
                 btn.textContent = '☀️ Light Mode';
             }
+        }
+
+        function moveButton(btn) {
+            // Bereken willekeurige posities binnen het venster
+            const padding = 50;
+            const maxX = window.innerWidth - btn.offsetWidth - padding;
+            const maxY = window.innerHeight - btn.offsetHeight - padding;
+            
+            const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
+            btn.style.bottom = 'auto';
+            btn.style.transform = 'none';
         }
 
         async function checkDNSSEC() {
@@ -180,16 +202,10 @@
                 const data = await response.json();
 
                 if (data.AD === true) {
-                    // Eerst de status op Ja zetten
                     statusElement.textContent = 'Ja';
                     statusElement.className = 'ja';
                     detailsElement.textContent = 'Aha, oke.';
-
-                    // Korte delay voordat de raket gaat
-                    setTimeout(() => {
-                        rocket.classList.add('launching');
-                    }, 300); 
-
+                    setTimeout(() => { rocket.classList.add('launching'); }, 300); 
                 } else {
                     statusElement.textContent = 'Nee';
                     statusElement.className = 'nee';
