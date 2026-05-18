@@ -88,17 +88,24 @@
             color: var(--text-color);
         }
 
+        @keyframes regenboog {
+            0%   { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
         button#check-btn {
             padding: 10px 20px;
             font-size: 1.2rem;
-            background-color: #e67e22;
+            background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet, red, orange, yellow, green, cyan, blue, violet);
+            background-size: 400% 100%;
+            animation: regenboog 3s linear infinite;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        button#check-btn:hover { background-color: #d35400; }
+        button#check-btn:hover { filter: brightness(1.15); }
 
         #status {
             font-size: 10rem;
