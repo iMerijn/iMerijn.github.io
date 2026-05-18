@@ -96,13 +96,18 @@
         button#check-btn {
             padding: 10px 20px;
             font-size: 1.2rem;
-            background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet, red, orange, yellow, green, cyan, blue, violet);
-            background-size: 400% 100%;
+            background: linear-gradient(90deg,
+                red 0%, orange, yellow, green, cyan, blue, violet,
+                red 50%,
+                orange, yellow, green, cyan, blue, violet, red 100%
+            );
+            background-size: 200% 100%;
             animation: regenboog 3s linear infinite;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
         }
 
         button#check-btn:hover { filter: brightness(1.15); }
