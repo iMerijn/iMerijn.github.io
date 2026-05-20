@@ -50,3 +50,6 @@ De techniek volgt daarbij altijd het doel. Nooit andersom.
 
 ---
 De juiste oplossing is soms zo eenvoudig
+
+---
+Objectives & key results
