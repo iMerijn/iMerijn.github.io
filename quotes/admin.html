@@ -211,6 +211,34 @@
             font-style: italic;
             padding: 40px 0;
         }
+
+        .danger-zone {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--input-border);
+        }
+
+        .danger-zone h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin: 0 0 12px;
+        }
+
+        .btn-danger {
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            background: none;
+            color: var(--red);
+            border: 2px solid var(--red);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .btn-danger:hover { background: var(--red); color: white; }
     </style>
 </head>
 <body>
@@ -244,6 +272,11 @@
             </div>
             <div id="pending-list">
                 <div class="empty-state">Laden...</div>
+            </div>
+
+            <div class="danger-zone">
+                <h3>⚠️ Danger zone</h3>
+                <button class="btn-danger" onclick="resetAllVotes()">🗑 Reset alle stemmen</button>
             </div>
         </div>
 
@@ -408,6 +441,14 @@
                 const err = await putResp.json();
                 throw new Error(err.message || 'Kan quotes.md niet updaten');
             }
+        }
+
+        // ── Reset votes ───────────────────────────────────────────────────────
+
+        async function resetAllVotes() {
+            if (!confirm('Weet je het zeker? Dit verwijdert ALLE stemmen permanent.')) return;
+            await db.ref('votes').remove();
+            alert('✓ Alle stemmen zijn gereset.');
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────

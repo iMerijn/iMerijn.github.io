@@ -469,15 +469,23 @@
             renderButtons(newVote);
 
             await db.ref('votes/' + key).transaction(current => {
-                const c = current ? { ...current } : {};
-                // total altijd via delta — werkt ook met bestaande data zonder ups/downs
-                c.total = (c.total || 0) + (newVote - prev);
-                // ups/downs los bijhouden (alleen voor nieuwe stemmen)
-                if (prev ===  1) c.ups   = Math.max(0, (c.ups   || 0) - 1);
-                if (prev === -1) c.downs = Math.max(0, (c.downs || 0) - 1);
-                if (newVote ===  1) c.ups   = (c.ups   || 0) + 1;
-                if (newVote === -1) c.downs = (c.downs || 0) + 1;
-                return c;
+                // Lees huidige waarden (altijd expliciete getallen, nooit undefined)
+                let ups   = (current && current.ups   != null) ? current.ups   : 0;
+                let downs = (current && current.downs != null) ? current.downs : 0;
+                let total = (current && current.total != null) ? current.total : 0;
+
+                // Verwijder oude stem
+                if (prev ===  1) ups   = Math.max(0, ups - 1);
+                if (prev === -1) downs = Math.max(0, downs - 1);
+
+                // Voeg nieuwe stem toe
+                if (newVote ===  1) ups   += 1;
+                if (newVote === -1) downs += 1;
+
+                total = total + (newVote - prev);
+
+                // Altijd alle drie velden teruggeven zodat Firebase ze altijd opslaat
+                return { total, ups, downs };
             });
         }
 
