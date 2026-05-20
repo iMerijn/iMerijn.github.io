@@ -155,12 +155,125 @@
         }
 
         button#next-btn:hover { filter: brightness(1.15); }
+
+        #scoreboard-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: none;
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        #scoreboard-btn:hover { opacity: 0.7; }
+
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-overlay.open { display: flex; }
+
+        #modal {
+            background: var(--bg-color);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 520px;
+            width: 90%;
+            position: relative;
+        }
+
+        #modal h2 {
+            margin: 0 0 24px;
+            font-size: 1.4rem;
+            text-align: center;
+        }
+
+        #modal-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--text-color);
+            line-height: 1;
+        }
+
+        .scoreboard-row {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .scoreboard-row:last-child { border-bottom: none; }
+
+        .sb-rank {
+            font-size: 1.1rem;
+            font-weight: bold;
+            min-width: 28px;
+            color: #888;
+        }
+
+        .sb-rank.gold   { color: #f1c40f; }
+        .sb-rank.silver { color: #95a5a6; }
+        .sb-rank.bronze { color: #cd7f32; }
+
+        .sb-quote {
+            flex: 1;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .sb-score {
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--vote-active-up);
+            min-width: 32px;
+            text-align: right;
+        }
+
+        .sb-score.negative { color: var(--vote-active-down); }
+
+        #scoreboard-loading {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 16px 0;
+        }
     </style>
 </head>
 <body>
 
     <a href="/" class="back-link">← Terug</a>
     <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+    <button id="scoreboard-btn" onclick="openScoreboard()">🏆 Scoreboard</button>
+
+    <div id="modal-overlay" onclick="closeScoreboardOnOverlay(event)">
+        <div id="modal">
+            <button id="modal-close" onclick="closeScoreboard()">✕</button>
+            <h2>🏆 Top 5 quotes</h2>
+            <div id="scoreboard-content">
+                <div id="scoreboard-loading">Laden...</div>
+            </div>
+        </div>
+    </div>
 
     <div class="quote-card">
         <h1 id="quote-text">Laden...</h1>
@@ -286,6 +399,38 @@
                 body.setAttribute('data-theme', 'dark');
                 btn.textContent = '☀️ Light Mode';
             }
+        }
+
+        async function openScoreboard() {
+            document.getElementById('modal-overlay').classList.add('open');
+            document.getElementById('scoreboard-content').innerHTML = '<div id="scoreboard-loading">Laden...</div>';
+
+            const snap = await db.ref('votes').once('value');
+            const allVotes = snap.val() || {};
+
+            const ranked = quotes
+                .map(q => ({ text: q, score: (allVotes[quoteKey(q)] || {}).total || 0 }))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 5);
+
+            const medals = ['gold', 'silver', 'bronze', '', ''];
+            const html = ranked.map((item, i) => `
+                <div class="scoreboard-row">
+                    <span class="sb-rank ${medals[i]}">#${i + 1}</span>
+                    <span class="sb-quote">${item.text}</span>
+                    <span class="sb-score ${item.score < 0 ? 'negative' : ''}">${item.score > 0 ? '+' : ''}${item.score}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('scoreboard-content').innerHTML = html || '<div id="scoreboard-loading">Nog geen stemmen.</div>';
+        }
+
+        function closeScoreboard() {
+            document.getElementById('modal-overlay').classList.remove('open');
+        }
+
+        function closeScoreboardOnOverlay(e) {
+            if (e.target === document.getElementById('modal-overlay')) closeScoreboard();
         }
 
         loadQuotes().then(showNextQuote).catch(() => {
