@@ -35,3 +35,18 @@ CEO | MD | CDO | CMO | CSO | Digital Commerce Director | Building high performin
 
 ---
 Repost for more reach 👍🏽
+
+---
+Internet is al lang geen speeltuin meer. 
+
+---
+Het internet is een multifunctioneel instrument om klanten te bereiken, je organisatie beter te laten functioneren en nieuwe kansen te pakken.
+
+---
+Dicode haalt het maximale uit internet.
+
+---
+De techniek volgt daarbij altijd het doel. Nooit andersom.
+
+---
+De juiste oplossing is soms zo eenvoudig
