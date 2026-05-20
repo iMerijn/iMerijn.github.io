@@ -1,27 +1,21 @@
-The internet is becoming the town square for the global village of tomorrow.
-— Bill Gates
+Keep u posted.
 
 ---
 
-Security used to be an inconvenience sometimes, but now it's a necessity all the time.
-— Martina Navratilova
+Hi all,
 
 ---
 
-DNSSEC is like a lock on your front door — most people walk right past it, but you're glad it's there.
-— Anoniem
+Hi Gents,
 
 ---
 
-The best time to implement DNSSEC was ten years ago. The second best time is now.
-— Anoniem
+Aha oke. En dan enkel voor .co.uk?
 
 ---
 
-DNS is the phonebook of the internet. DNSSEC makes sure no one rips out the pages.
-— Anoniem
+
 
 ---
 
-Privacy and security are not luxuries, they are rights.
-— Onbekend
+
