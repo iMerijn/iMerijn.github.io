@@ -65,3 +65,7 @@ De bobbel moet iets strakker
 ---
 
 Ik trek al jullie dochters uit elkaar
+
+---
+
+Hoe gaat die CDON omzet toch opeens zo hard?
