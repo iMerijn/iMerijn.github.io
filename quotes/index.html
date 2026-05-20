@@ -71,13 +71,13 @@
             text-decoration: none;
         }
 
-        a.back-link:hover { opacity: 0.7; }
+        a.back-link:hover, #theme-toggle:hover { opacity: 0.7; }
 
-        /* Quote vult de ruimte boven de vaste knoppen */
+        /* ── Quote + controls ── */
         .quote-area {
             position: fixed;
-            top: 60px;           /* onder de header-knoppen */
-            bottom: 42%;         /* boven de controls */
+            top: 60px;
+            bottom: 42%;
             left: 0;
             right: 0;
             display: flex;
@@ -96,7 +96,6 @@
             max-width: 620px;
         }
 
-        /* Knoppen staan altijd op exact dezelfde plek */
         .controls-area {
             position: fixed;
             top: 58%;
@@ -131,7 +130,6 @@
         }
 
         .vote-btn:hover { transform: scale(1.12); }
-
         .vote-btn.active-up   { border-color: var(--vote-active-up);   }
         .vote-btn.active-down { border-color: var(--vote-active-down); }
 
@@ -155,12 +153,8 @@
             padding: 10px 24px;
             font-size: 1rem;
             background: linear-gradient(90deg,
-                hsl(0,   90%, 55%),
-                hsl(60,  90%, 52%),
-                hsl(120, 80%, 45%),
-                hsl(180, 85%, 45%),
-                hsl(240, 90%, 60%),
-                hsl(300, 90%, 55%),
+                hsl(0,   90%, 55%), hsl(60,  90%, 52%), hsl(120, 80%, 45%),
+                hsl(180, 85%, 45%), hsl(240, 90%, 60%), hsl(300, 90%, 55%),
                 hsl(360, 90%, 55%)
             );
             background-size: 600px 100%;
@@ -175,11 +169,18 @@
 
         button#next-btn:hover { filter: brightness(1.15); }
 
-        #scoreboard-btn {
+        /* ── Bottom buttons ── */
+        .bottom-btns {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .bottom-btn {
             background: none;
             border: 2px solid var(--input-border);
             color: var(--text-color);
@@ -188,11 +189,13 @@
             cursor: pointer;
             font-size: 0.85rem;
             white-space: nowrap;
+            font-family: inherit;
         }
 
-        #scoreboard-btn:hover { opacity: 0.7; }
+        .bottom-btn:hover { opacity: 0.7; }
 
-        #modal-overlay {
+        /* ── Shared modal styles ── */
+        .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
@@ -202,9 +205,9 @@
             align-items: center;
         }
 
-        #modal-overlay.open { display: flex; }
+        .modal-overlay.open { display: flex; }
 
-        #modal {
+        .modal {
             background: var(--bg-color);
             border: 1px solid var(--input-border);
             border-radius: 12px;
@@ -212,24 +215,17 @@
             max-width: 520px;
             width: 90%;
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
-        #modal h2 {
+        .modal h2 {
             margin: 0 0 20px;
             font-size: 1.4rem;
             text-align: center;
         }
 
-        .sb-section-title {
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #888;
-            margin: 20px 0 4px;
-        }
-
-        #modal-close {
+        .modal-close {
             position: absolute;
             top: 14px;
             right: 16px;
@@ -239,6 +235,16 @@
             cursor: pointer;
             color: var(--text-color);
             line-height: 1;
+        }
+
+        /* ── Scoreboard ── */
+        .sb-section-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin: 20px 0 4px;
         }
 
         .scoreboard-row {
@@ -251,39 +257,89 @@
 
         .scoreboard-row:last-child { border-bottom: none; }
 
-        .sb-rank {
-            font-size: 1.1rem;
-            font-weight: bold;
-            min-width: 28px;
-            color: #888;
-        }
-
+        .sb-rank { font-size: 1.1rem; font-weight: bold; min-width: 28px; color: #888; }
         .sb-rank.gold   { color: #f1c40f; }
         .sb-rank.silver { color: #95a5a6; }
         .sb-rank.bronze { color: #cd7f32; }
 
-        .sb-quote {
-            flex: 1;
-            font-size: 0.95rem;
-            line-height: 1.4;
-        }
+        .sb-quote { flex: 1; font-size: 0.95rem; line-height: 1.4; }
 
-        .sb-score {
-            font-weight: bold;
-            font-size: 1rem;
-            color: var(--vote-active-up);
-            min-width: 32px;
-            text-align: right;
-        }
-
+        .sb-score { font-weight: bold; font-size: 1rem; color: var(--vote-active-up); min-width: 32px; text-align: right; }
         .sb-score.negative { color: var(--vote-active-down); }
 
-        #scoreboard-loading {
-            text-align: center;
-            color: #888;
-            font-style: italic;
-            padding: 16px 0;
+        /* ── Add quote modal ── */
+        #add-quote-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
         }
+
+        #add-quote-textarea:focus { outline: none; border-color: #888; }
+
+        #duplicate-warning {
+            background: #fff8e1;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            font-size: 0.88rem;
+            color: #7a5800;
+            display: none;
+        }
+
+        [data-theme="dark"] #duplicate-warning {
+            background: #332900;
+            border-color: #ffc107;
+            color: #ffd54f;
+        }
+
+        #add-result {
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            text-align: center;
+            display: none;
+        }
+
+        #add-result.success { background: #d4edda; color: #155724; }
+        #add-result.error   { background: #f8d7da; color: #721c24; }
+
+        [data-theme="dark"] #add-result.success { background: #1a3a22; color: #86efac; }
+        [data-theme="dark"] #add-result.error   { background: #3a1a1c; color: #fca5a5; }
+
+        .modal-footer { display: flex; justify-content: flex-end; }
+
+        button#submit-quote-btn {
+            padding: 10px 22px;
+            font-size: 1rem;
+            background: linear-gradient(90deg,
+                hsl(0,   90%, 55%), hsl(60,  90%, 52%), hsl(120, 80%, 45%),
+                hsl(180, 85%, 45%), hsl(240, 90%, 60%), hsl(300, 90%, 55%),
+                hsl(360, 90%, 55%)
+            );
+            background-size: 600px 100%;
+            background-repeat: repeat-x;
+            animation: regenboog 10s linear infinite;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+            font-family: inherit;
+        }
+
+        button#submit-quote-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; }
     </style>
 </head>
 <body>
@@ -291,14 +347,31 @@
     <a href="/" class="back-link">← Terug</a>
     <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
 
-    <button id="scoreboard-btn" onclick="openScoreboard()">🏆 Scoreboard</button>
+    <!-- Bottom buttons -->
+    <div class="bottom-btns">
+        <button class="bottom-btn" onclick="openScoreboard()">🏆 Scoreboard</button>
+        <button class="bottom-btn" onclick="openAddQuote()">📝 Quote toevoegen</button>
+    </div>
 
-    <div id="modal-overlay" onclick="closeScoreboardOnOverlay(event)">
-        <div id="modal">
-            <button id="modal-close" onclick="closeScoreboard()">✕</button>
+    <!-- Scoreboard modal -->
+    <div id="scoreboard-overlay" class="modal-overlay" onclick="closeScoreboardOnOverlay(event)">
+        <div class="modal">
+            <button class="modal-close" onclick="closeScoreboard()">✕</button>
             <h2>🏆 Top 5 quotes</h2>
-            <div id="scoreboard-content">
-                <div id="scoreboard-loading">Laden...</div>
+            <div id="scoreboard-content"><div style="text-align:center;color:#888;font-style:italic;padding:16px 0">Laden...</div></div>
+        </div>
+    </div>
+
+    <!-- Add quote modal -->
+    <div id="add-quote-overlay" class="modal-overlay" onclick="closeAddOnOverlay(event)">
+        <div class="modal">
+            <button class="modal-close" onclick="closeAddQuote()">✕</button>
+            <h2>📝 Quote toevoegen</h2>
+            <textarea id="add-quote-textarea" placeholder="Typ hier je quote..." oninput="onQuoteInput()"></textarea>
+            <div id="duplicate-warning"></div>
+            <div id="add-result"></div>
+            <div class="modal-footer">
+                <button id="submit-quote-btn" onclick="submitQuote()">Indienen</button>
             </div>
         </div>
     </div>
@@ -317,9 +390,6 @@
     </div>
 
     <script>
-        // ── Firebase config ──────────────────────────────────────────────────
-        // Vul hieronder jouw Firebase project gegevens in.
-        // Zie: console.firebase.google.com → jouw project → Project settings → Your apps
         const FIREBASE_CONFIG = {
             apiKey:            "AIzaSyDeH8CLVTQBedgLrKNU3cvrpjs7J2eAL4o",
             authDomain:        "dnssec-quotes.firebaseapp.com",
@@ -330,7 +400,6 @@
             appId:             "1:40756484574:web:95655704564cfac23d654f",
             measurementId:     "G-LJWYY51TGL",
         };
-        // ────────────────────────────────────────────────────────────────────
 
         firebase.initializeApp(FIREBASE_CONFIG);
         const db = firebase.database();
@@ -339,17 +408,14 @@
         let currentIndex = -1;
         let currentScoreRef = null;
 
+        // ── Voting ───────────────────────────────────────────────────────────
+
         function quoteKey(text) {
             return text.trim().substring(0, 60).replace(/[.#$\/\[\]\s]/g, '_');
         }
 
-        function loadMyVotes() {
-            return JSON.parse(localStorage.getItem('my_votes') || '{}');
-        }
-
-        function saveMyVotes(v) {
-            localStorage.setItem('my_votes', JSON.stringify(v));
-        }
+        function loadMyVotes() { return JSON.parse(localStorage.getItem('my_votes') || '{}'); }
+        function saveMyVotes(v) { localStorage.setItem('my_votes', JSON.stringify(v)); }
 
         function renderScore(score) {
             const el = document.getElementById('score-display');
@@ -372,51 +438,146 @@
             const key = quoteKey(quotes[currentIndex]);
             const myVotes = loadMyVotes();
             const prev = (myVotes[key] || {}).myVote || 0;
-
             let delta;
-            if (prev === value) {
-                delta = -value;
-                myVotes[key] = { myVote: 0 };
-            } else {
-                delta = value - prev;
-                myVotes[key] = { myVote: value };
-            }
-
+            if (prev === value) { delta = -value; myVotes[key] = { myVote: 0 }; }
+            else                { delta = value - prev; myVotes[key] = { myVote: value }; }
             saveMyVotes(myVotes);
             renderButtons(myVotes[key].myVote);
-
             await db.ref('votes/' + key + '/total').transaction(n => (n || 0) + delta);
         }
+
+        // ── Quotes loader ─────────────────────────────────────────────────────
 
         async function loadQuotes() {
             const response = await fetch('/quotes/quotes.md');
             const text = await response.text();
             quotes = text
                 .split(/\n---\n/)
-                .map(b => b.trim())
-                .filter(b => b.length > 0)
+                .map(b => b.trim()).filter(b => b.length > 0)
                 .map(b => b.split('\n').map(l => l.trim()).filter(l => l).join(' '))
                 .filter(t => t.length > 0);
         }
 
         function showNextQuote() {
-            if (quotes.length === 0) {
-                document.getElementById('quote-text').textContent = 'Geen quotes gevonden.';
-                return;
-            }
+            if (quotes.length === 0) { document.getElementById('quote-text').textContent = 'Geen quotes gevonden.'; return; }
             let index;
-            do {
-                index = Math.floor(Math.random() * quotes.length);
-            } while (quotes.length > 1 && index === currentIndex);
+            do { index = Math.floor(Math.random() * quotes.length); }
+            while (quotes.length > 1 && index === currentIndex);
             currentIndex = index;
-
             document.getElementById('quote-text').textContent = quotes[currentIndex];
-
             const key = quoteKey(quotes[currentIndex]);
-            const myVote = (loadMyVotes()[key] || {}).myVote || 0;
-            renderButtons(myVote);
+            renderButtons((loadMyVotes()[key] || {}).myVote || 0);
             watchScore(key);
         }
+
+        // ── Scoreboard ────────────────────────────────────────────────────────
+
+        function renderRows(items, rankFn) {
+            return items.map((item, i) => `
+                <div class="scoreboard-row">
+                    <span class="sb-rank ${rankFn(i)}">#${i + 1}</span>
+                    <span class="sb-quote">${item.text}</span>
+                    <span class="sb-score ${item.score < 0 ? 'negative' : ''}">${item.score > 0 ? '+' : ''}${item.score}</span>
+                </div>`).join('');
+        }
+
+        async function openScoreboard() {
+            document.getElementById('scoreboard-overlay').classList.add('open');
+            document.getElementById('scoreboard-content').innerHTML = '<div style="text-align:center;color:#888;font-style:italic;padding:16px 0">Laden...</div>';
+            const snap = await db.ref('votes').once('value');
+            const allVotes = snap.val() || {};
+            const scored = quotes.map(q => ({ text: q, score: (allVotes[quoteKey(q)] || {}).total || 0 }));
+            const top5    = [...scored].sort((a, b) => b.score - a.score).slice(0, 5);
+            const bottom5 = [...scored].sort((a, b) => a.score - b.score).slice(0, 5);
+            document.getElementById('scoreboard-content').innerHTML = `
+                <div class="sb-section-title">⬆️ Beste quotes</div>
+                ${renderRows(top5, i => ['gold','silver','bronze','',''][i])}
+                <div class="sb-section-title" style="margin-top:24px">⬇️ Slechtste quotes</div>
+                ${renderRows(bottom5, () => '')}`;
+        }
+
+        function closeScoreboard() { document.getElementById('scoreboard-overlay').classList.remove('open'); }
+        function closeScoreboardOnOverlay(e) { if (e.target === document.getElementById('scoreboard-overlay')) closeScoreboard(); }
+
+        // ── Quote toevoegen ───────────────────────────────────────────────────
+
+        function jaccardSimilarity(a, b) {
+            const wordsA = new Set(a.toLowerCase().match(/\w+/g) || []);
+            const wordsB = new Set(b.toLowerCase().match(/\w+/g) || []);
+            const intersection = [...wordsA].filter(w => wordsB.has(w)).length;
+            const union = new Set([...wordsA, ...wordsB]).size;
+            return union === 0 ? 0 : intersection / union;
+        }
+
+        function findSimilar(text) {
+            return quotes.find(q => jaccardSimilarity(text, q) >= 0.5);
+        }
+
+        function onQuoteInput() {
+            const text = document.getElementById('add-quote-textarea').value.trim();
+            const warnEl = document.getElementById('duplicate-warning');
+            const similar = text.length > 8 ? findSimilar(text) : null;
+            if (similar) {
+                warnEl.innerHTML = `⚠️ Er staat al iets vergelijkbaars in de lijst:<br><em>"${similar}"</em>`;
+                warnEl.style.display = 'block';
+            } else {
+                warnEl.style.display = 'none';
+            }
+        }
+
+        async function submitQuote() {
+            const text = document.getElementById('add-quote-textarea').value.trim();
+            const resultEl = document.getElementById('add-result');
+            const btn = document.getElementById('submit-quote-btn');
+
+            if (!text) return;
+
+            if (findSimilar(text)) {
+                resultEl.textContent = 'Pas je quote aan — er staat al iets te vergelijkbaars in de lijst.';
+                resultEl.className = 'error';
+                resultEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Bezig...';
+            resultEl.style.display = 'none';
+
+            try {
+                await db.ref('pending_quotes').push({
+                    text,
+                    submitted_at: Date.now(),
+                    status: 'pending',
+                });
+                resultEl.textContent = '✓ Quote ingediend! Hij wordt beoordeeld voordat hij verschijnt.';
+                resultEl.className = 'success';
+                resultEl.style.display = 'block';
+                document.getElementById('add-quote-textarea').value = '';
+                document.getElementById('duplicate-warning').style.display = 'none';
+                btn.textContent = 'Verzonden ✓';
+            } catch (e) {
+                resultEl.textContent = 'Er ging iets mis. Probeer opnieuw.';
+                resultEl.className = 'error';
+                resultEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Indienen';
+            }
+        }
+
+        function openAddQuote() {
+            document.getElementById('add-quote-overlay').classList.add('open');
+            document.getElementById('add-quote-textarea').value = '';
+            document.getElementById('duplicate-warning').style.display = 'none';
+            document.getElementById('add-result').style.display = 'none';
+            const btn = document.getElementById('submit-quote-btn');
+            btn.disabled = false;
+            btn.textContent = 'Indienen';
+        }
+
+        function closeAddQuote() { document.getElementById('add-quote-overlay').classList.remove('open'); }
+        function closeAddOnOverlay(e) { if (e.target === document.getElementById('add-quote-overlay')) closeAddQuote(); }
+
+        // ── Theme ─────────────────────────────────────────────────────────────
 
         function toggleTheme() {
             const body = document.documentElement;
@@ -428,46 +589,6 @@
                 body.setAttribute('data-theme', 'dark');
                 btn.textContent = '☀️ Light Mode';
             }
-        }
-
-        function renderRows(items, rankFn) {
-            return items.map((item, i) => `
-                <div class="scoreboard-row">
-                    <span class="sb-rank ${rankFn(i)}">#${i + 1}</span>
-                    <span class="sb-quote">${item.text}</span>
-                    <span class="sb-score ${item.score < 0 ? 'negative' : ''}">${item.score > 0 ? '+' : ''}${item.score}</span>
-                </div>
-            `).join('');
-        }
-
-        async function openScoreboard() {
-            document.getElementById('modal-overlay').classList.add('open');
-            document.getElementById('scoreboard-content').innerHTML = '<div id="scoreboard-loading">Laden...</div>';
-
-            const snap = await db.ref('votes').once('value');
-            const allVotes = snap.val() || {};
-
-            const scored = quotes.map(q => ({ text: q, score: (allVotes[quoteKey(q)] || {}).total || 0 }));
-            const top5    = [...scored].sort((a, b) => b.score - a.score).slice(0, 5);
-            const bottom5 = [...scored].sort((a, b) => a.score - b.score).slice(0, 5);
-
-            const medals = i => ['gold', 'silver', 'bronze', '', ''][i];
-            const none   = () => '';
-
-            document.getElementById('scoreboard-content').innerHTML = `
-                <div class="sb-section-title">⬆️ Beste quotes</div>
-                ${renderRows(top5, medals)}
-                <div class="sb-section-title" style="margin-top:24px">⬇️ Slechtste quotes</div>
-                ${renderRows(bottom5, none)}
-            `;
-        }
-
-        function closeScoreboard() {
-            document.getElementById('modal-overlay').classList.remove('open');
-        }
-
-        function closeScoreboardOnOverlay(e) {
-            if (e.target === document.getElementById('modal-overlay')) closeScoreboard();
         }
 
         loadQuotes().then(showNextQuote).catch(() => {

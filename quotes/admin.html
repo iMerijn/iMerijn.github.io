@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Quotes</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --input-border: #dddddd;
+            --card-bg: #f9f9f9;
+            --green: #2ecc71;
+            --red: #e74c3c;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --input-border: #444444;
+            --card-bg: #2d2d2d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            padding: 40px 20px 60px;
+        }
+
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        a.back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .page {
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        h1 { font-size: 2rem; margin: 0 0 8px; text-align: center; }
+        .subtitle { color: #888; text-align: center; margin: 0 0 32px; font-size: 0.95rem; }
+
+        /* ── Login ── */
+        #login-section { text-align: center; }
+
+        .pat-input-wrap {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0 10px;
+        }
+
+        input[type="password"], input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 1rem;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: inherit;
+        }
+
+        input:focus { outline: none; border-color: #888; }
+
+        .btn-primary {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        [data-theme="dark"] .btn-primary { background: #f0f0f0; color: #1a1a1a; }
+        .btn-primary:hover { opacity: 0.8; }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .login-hint {
+            font-size: 0.82rem;
+            color: #888;
+            margin-top: 6px;
+        }
+
+        .login-hint a { color: #888; }
+
+        #login-error {
+            color: var(--red);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* ── Admin content ── */
+        #admin-section { display: none; }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+
+        .logout-btn:hover { opacity: 0.7; }
+
+        /* ── Pending cards ── */
+        .pending-card {
+            background: var(--card-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            transition: opacity 0.3s;
+        }
+
+        .pending-card.done { opacity: 0.4; }
+
+        .pending-quote-text {
+            font-size: 1.15rem;
+            line-height: 1.5;
+            margin: 0 0 8px;
+            font-weight: 500;
+        }
+
+        .pending-meta {
+            font-size: 0.8rem;
+            color: #888;
+            margin: 0 0 16px;
+        }
+
+        .pending-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .approve-btn, .reject-btn {
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .approve-btn { background: var(--green); color: white; }
+        .reject-btn  { background: var(--red);   color: white; }
+        .approve-btn:hover { filter: brightness(1.1); }
+        .reject-btn:hover  { filter: brightness(1.1); }
+        .approve-btn:disabled, .reject-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .card-status {
+            margin-top: 10px;
+            font-size: 0.88rem;
+            font-style: italic;
+            color: #888;
+            min-height: 1.2em;
+        }
+
+        .card-status.ok  { color: var(--green); }
+        .card-status.err { color: var(--red); }
+
+        .empty-state {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/quotes/" class="back-link">← Quotes</a>
+    <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+    <div class="page">
+
+        <!-- Login -->
+        <div id="login-section">
+            <h1>🔐 Admin</h1>
+            <p class="subtitle">Log in met je GitHub Personal Access Token om ingediende quotes te beoordelen.</p>
+
+            <div class="pat-input-wrap">
+                <input type="password" id="pat-input" placeholder="ghp_..." onkeydown="if(event.key==='Enter')login()">
+                <button class="btn-primary" id="login-btn" onclick="login()">Inloggen</button>
+            </div>
+            <p class="login-hint">
+                Maak een token aan via <a href="https://github.com/settings/tokens/new" target="_blank">GitHub → Settings → Tokens</a>
+                met scope <strong>repo</strong> (Contents: write).
+            </p>
+            <p id="login-error">Token werkt niet. Controleer of je de juiste scope hebt.</p>
+        </div>
+
+        <!-- Admin content -->
+        <div id="admin-section">
+            <div class="admin-header">
+                <h1 style="margin:0;text-align:left;font-size:1.6rem">📋 Ingediende quotes</h1>
+                <button class="logout-btn" onclick="logout()">Uitloggen</button>
+            </div>
+            <div id="pending-list">
+                <div class="empty-state">Laden...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const FIREBASE_CONFIG = {
+            apiKey:            "AIzaSyDeH8CLVTQBedgLrKNU3cvrpjs7J2eAL4o",
+            authDomain:        "dnssec-quotes.firebaseapp.com",
+            databaseURL:       "https://dnssec-quotes-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId:         "dnssec-quotes",
+            storageBucket:     "dnssec-quotes.firebasestorage.app",
+            messagingSenderId: "40756484574",
+            appId:             "1:40756484574:web:95655704564cfac23d654f",
+            measurementId:     "G-LJWYY51TGL",
+        };
+
+        const GITHUB_REPO = 'iMerijn/iMerijn.github.io';
+        const QUOTES_PATH = 'quotes/quotes.md';
+
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const db = firebase.database();
+
+        let githubToken = '';
+
+        // ── Auth ──────────────────────────────────────────────────────────────
+
+        async function login() {
+            const token = document.getElementById('pat-input').value.trim();
+            if (!token) return;
+
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.textContent = 'Controleren...';
+            document.getElementById('login-error').style.display = 'none';
+
+            try {
+                const resp = await fetch(
+                    `https://api.github.com/repos/${GITHUB_REPO}/contents/${QUOTES_PATH}`,
+                    { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } }
+                );
+                if (!resp.ok) throw new Error();
+                githubToken = token;
+                localStorage.setItem('admin_pat', token);
+                showAdmin();
+            } catch {
+                document.getElementById('login-error').style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Inloggen';
+            }
+        }
+
+        function logout() {
+            githubToken = '';
+            localStorage.removeItem('admin_pat');
+            document.getElementById('admin-section').style.display = 'none';
+            document.getElementById('login-section').style.display  = 'block';
+            document.getElementById('pat-input').value = '';
+        }
+
+        function showAdmin() {
+            document.getElementById('login-section').style.display  = 'none';
+            document.getElementById('admin-section').style.display  = 'block';
+            loadPending();
+        }
+
+        // ── Pending quotes ────────────────────────────────────────────────────
+
+        async function loadPending() {
+            const snap = await db.ref('pending_quotes')
+                .orderByChild('status').equalTo('pending').once('value');
+
+            const items = [];
+            snap.forEach(child => items.push({ id: child.key, ...child.val() }));
+            items.sort((a, b) => a.submitted_at - b.submitted_at);
+
+            const listEl = document.getElementById('pending-list');
+
+            if (items.length === 0) {
+                listEl.innerHTML = '<div class="empty-state">Geen quotes wachtend op goedkeuring 🎉</div>';
+                return;
+            }
+
+            listEl.innerHTML = items.map(q => `
+                <div class="pending-card" id="card-${q.id}">
+                    <p class="pending-quote-text">"${escapeHtml(q.text)}"</p>
+                    <p class="pending-meta">Ingediend op ${new Date(q.submitted_at).toLocaleString('nl-NL')}</p>
+                    <div class="pending-actions">
+                        <button class="approve-btn" id="approve-${q.id}" onclick="approve('${q.id}', this)">✓ Goedkeuren</button>
+                        <button class="reject-btn"  id="reject-${q.id}"  onclick="reject('${q.id}', this)">✗ Afwijzen</button>
+                    </div>
+                    <div class="card-status" id="status-${q.id}"></div>
+                </div>
+            `).join('');
+        }
+
+        function setCardBusy(id, busy) {
+            document.getElementById(`approve-${id}`).disabled = busy;
+            document.getElementById(`reject-${id}`).disabled  = busy;
+        }
+
+        async function approve(id, btn) {
+            const card   = document.getElementById(`card-${id}`);
+            const status = document.getElementById(`status-${id}`);
+            const text   = card.querySelector('.pending-quote-text').textContent.slice(1, -1); // strip ""
+            setCardBusy(id, true);
+            status.textContent = 'Bezig met toevoegen aan quotes.md...';
+            status.className = 'card-status';
+
+            try {
+                await addToQuotesMd(text);
+                await db.ref(`pending_quotes/${id}`).update({ status: 'approved' });
+                card.classList.add('done');
+                status.textContent = '✓ Goedgekeurd en toegevoegd aan quotes.md';
+                status.className = 'card-status ok';
+            } catch (e) {
+                status.textContent = 'Fout: ' + e.message;
+                status.className = 'card-status err';
+                setCardBusy(id, false);
+            }
+        }
+
+        async function reject(id, btn) {
+            const card   = document.getElementById(`card-${id}`);
+            const status = document.getElementById(`status-${id}`);
+            setCardBusy(id, true);
+
+            await db.ref(`pending_quotes/${id}`).update({ status: 'rejected' });
+            card.classList.add('done');
+            status.textContent = '✗ Afgewezen';
+            status.className = 'card-status';
+        }
+
+        // ── GitHub API ────────────────────────────────────────────────────────
+
+        async function addToQuotesMd(quoteText) {
+            const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${QUOTES_PATH}`;
+            const headers = {
+                Authorization: `Bearer ${githubToken}`,
+                Accept: 'application/vnd.github+json',
+                'Content-Type': 'application/json',
+            };
+
+            const getResp = await fetch(apiUrl, { headers });
+            if (!getResp.ok) throw new Error('Kan quotes.md niet ophalen');
+            const fileData = await getResp.json();
+
+            const currentContent = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
+            const newContent = currentContent.trimEnd() + '\n\n---\n\n' + quoteText.trim() + '\n';
+
+            const putResp = await fetch(apiUrl, {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify({
+                    message: `Voeg goedgekeurde quote toe: "${quoteText.substring(0, 50)}"`,
+                    content: btoa(unescape(encodeURIComponent(newContent))),
+                    sha: fileData.sha,
+                }),
+            });
+
+            if (!putResp.ok) {
+                const err = await putResp.json();
+                throw new Error(err.message || 'Kan quotes.md niet updaten');
+            }
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function toggleTheme() {
+            const body = document.documentElement;
+            const btn  = document.getElementById('theme-toggle');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                btn.textContent = '🌙 Dark Mode';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️ Light Mode';
+            }
+        }
+
+        // Auto-login als token nog in localStorage staat
+        const savedToken = localStorage.getItem('admin_pat');
+        if (savedToken) {
+            document.getElementById('pat-input').value = savedToken;
+            login();
+        }
+    </script>
+</body>
+</html>
