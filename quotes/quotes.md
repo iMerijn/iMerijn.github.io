@@ -27,3 +27,8 @@ Intunen
 ---
 LLM
 
+---
+Meeting ingeschoten
+
+---
+CEO | MD | CDO | CMO | CSO | Digital Commerce Director | Building high performing teams & organizations | SaaS | Scale-ups
