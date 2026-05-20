@@ -163,12 +163,14 @@
                 .map(block => {
                     const lines = block.split('\n').map(l => l.trim()).filter(l => l);
                     const authorIndex = lines.findIndex(l => l.startsWith('—'));
-                    if (authorIndex === -1) return null;
+                    if (authorIndex === -1) {
+                        return { text: lines.join(' '), author: '' };
+                    }
                     const text = lines.slice(0, authorIndex).join(' ');
                     const author = lines[authorIndex].replace(/^—\s*/, '');
                     return { text, author };
                 })
-                .filter(Boolean);
+                .filter(q => q.text.length > 0);
         }
 
         function showRandomQuote() {
@@ -182,8 +184,10 @@
                 index = Math.floor(Math.random() * quotes.length);
             } while (quotes.length > 1 && index === lastIndex);
             lastIndex = index;
+            const authorEl = document.getElementById('quote-author');
             document.getElementById('quote-text').textContent = quotes[index].text;
-            document.getElementById('quote-author').textContent = quotes[index].author;
+            authorEl.textContent = quotes[index].author;
+            authorEl.style.visibility = quotes[index].author ? 'visible' : 'hidden';
         }
 
         function showNextQuote() { showRandomQuote(); }
