@@ -362,6 +362,39 @@
         }
 
         button#submit-quote-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; }
+
+        /* ── Mobile ── */
+        @media (max-width: 600px) {
+            h1#quote-text {
+                font-size: 1.6rem;
+                line-height: 1.35;
+            }
+
+            .quote-area {
+                padding: 0 20px;
+                overflow-y: auto;
+                /* Verberg scrollbar maar houd scrollfunctie */
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .quote-area::-webkit-scrollbar { display: none; }
+
+            .controls-area {
+                gap: 14px;
+            }
+
+            .vote-btn {
+                width: 46px;
+                height: 46px;
+                font-size: 1.2rem;
+            }
+
+            a.back-link, #theme-toggle {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
