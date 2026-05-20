@@ -56,3 +56,6 @@ Objectives & key results
 
 ---
 Yusu, keine ahnung
+
+---
+morning mr Valentino Rossi!
