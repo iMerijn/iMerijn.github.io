@@ -53,3 +53,6 @@ De juiste oplossing is soms zo eenvoudig
 
 ---
 Objectives & key results
+
+---
+Yusu, keine ahnung
