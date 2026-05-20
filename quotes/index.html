@@ -196,9 +196,18 @@
         }
 
         #modal h2 {
-            margin: 0 0 24px;
+            margin: 0 0 20px;
             font-size: 1.4rem;
             text-align: center;
+        }
+
+        .sb-section-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+            margin: 20px 0 4px;
         }
 
         #modal-close {
@@ -401,6 +410,16 @@
             }
         }
 
+        function renderRows(items, rankFn) {
+            return items.map((item, i) => `
+                <div class="scoreboard-row">
+                    <span class="sb-rank ${rankFn(i)}">#${i + 1}</span>
+                    <span class="sb-quote">${item.text}</span>
+                    <span class="sb-score ${item.score < 0 ? 'negative' : ''}">${item.score > 0 ? '+' : ''}${item.score}</span>
+                </div>
+            `).join('');
+        }
+
         async function openScoreboard() {
             document.getElementById('modal-overlay').classList.add('open');
             document.getElementById('scoreboard-content').innerHTML = '<div id="scoreboard-loading">Laden...</div>';
@@ -408,21 +427,19 @@
             const snap = await db.ref('votes').once('value');
             const allVotes = snap.val() || {};
 
-            const ranked = quotes
-                .map(q => ({ text: q, score: (allVotes[quoteKey(q)] || {}).total || 0 }))
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 5);
+            const scored = quotes.map(q => ({ text: q, score: (allVotes[quoteKey(q)] || {}).total || 0 }));
+            const top5    = [...scored].sort((a, b) => b.score - a.score).slice(0, 5);
+            const bottom5 = [...scored].sort((a, b) => a.score - b.score).slice(0, 5);
 
-            const medals = ['gold', 'silver', 'bronze', '', ''];
-            const html = ranked.map((item, i) => `
-                <div class="scoreboard-row">
-                    <span class="sb-rank ${medals[i]}">#${i + 1}</span>
-                    <span class="sb-quote">${item.text}</span>
-                    <span class="sb-score ${item.score < 0 ? 'negative' : ''}">${item.score > 0 ? '+' : ''}${item.score}</span>
-                </div>
-            `).join('');
+            const medals = i => ['gold', 'silver', 'bronze', '', ''][i];
+            const none   = () => '';
 
-            document.getElementById('scoreboard-content').innerHTML = html || '<div id="scoreboard-loading">Nog geen stemmen.</div>';
+            document.getElementById('scoreboard-content').innerHTML = `
+                <div class="sb-section-title">⬆️ Beste quotes</div>
+                ${renderRows(top5, medals)}
+                <div class="sb-section-title" style="margin-top:24px">⬇️ Slechtste quotes</div>
+                ${renderRows(bottom5, none)}
+            `;
         }
 
         function closeScoreboard() {
