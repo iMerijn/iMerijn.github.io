@@ -634,9 +634,23 @@
             }
         }
 
-        loadQuotes().then(showNextQuote).catch(() => {
-            document.getElementById('quote-text').textContent = 'Kon quotes niet laden.';
-        });
+        // Wis stale localStorage als Firebase votes gereset zijn
+        async function syncResetTimestamp() {
+            const snap = await db.ref('metadata/votes_reset_at').once('value');
+            const serverTs = snap.val() || 0;
+            const localTs  = parseInt(localStorage.getItem('votes_reset_at') || '0');
+            if (serverTs > localTs) {
+                localStorage.removeItem('my_votes');
+                localStorage.setItem('votes_reset_at', serverTs);
+            }
+        }
+
+        syncResetTimestamp()
+            .then(() => loadQuotes())
+            .then(showNextQuote)
+            .catch(() => {
+                document.getElementById('quote-text').textContent = 'Kon quotes niet laden.';
+            });
     </script>
 </body>
 </html>

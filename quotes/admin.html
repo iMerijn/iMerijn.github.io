@@ -446,9 +446,14 @@
         // ── Reset votes ───────────────────────────────────────────────────────
 
         async function resetAllVotes() {
-            if (!confirm('Weet je het zeker? Dit verwijdert ALLE stemmen permanent.')) return;
+            if (!confirm('Weet je het zeker? Dit verwijdert ALLE stemmen permanent en zorgt dat alle browsers hun stemgeschiedenis wissen.')) return;
+            const ts = Date.now();
             await db.ref('votes').remove();
-            alert('✓ Alle stemmen zijn gereset.');
+            await db.ref('metadata/votes_reset_at').set(ts);
+            // Wis ook eigen localStorage meteen
+            localStorage.removeItem('my_votes');
+            localStorage.setItem('votes_reset_at', ts);
+            alert('✓ Alle stemmen gereset. Elke bezoeker begint opnieuw zodra ze de pagina openen.');
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
