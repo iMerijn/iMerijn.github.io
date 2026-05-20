@@ -12,6 +12,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quotes — DNSSEC</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --bg-color: #ffffff;
@@ -162,7 +167,7 @@
 
         <div class="vote-row">
             <button class="vote-btn" id="upvote-btn"   onclick="vote(1)"  title="Upvote">🚀</button>
-            <span id="score-display">0</span>
+            <span id="score-display">–</span>
             <button class="vote-btn" id="downvote-btn" onclick="vote(-1)" title="Downvote">📉</button>
         </div>
 
@@ -170,60 +175,81 @@
     </div>
 
     <script>
+        // ── Firebase config ──────────────────────────────────────────────────
+        // Vul hieronder jouw Firebase project gegevens in.
+        // Zie: console.firebase.google.com → jouw project → Project settings → Your apps
+        const FIREBASE_CONFIG = {
+            apiKey:      "VUL_IN",
+            authDomain:  "VUL_IN.firebaseapp.com",
+            databaseURL: "https://VUL_IN-default-rtdb.firebaseio.com",
+            projectId:   "VUL_IN",
+        };
+        // ────────────────────────────────────────────────────────────────────
+
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const db = firebase.database();
+
         let quotes = [];
         let currentIndex = -1;
+        let currentScoreRef = null;
 
         function quoteKey(text) {
-            return text.trim().substring(0, 80);
+            return text.trim().substring(0, 60).replace(/[.#$\/\[\]\s]/g, '_');
         }
 
-        function loadVotes() {
-            return JSON.parse(localStorage.getItem('quote_votes') || '{}');
+        function loadMyVotes() {
+            return JSON.parse(localStorage.getItem('my_votes') || '{}');
         }
 
-        function saveVotes(votes) {
-            localStorage.setItem('quote_votes', JSON.stringify(votes));
+        function saveMyVotes(v) {
+            localStorage.setItem('my_votes', JSON.stringify(v));
         }
 
-        function vote(value) {
+        function renderScore(score) {
+            const el = document.getElementById('score-display');
+            el.textContent = score;
+            el.className = score > 0 ? 'positive' : score < 0 ? 'negative' : '';
+        }
+
+        function renderButtons(myVote) {
+            document.getElementById('upvote-btn').className   = 'vote-btn' + (myVote ===  1 ? ' active-up'   : '');
+            document.getElementById('downvote-btn').className = 'vote-btn' + (myVote === -1 ? ' active-down' : '');
+        }
+
+        function watchScore(key) {
+            if (currentScoreRef) currentScoreRef.off();
+            currentScoreRef = db.ref('votes/' + key + '/total');
+            currentScoreRef.on('value', snap => renderScore(snap.val() || 0));
+        }
+
+        async function vote(value) {
             const key = quoteKey(quotes[currentIndex]);
-            const votes = loadVotes();
-            const entry = votes[key] || { score: 0, myVote: 0 };
+            const myVotes = loadMyVotes();
+            const prev = (myVotes[key] || {}).myVote || 0;
 
-            if (entry.myVote === value) {
-                entry.score  -= value;
-                entry.myVote  = 0;
+            let delta;
+            if (prev === value) {
+                delta = -value;
+                myVotes[key] = { myVote: 0 };
             } else {
-                entry.score  -= entry.myVote;
-                entry.score  += value;
-                entry.myVote  = value;
+                delta = value - prev;
+                myVotes[key] = { myVote: value };
             }
 
-            votes[key] = entry;
-            saveVotes(votes);
-            renderVote(entry);
-        }
+            saveMyVotes(myVotes);
+            renderButtons(myVotes[key].myVote);
 
-        function renderVote(entry) {
-            const scoreEl    = document.getElementById('score-display');
-            const upvoteBtn  = document.getElementById('upvote-btn');
-            const downvoteBtn = document.getElementById('downvote-btn');
-
-            scoreEl.textContent = entry.score;
-            scoreEl.className   = entry.score > 0 ? 'positive' : entry.score < 0 ? 'negative' : '';
-            upvoteBtn.className   = 'vote-btn' + (entry.myVote ===  1 ? ' active-up'   : '');
-            downvoteBtn.className = 'vote-btn' + (entry.myVote === -1 ? ' active-down' : '');
+            await db.ref('votes/' + key + '/total').transaction(n => (n || 0) + delta);
         }
 
         async function loadQuotes() {
             const response = await fetch('/quotes/quotes.md');
             const text = await response.text();
-
             quotes = text
                 .split(/\n---\n/)
-                .map(block => block.trim())
-                .filter(block => block.length > 0)
-                .map(block => block.split('\n').map(l => l.trim()).filter(l => l).join(' '))
+                .map(b => b.trim())
+                .filter(b => b.length > 0)
+                .map(b => b.split('\n').map(l => l.trim()).filter(l => l).join(' '))
                 .filter(t => t.length > 0);
         }
 
@@ -240,8 +266,10 @@
 
             document.getElementById('quote-text').textContent = quotes[currentIndex];
 
-            const votes = loadVotes();
-            renderVote(votes[quoteKey(quotes[currentIndex])] || { score: 0, myVote: 0 });
+            const key = quoteKey(quotes[currentIndex]);
+            const myVote = (loadMyVotes()[key] || {}).myVote || 0;
+            renderButtons(myVote);
+            watchScore(key);
         }
 
         function toggleTheme() {
