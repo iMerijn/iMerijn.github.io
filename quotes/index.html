@@ -484,8 +484,8 @@
             const el = document.getElementById('score-display');
             el.textContent = score;
             el.className = score > 0 ? 'positive' : score < 0 ? 'negative' : '';
-            document.getElementById('up-count').textContent   = ups   > 0 ? ups   : '';
-            document.getElementById('down-count').textContent = downs > 0 ? downs : '';
+            document.getElementById('up-count').textContent   = ups;
+            document.getElementById('down-count').textContent = downs;
         }
 
         function renderButtons(myVote) {
