@@ -31,15 +31,16 @@
 
         body {
             margin: 0;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
-            padding: 40px 20px 80px;
+            padding: 20px;
             box-sizing: border-box;
         }
 
@@ -54,7 +55,6 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 0.9rem;
-            z-index: 10;
         }
 
         a.back-link {
@@ -68,56 +68,73 @@
             border-radius: 20px;
             font-size: 0.9rem;
             text-decoration: none;
-            z-index: 10;
         }
 
         a.back-link:hover { opacity: 0.7; }
-
-        h1 {
-            font-size: 2.5rem;
-            margin: 20px 0 10px;
-            text-align: center;
-        }
-
-        .subtitle {
-            color: #888;
-            font-style: italic;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
-        .quotes-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
-            max-width: 680px;
-        }
 
         .quote-card {
             background-color: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 12px;
-            padding: 24px 28px;
-            position: relative;
+            padding: 40px 48px;
+            max-width: 620px;
+            width: 100%;
+            text-align: center;
         }
 
         .quote-text {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin: 0 0 12px;
+            font-size: 1.4rem;
+            line-height: 1.7;
+            margin: 0 0 20px;
         }
 
         .quote-text::before { content: "\201C"; }
         .quote-text::after  { content: "\201D"; }
 
         .quote-author {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #888;
-            text-align: right;
         }
 
         .quote-author::before { content: "— "; }
+
+        @keyframes regenboog {
+            from { background-position-x: 0; }
+            to   { background-position-x: -600px; }
+        }
+
+        button#next-btn {
+            margin-top: 32px;
+            padding: 10px 24px;
+            font-size: 1rem;
+            background: linear-gradient(90deg,
+                hsl(0,   90%, 55%),
+                hsl(60,  90%, 52%),
+                hsl(120, 80%, 45%),
+                hsl(180, 85%, 45%),
+                hsl(240, 90%, 60%),
+                hsl(300, 90%, 55%),
+                hsl(360, 90%, 55%)
+            );
+            background-size: 600px 100%;
+            background-repeat: repeat-x;
+            animation: regenboog 10s linear infinite;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        button#next-btn:hover { filter: brightness(1.15); }
+
+        #error {
+            color: #888;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -125,44 +142,52 @@
     <a href="/" class="back-link">← Terug</a>
     <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
 
-    <h1>Quotes 💬</h1>
-    <p class="subtitle">Wat slimme mensen zeiden over het internet.</p>
-
-    <div class="quotes-grid">
-
-        <div class="quote-card">
-            <p class="quote-text">The internet is becoming the town square for the global village of tomorrow.</p>
-            <p class="quote-author">Bill Gates</p>
-        </div>
-
-        <div class="quote-card">
-            <p class="quote-text">Security used to be an inconvenience sometimes, but now it's a necessity all the time.</p>
-            <p class="quote-author">Martina Navratilova</p>
-        </div>
-
-        <div class="quote-card">
-            <p class="quote-text">DNSSEC is like a lock on your front door — most people walk right past it, but you're glad it's there.</p>
-            <p class="quote-author">Anoniem</p>
-        </div>
-
-        <div class="quote-card">
-            <p class="quote-text">The best time to implement DNSSEC was ten years ago. The second best time is now.</p>
-            <p class="quote-author">Anoniem</p>
-        </div>
-
-        <div class="quote-card">
-            <p class="quote-text">Privacidad y seguridad no son lujos, son derechos.</p>
-            <p class="quote-author">Onbekend</p>
-        </div>
-
-        <div class="quote-card">
-            <p class="quote-text">DNS is the phonebook of the internet. DNSSEC makes sure no one rips out the pages.</p>
-            <p class="quote-author">Anoniem</p>
-        </div>
-
+    <div class="quote-card">
+        <p class="quote-text" id="quote-text">Laden...</p>
+        <p class="quote-author" id="quote-author"></p>
+        <button id="next-btn" onclick="showNextQuote()">Volgende quote</button>
     </div>
 
     <script>
+        let quotes = [];
+        let lastIndex = -1;
+
+        async function loadQuotes() {
+            const response = await fetch('/quotes/quotes.md');
+            const text = await response.text();
+
+            quotes = text
+                .split(/\n---\n/)
+                .map(block => block.trim())
+                .filter(block => block.length > 0)
+                .map(block => {
+                    const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+                    const authorIndex = lines.findIndex(l => l.startsWith('—'));
+                    if (authorIndex === -1) return null;
+                    const text = lines.slice(0, authorIndex).join(' ');
+                    const author = lines[authorIndex].replace(/^—\s*/, '');
+                    return { text, author };
+                })
+                .filter(Boolean);
+        }
+
+        function showRandomQuote() {
+            if (quotes.length === 0) {
+                document.getElementById('quote-text').textContent = 'Geen quotes gevonden.';
+                document.getElementById('quote-author').textContent = '';
+                return;
+            }
+            let index;
+            do {
+                index = Math.floor(Math.random() * quotes.length);
+            } while (quotes.length > 1 && index === lastIndex);
+            lastIndex = index;
+            document.getElementById('quote-text').textContent = quotes[index].text;
+            document.getElementById('quote-author').textContent = quotes[index].author;
+        }
+
+        function showNextQuote() { showRandomQuote(); }
+
         function toggleTheme() {
             const body = document.documentElement;
             const btn = document.getElementById('theme-toggle');
@@ -174,6 +199,11 @@
                 btn.textContent = '☀️ Light Mode';
             }
         }
+
+        loadQuotes().then(showRandomQuote).catch(() => {
+            document.getElementById('quote-text').textContent = 'Kon quotes niet laden.';
+            document.getElementById('quote-author').textContent = '';
+        });
     </script>
 </body>
 </html>
