@@ -81,11 +81,19 @@
             left: 0;
             right: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 0 32px;
             text-align: center;
             overflow: hidden;
+        }
+
+        #crown {
+            font-size: 2rem;
+            display: none;
+            margin-bottom: 8px;
+            line-height: 1;
         }
 
         h1#quote-text {
@@ -391,6 +399,7 @@
     </div>
 
     <div class="quote-area">
+        <div id="crown">👑</div>
         <h1 id="quote-text">Laden...</h1>
     </div>
 
@@ -427,6 +436,7 @@
         let quotes = [];
         let currentIndex = -1;
         let currentScoreRef = null;
+        let topQuoteKey = null;   // key met meeste ups
 
         // ── Voting ───────────────────────────────────────────────────────────
 
@@ -501,6 +511,12 @@
                 .filter(t => t.length > 0);
         }
 
+        function updateCrown() {
+            const crown = document.getElementById('crown');
+            if (currentIndex < 0 || !topQuoteKey) { crown.style.display = 'none'; return; }
+            crown.style.display = quoteKey(quotes[currentIndex]) === topQuoteKey ? 'block' : 'none';
+        }
+
         function showNextQuote() {
             if (quotes.length === 0) { document.getElementById('quote-text').textContent = 'Geen quotes gevonden.'; return; }
             let index;
@@ -511,6 +527,24 @@
             const key = quoteKey(quotes[currentIndex]);
             renderButtons((loadMyVotes()[key] || {}).myVote || 0);
             watchScore(key);
+            updateCrown();
+        }
+
+        // Luister real-time naar alle stemmen om de quote met meeste ups bij te houden
+        function startWatchingTopQuote() {
+            db.ref('votes').on('value', snap => {
+                const allVotes = snap.val() || {};
+                let bestKey = null;
+                let bestUps = 0;
+                for (const [k, v] of Object.entries(allVotes)) {
+                    if ((v.ups || 0) > bestUps) {
+                        bestUps = v.ups;
+                        bestKey = k;
+                    }
+                }
+                topQuoteKey = bestUps > 0 ? bestKey : null;
+                updateCrown();
+            });
         }
 
         // ── Scoreboard ────────────────────────────────────────────────────────
@@ -647,7 +681,10 @@
 
         syncResetTimestamp()
             .then(() => loadQuotes())
-            .then(showNextQuote)
+            .then(() => {
+                startWatchingTopQuote();
+                showNextQuote();
+            })
             .catch(() => {
                 document.getElementById('quote-text').textContent = 'Kon quotes niet laden.';
             });
