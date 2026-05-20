@@ -16,17 +16,17 @@
         :root {
             --bg-color: #ffffff;
             --text-color: #333333;
-            --card-bg: #f9f9f9;
-            --card-border: #e0e0e0;
             --input-border: #dddddd;
+            --vote-active-up: #2ecc71;
+            --vote-active-down: #e74c3c;
+            --vote-neutral: #bdc3c7;
         }
 
         [data-theme="dark"] {
             --bg-color: #1a1a1a;
             --text-color: #f0f0f0;
-            --card-bg: #2d2d2d;
-            --card-border: #444444;
             --input-border: #444444;
+            --vote-neutral: #555;
         }
 
         body {
@@ -81,9 +81,46 @@
         h1#quote-text {
             font-size: 2.5rem;
             line-height: 1.3;
-            margin: 0;
+            margin: 0 0 32px;
             font-weight: bold;
         }
+
+        .vote-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .vote-btn {
+            background: none;
+            border: 2px solid var(--vote-neutral);
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: border-color 0.15s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vote-btn:hover { transform: scale(1.12); }
+
+        .vote-btn.active-up   { border-color: var(--vote-active-up);   }
+        .vote-btn.active-down { border-color: var(--vote-active-down); }
+
+        #score-display {
+            font-size: 1.6rem;
+            font-weight: bold;
+            min-width: 40px;
+            color: var(--text-color);
+        }
+
+        #score-display.positive { color: var(--vote-active-up);   }
+        #score-display.negative { color: var(--vote-active-down); }
 
         @keyframes regenboog {
             from { background-position-x: 0; }
@@ -91,7 +128,6 @@
         }
 
         button#next-btn {
-            margin-top: 32px;
             padding: 10px 24px;
             font-size: 1rem;
             background: linear-gradient(90deg,
@@ -111,17 +147,9 @@
             border-radius: 5px;
             cursor: pointer;
             text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         button#next-btn:hover { filter: brightness(1.15); }
-
-        #error {
-            color: #888;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
@@ -131,12 +159,61 @@
 
     <div class="quote-card">
         <h1 id="quote-text">Laden...</h1>
+
+        <div class="vote-row">
+            <button class="vote-btn" id="upvote-btn"   onclick="vote(1)"  title="Upvote">👍</button>
+            <span id="score-display">0</span>
+            <button class="vote-btn" id="downvote-btn" onclick="vote(-1)" title="Downvote">👎</button>
+        </div>
+
         <button id="next-btn" onclick="showNextQuote()">Volgende quote</button>
     </div>
 
     <script>
         let quotes = [];
-        let lastIndex = -1;
+        let currentIndex = -1;
+
+        function quoteKey(text) {
+            return text.trim().substring(0, 80);
+        }
+
+        function loadVotes() {
+            return JSON.parse(localStorage.getItem('quote_votes') || '{}');
+        }
+
+        function saveVotes(votes) {
+            localStorage.setItem('quote_votes', JSON.stringify(votes));
+        }
+
+        function vote(value) {
+            const key = quoteKey(quotes[currentIndex]);
+            const votes = loadVotes();
+            const entry = votes[key] || { score: 0, myVote: 0 };
+
+            if (entry.myVote === value) {
+                entry.score  -= value;
+                entry.myVote  = 0;
+            } else {
+                entry.score  -= entry.myVote;
+                entry.score  += value;
+                entry.myVote  = value;
+            }
+
+            votes[key] = entry;
+            saveVotes(votes);
+            renderVote(entry);
+        }
+
+        function renderVote(entry) {
+            const scoreEl    = document.getElementById('score-display');
+            const upvoteBtn  = document.getElementById('upvote-btn');
+            const downvoteBtn = document.getElementById('downvote-btn');
+
+            scoreEl.textContent = entry.score;
+            scoreEl.className   = entry.score > 0 ? 'positive' : entry.score < 0 ? 'negative' : '';
+            upvoteBtn.className   = 'vote-btn' + (entry.myVote ===  1 ? ' active-up'   : '');
+            downvoteBtn.className = 'vote-btn' + (entry.myVote === -1 ? ' active-down' : '');
+        }
 
         async function loadQuotes() {
             const response = await fetch('/quotes/quotes.md');
@@ -150,7 +227,7 @@
                 .filter(t => t.length > 0);
         }
 
-        function showRandomQuote() {
+        function showNextQuote() {
             if (quotes.length === 0) {
                 document.getElementById('quote-text').textContent = 'Geen quotes gevonden.';
                 return;
@@ -158,12 +235,14 @@
             let index;
             do {
                 index = Math.floor(Math.random() * quotes.length);
-            } while (quotes.length > 1 && index === lastIndex);
-            lastIndex = index;
-            document.getElementById('quote-text').textContent = quotes[index];
-        }
+            } while (quotes.length > 1 && index === currentIndex);
+            currentIndex = index;
 
-        function showNextQuote() { showRandomQuote(); }
+            document.getElementById('quote-text').textContent = quotes[currentIndex];
+
+            const votes = loadVotes();
+            renderVote(votes[quoteKey(quotes[currentIndex])] || { score: 0, myVote: 0 });
+        }
 
         function toggleTheme() {
             const body = document.documentElement;
@@ -177,7 +256,7 @@
             }
         }
 
-        loadQuotes().then(showRandomQuote).catch(() => {
+        loadQuotes().then(showNextQuote).catch(() => {
             document.getElementById('quote-text').textContent = 'Kon quotes niet laden.';
         });
     </script>
