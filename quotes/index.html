@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6KVMLB0CQ4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6KVMLB0CQ4');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotes — DNSSEC</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f9f9f9;
+            --card-border: #e0e0e0;
+            --input-border: #dddddd;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --card-bg: #2d2d2d;
+            --card-border: #444444;
+            --input-border: #444444;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            padding: 40px 20px 80px;
+            box-sizing: border-box;
+        }
+
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+
+        a.back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            z-index: 10;
+        }
+
+        a.back-link:hover { opacity: 0.7; }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 20px 0 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #888;
+            font-style: italic;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .quotes-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        .quote-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 24px 28px;
+            position: relative;
+        }
+
+        .quote-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin: 0 0 12px;
+        }
+
+        .quote-text::before { content: "\201C"; }
+        .quote-text::after  { content: "\201D"; }
+
+        .quote-author {
+            font-size: 0.9rem;
+            color: #888;
+            text-align: right;
+        }
+
+        .quote-author::before { content: "— "; }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="back-link">← Terug</a>
+    <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+    <h1>Quotes 💬</h1>
+    <p class="subtitle">Wat slimme mensen zeiden over het internet.</p>
+
+    <div class="quotes-grid">
+
+        <div class="quote-card">
+            <p class="quote-text">The internet is becoming the town square for the global village of tomorrow.</p>
+            <p class="quote-author">Bill Gates</p>
+        </div>
+
+        <div class="quote-card">
+            <p class="quote-text">Security used to be an inconvenience sometimes, but now it's a necessity all the time.</p>
+            <p class="quote-author">Martina Navratilova</p>
+        </div>
+
+        <div class="quote-card">
+            <p class="quote-text">DNSSEC is like a lock on your front door — most people walk right past it, but you're glad it's there.</p>
+            <p class="quote-author">Anoniem</p>
+        </div>
+
+        <div class="quote-card">
+            <p class="quote-text">The best time to implement DNSSEC was ten years ago. The second best time is now.</p>
+            <p class="quote-author">Anoniem</p>
+        </div>
+
+        <div class="quote-card">
+            <p class="quote-text">Privacidad y seguridad no son lujos, son derechos.</p>
+            <p class="quote-author">Onbekend</p>
+        </div>
+
+        <div class="quote-card">
+            <p class="quote-text">DNS is the phonebook of the internet. DNSSEC makes sure no one rips out the pages.</p>
+            <p class="quote-author">Anoniem</p>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                btn.textContent = '🌙 Dark Mode';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️ Light Mode';
+            }
+        }
+    </script>
+</body>
+</html>
