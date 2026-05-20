@@ -115,6 +115,20 @@
             gap: 16px;
         }
 
+        .vote-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .vote-count {
+            font-size: 0.72rem;
+            color: #888;
+            min-width: 40px;
+            text-align: center;
+        }
+
         .vote-btn {
             background: none;
             border: 2px solid var(--vote-neutral);
@@ -382,9 +396,15 @@
 
     <div class="controls-area">
         <div class="vote-row">
-            <button class="vote-btn" id="upvote-btn"   onclick="vote(1)"  title="Upvote">🚀</button>
+            <div class="vote-col">
+                <button class="vote-btn" id="upvote-btn" onclick="vote(1)" title="Upvote">🚀</button>
+                <span class="vote-count" id="up-count">0</span>
+            </div>
             <span id="score-display">–</span>
-            <button class="vote-btn" id="downvote-btn" onclick="vote(-1)" title="Downvote">📉</button>
+            <div class="vote-col">
+                <button class="vote-btn" id="downvote-btn" onclick="vote(-1)" title="Downvote">📉</button>
+                <span class="vote-count" id="down-count">0</span>
+            </div>
         </div>
         <button id="next-btn" onclick="showNextQuote()">Volgende quote</button>
     </div>
@@ -417,10 +437,12 @@
         function loadMyVotes() { return JSON.parse(localStorage.getItem('my_votes') || '{}'); }
         function saveMyVotes(v) { localStorage.setItem('my_votes', JSON.stringify(v)); }
 
-        function renderScore(score) {
+        function renderScore(score, ups, downs) {
             const el = document.getElementById('score-display');
             el.textContent = score;
             el.className = score > 0 ? 'positive' : score < 0 ? 'negative' : '';
+            document.getElementById('up-count').textContent   = ups   > 0 ? ups   : '';
+            document.getElementById('down-count').textContent = downs > 0 ? downs : '';
         }
 
         function renderButtons(myVote) {
@@ -430,20 +452,31 @@
 
         function watchScore(key) {
             if (currentScoreRef) currentScoreRef.off();
-            currentScoreRef = db.ref('votes/' + key + '/total');
-            currentScoreRef.on('value', snap => renderScore(snap.val() || 0));
+            currentScoreRef = db.ref('votes/' + key);
+            currentScoreRef.on('value', snap => {
+                const d = snap.val() || {};
+                renderScore(d.total || 0, d.ups || 0, d.downs || 0);
+            });
         }
 
         async function vote(value) {
             const key = quoteKey(quotes[currentIndex]);
             const myVotes = loadMyVotes();
             const prev = (myVotes[key] || {}).myVote || 0;
-            let delta;
-            if (prev === value) { delta = -value; myVotes[key] = { myVote: 0 }; }
-            else                { delta = value - prev; myVotes[key] = { myVote: value }; }
+            const newVote = prev === value ? 0 : value;
+            myVotes[key] = { myVote: newVote };
             saveMyVotes(myVotes);
-            renderButtons(myVotes[key].myVote);
-            await db.ref('votes/' + key + '/total').transaction(n => (n || 0) + delta);
+            renderButtons(newVote);
+
+            await db.ref('votes/' + key).transaction(current => {
+                const c = current || { total: 0, ups: 0, downs: 0 };
+                if (prev ===  1) c.ups   = Math.max(0, (c.ups   || 0) - 1);
+                if (prev === -1) c.downs = Math.max(0, (c.downs || 0) - 1);
+                if (newVote ===  1) c.ups   = (c.ups   || 0) + 1;
+                if (newVote === -1) c.downs = (c.downs || 0) + 1;
+                c.total = (c.ups || 0) - (c.downs || 0);
+                return c;
+            });
         }
 
         // ── Quotes loader ─────────────────────────────────────────────────────
