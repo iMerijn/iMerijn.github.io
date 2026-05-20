@@ -469,12 +469,14 @@
             renderButtons(newVote);
 
             await db.ref('votes/' + key).transaction(current => {
-                const c = current || { total: 0, ups: 0, downs: 0 };
+                const c = current ? { ...current } : {};
+                // total altijd via delta — werkt ook met bestaande data zonder ups/downs
+                c.total = (c.total || 0) + (newVote - prev);
+                // ups/downs los bijhouden (alleen voor nieuwe stemmen)
                 if (prev ===  1) c.ups   = Math.max(0, (c.ups   || 0) - 1);
                 if (prev === -1) c.downs = Math.max(0, (c.downs || 0) - 1);
                 if (newVote ===  1) c.ups   = (c.ups   || 0) + 1;
                 if (newVote === -1) c.downs = (c.downs || 0) + 1;
-                c.total = (c.ups || 0) - (c.downs || 0);
                 return c;
             });
         }
