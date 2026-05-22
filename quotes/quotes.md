@@ -89,3 +89,7 @@ Prime example
 ---
 
 Keep on pushing! 🚀
+
+---
+
+We moeten er 200% zeker van zijn dat als we nieuwe optimalisatieprojecten starten dit de live performance absoluut niet kan en mag raken.
