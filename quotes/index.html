@@ -471,6 +471,37 @@
         let currentScoreRef = null;
         let topQuoteKey = null;   // key met meeste ups
 
+        // ── Playlist shuffle ──────────────────────────────────────────────────
+        // Alle quotes worden precies één keer getoond per ronde (Fisher-Yates shuffle).
+        // Pas bij de volgende ronde worden ze opnieuw geshuffeld — zo geen herhalingen.
+
+        let playlist      = [];   // geschuffelde indices
+        let playlistIndex = 0;    // huidige positie in playlist
+
+        function shuffleIndices(length) {
+            const arr = Array.from({ length }, (_, i) => i);
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function nextFromPlaylist() {
+            if (playlistIndex >= playlist.length) {
+                // Nieuwe ronde: hershuffle — zorg dat de eerste quote ≠ laatste van vorige ronde
+                const lastIndex = playlist.length > 0 ? playlist[playlist.length - 1] : -1;
+                playlist = shuffleIndices(quotes.length);
+                if (playlist[0] === lastIndex && playlist.length > 1) {
+                    // Wissel eerste met willekeurige andere positie
+                    const swap = Math.floor(Math.random() * (playlist.length - 1)) + 1;
+                    [playlist[0], playlist[swap]] = [playlist[swap], playlist[0]];
+                }
+                playlistIndex = 0;
+            }
+            return playlist[playlistIndex++];
+        }
+
         // ── Voting ───────────────────────────────────────────────────────────
 
         function quoteKey(text) {
@@ -552,10 +583,7 @@
 
         function showNextQuote() {
             if (quotes.length === 0) { document.getElementById('quote-text').textContent = 'Geen quotes gevonden.'; return; }
-            let index;
-            do { index = Math.floor(Math.random() * quotes.length); }
-            while (quotes.length > 1 && index === currentIndex);
-            currentIndex = index;
+            currentIndex = nextFromPlaylist();
             document.getElementById('quote-text').textContent = quotes[currentIndex];
             const key = quoteKey(quotes[currentIndex]);
             renderButtons((loadMyVotes()[key] || {}).myVote || 0);
