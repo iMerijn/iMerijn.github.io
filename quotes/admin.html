@@ -315,7 +315,10 @@
             <div class="view-tabs">
                 <button class="tab-btn active" id="tab-pending"  onclick="switchView('pending')">📥 Ingediend <span class="tab-count" id="count-pending">0</span></button>
                 <button class="tab-btn"        id="tab-rejected" onclick="switchView('rejected')">🗑 Afgekeurd <span class="tab-count" id="count-rejected">0</span></button>
+                <button class="tab-btn" onclick="forceRefresh()" title="Opnieuw laden" style="margin-left:auto;font-size:1rem;padding:10px 12px">🔄</button>
             </div>
+
+            <div id="debug-info" style="font-size:0.78rem;color:#888;margin-bottom:12px;min-height:1.2em"></div>
 
             <div id="pending-list">
                 <div class="empty-state">Laden...</div>
@@ -402,21 +405,42 @@
         let renderTimer  = null;       // debounce zodat success-berichten zichtbaar blijven
 
         function loadQuotes() {
-            // Real-time listener: bijwerken zodra iemand een quote indient of de status wijzigt
-            db.ref('pending_quotes').on('value', snap => {
-                allQuotes = [];
-                snap.forEach(child => allQuotes.push({ id: child.key, ...child.val() }));
+            db.ref('pending_quotes').on(
+                'value',
+                snap => {
+                    allQuotes = [];
+                    snap.forEach(child => {
+                        const val = child.val();
+                        if (val && typeof val === 'object') {
+                            allQuotes.push({ id: child.key, ...val });
+                        }
+                    });
 
-                if (firstLoad) {
-                    // Eerste keer: meteen renderen
-                    firstLoad = false;
-                    renderView();
-                } else {
-                    // Daarna: korte vertraging zodat approve/reject-berichten even zichtbaar blijven
-                    clearTimeout(renderTimer);
-                    renderTimer = setTimeout(renderView, 800);
+                    if (firstLoad) {
+                        firstLoad = false;
+                        renderView();
+                    } else {
+                        clearTimeout(renderTimer);
+                        renderTimer = setTimeout(renderView, 800);
+                    }
+                },
+                error => {
+                    // Firebase permission of verbindingsfout
+                    document.getElementById('debug-info').textContent =
+                        `⚠️ Firebase fout: ${error.message}`;
+                    document.getElementById('pending-list').innerHTML =
+                        `<div class="empty-state" style="color:var(--red)">Kan data niet laden — zie debug-info hierboven.</div>`;
                 }
-            });
+            );
+        }
+
+        function forceRefresh() {
+            db.ref('pending_quotes').off();
+            firstLoad = true;
+            allQuotes = [];
+            document.getElementById('pending-list').innerHTML = '<div class="empty-state">Herladen...</div>';
+            document.getElementById('debug-info').textContent = '';
+            loadQuotes();
         }
 
         function switchView(view) {
@@ -426,15 +450,30 @@
             renderView();
         }
 
+        // Entries zonder status-veld worden ook als 'pending' beschouwd
+        const isPending  = q => !q.status || q.status === 'pending';
+        const isRejected = q => q.status === 'rejected';
+
         function renderView() {
-            const pendingCount  = allQuotes.filter(q => q.status === 'pending').length;
-            const rejectedCount = allQuotes.filter(q => q.status === 'rejected').length;
+            const pendingCount  = allQuotes.filter(isPending).length;
+            const rejectedCount = allQuotes.filter(isRejected).length;
+            const approvedCount = allQuotes.filter(q => q.status === 'approved').length;
+            const otherCount    = allQuotes.length - pendingCount - rejectedCount - approvedCount;
+
             document.getElementById('count-pending').textContent  = pendingCount;
             document.getElementById('count-rejected').textContent = rejectedCount;
 
-            // Pending: oudste eerst (FIFO). Rejected: nieuwste eerst (meest relevante info bovenaan).
+            // Debug-info: laat zien wat Firebase heeft teruggegeven
+            const parts = [`${allQuotes.length} entries geladen`];
+            if (pendingCount)  parts.push(`${pendingCount} ingediend`);
+            if (approvedCount) parts.push(`${approvedCount} goedgekeurd`);
+            if (rejectedCount) parts.push(`${rejectedCount} afgekeurd`);
+            if (otherCount)    parts.push(`${otherCount} onbekende status`);
+            document.getElementById('debug-info').textContent = parts.join(' · ');
+
+            // Pending: oudste eerst (FIFO). Rejected: nieuwste eerst.
             const filtered = allQuotes
-                .filter(q => q.status === currentView)
+                .filter(q => currentView === 'pending' ? isPending(q) : isRejected(q))
                 .sort((a, b) => currentView === 'pending'
                     ? a.submitted_at - b.submitted_at
                     : b.submitted_at - a.submitted_at);
