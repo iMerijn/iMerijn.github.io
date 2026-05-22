@@ -558,7 +558,7 @@
                 'Content-Type': 'application/json',
             };
 
-            const getResp = await fetch(apiUrl, { headers });
+            const getResp = await fetch(apiUrl, { headers, cache: 'no-store' });
             if (!getResp.ok) throw new Error('Kan quotes.md niet ophalen');
             const fileData = await getResp.json();
 
