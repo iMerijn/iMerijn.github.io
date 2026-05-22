@@ -379,6 +379,10 @@
         function logout() {
             githubToken = '';
             localStorage.removeItem('admin_pat');
+            db.ref('pending_quotes').off(); // listener opruimen
+            firstLoad = true;
+            clearTimeout(renderTimer);
+            allQuotes = [];
             document.getElementById('admin-section').style.display = 'none';
             document.getElementById('login-section').style.display  = 'block';
             document.getElementById('pat-input').value = '';
@@ -392,15 +396,27 @@
 
         // ── Quote moderatie ───────────────────────────────────────────────────
 
-        let allQuotes = [];          // {id, text, status, submitted_at}
-        let currentView = 'pending'; // 'pending' | 'rejected'
+        let allQuotes    = [];          // {id, text, status, submitted_at}
+        let currentView  = 'pending';  // 'pending' | 'rejected'
+        let firstLoad    = true;       // voor directe render bij eerste load
+        let renderTimer  = null;       // debounce zodat success-berichten zichtbaar blijven
 
-        async function loadQuotes() {
-            // Haal ALLES op en filter client-side — voorkomt issues met ontbrekende indexen
-            const snap = await db.ref('pending_quotes').once('value');
-            allQuotes = [];
-            snap.forEach(child => allQuotes.push({ id: child.key, ...child.val() }));
-            renderView();
+        function loadQuotes() {
+            // Real-time listener: bijwerken zodra iemand een quote indient of de status wijzigt
+            db.ref('pending_quotes').on('value', snap => {
+                allQuotes = [];
+                snap.forEach(child => allQuotes.push({ id: child.key, ...child.val() }));
+
+                if (firstLoad) {
+                    // Eerste keer: meteen renderen
+                    firstLoad = false;
+                    renderView();
+                } else {
+                    // Daarna: korte vertraging zodat approve/reject-berichten even zichtbaar blijven
+                    clearTimeout(renderTimer);
+                    renderTimer = setTimeout(renderView, 800);
+                }
+            });
         }
 
         function switchView(view) {
@@ -471,7 +487,7 @@
                 card.classList.add('done');
                 status.textContent = '✓ Goedgekeurd en toegevoegd aan quotes.md';
                 status.className = 'card-status ok';
-                setTimeout(renderView, 1500);
+                // Real-time listener zorgt automatisch voor re-render
             } catch (e) {
                 status.textContent = 'Fout: ' + e.message;
                 status.className = 'card-status err';
@@ -490,7 +506,7 @@
             card.classList.add('done');
             status.textContent = '✗ Afgewezen';
             status.className = 'card-status';
-            setTimeout(renderView, 1000);
+            // Real-time listener zorgt automatisch voor re-render
         }
 
         // ── GitHub API ────────────────────────────────────────────────────────
