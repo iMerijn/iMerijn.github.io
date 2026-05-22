@@ -109,3 +109,7 @@ Dank all
 ---
 
 Dank all
+
+---
+
+Als het jankt, wordt je later bedankt
