@@ -117,3 +117,7 @@ Als het jankt, wordt je later bedankt
 ---
 
 We gaan als een Jekko
+
+---
+
+Ja ik heb een goeie sessie gehad 💩
