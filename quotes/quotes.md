@@ -93,3 +93,11 @@ Keep on pushing! 🚀
 ---
 
 We moeten er 200% zeker van zijn dat als we nieuwe optimalisatieprojecten starten dit de live performance absoluut niet kan en mag raken.
+
+---
+
+Wat krijg jij bij EXIT Toys?
+- Leuk team met enthousiaste collega’s: 𝗪𝗶'𝗷 𝗸𝘂𝗻𝘁 '𝘁 𝗻𝗲𝗲𝘁 𝗮𝗹𝗹𝗲𝗻𝗲 𝗱𝗼𝗼𝗻!
+
+
+𝗡𝗶𝗲𝘂𝘄𝘀𝗴𝗶𝗲𝗿𝗶𝗴? Neem contact met mij op en laten we samen de mogelijkheden onderzoeken! 📞 𝟬𝟲-𝟰𝟱𝟯𝟬𝟮𝟬𝟭𝟴
