@@ -77,3 +77,7 @@ Staan we liive to convert?
 ---
 
 thanks voor de quickfix!
+
+---
+
+We moeten momentum behouden zodat we niet de window verliezen
