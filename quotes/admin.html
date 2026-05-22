@@ -148,6 +148,47 @@
 
         .logout-btn:hover { opacity: 0.7; }
 
+        /* ── Tabs ── */
+        .view-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-family: inherit;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            opacity: 0.55;
+            transition: opacity 0.15s, border-color 0.15s;
+        }
+
+        .tab-btn:hover { opacity: 0.85; }
+
+        .tab-btn.active {
+            opacity: 1;
+            border-bottom-color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .tab-count {
+            display: inline-block;
+            background: var(--input-border);
+            color: var(--text-color);
+            font-size: 0.78rem;
+            padding: 1px 7px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
+
         /* ── Pending cards ── */
         .pending-card {
             background: var(--card-bg);
@@ -267,9 +308,15 @@
         <!-- Admin content -->
         <div id="admin-section">
             <div class="admin-header">
-                <h1 style="margin:0;text-align:left;font-size:1.6rem">📋 Ingediende quotes</h1>
+                <h1 style="margin:0;text-align:left;font-size:1.6rem">📋 Quote moderatie</h1>
                 <button class="logout-btn" onclick="logout()">Uitloggen</button>
             </div>
+
+            <div class="view-tabs">
+                <button class="tab-btn active" id="tab-pending"  onclick="switchView('pending')">📥 Ingediend <span class="tab-count" id="count-pending">0</span></button>
+                <button class="tab-btn"        id="tab-rejected" onclick="switchView('rejected')">🗑 Afgekeurd <span class="tab-count" id="count-rejected">0</span></button>
+            </div>
+
             <div id="pending-list">
                 <div class="empty-state">Laden...</div>
             </div>
@@ -340,45 +387,75 @@
         function showAdmin() {
             document.getElementById('login-section').style.display  = 'none';
             document.getElementById('admin-section').style.display  = 'block';
-            loadPending();
+            loadQuotes();
         }
 
-        // ── Pending quotes ────────────────────────────────────────────────────
+        // ── Quote moderatie ───────────────────────────────────────────────────
 
-        async function loadPending() {
-            const snap = await db.ref('pending_quotes')
-                .orderByChild('status').equalTo('pending').once('value');
+        let allQuotes = [];          // {id, text, status, submitted_at}
+        let currentView = 'pending'; // 'pending' | 'rejected'
 
-            const items = [];
-            snap.forEach(child => items.push({ id: child.key, ...child.val() }));
-            items.sort((a, b) => a.submitted_at - b.submitted_at);
+        async function loadQuotes() {
+            // Haal ALLES op en filter client-side — voorkomt issues met ontbrekende indexen
+            const snap = await db.ref('pending_quotes').once('value');
+            allQuotes = [];
+            snap.forEach(child => allQuotes.push({ id: child.key, ...child.val() }));
+            renderView();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.getElementById('tab-pending').classList.toggle('active',  view === 'pending');
+            document.getElementById('tab-rejected').classList.toggle('active', view === 'rejected');
+            renderView();
+        }
+
+        function renderView() {
+            const pendingCount  = allQuotes.filter(q => q.status === 'pending').length;
+            const rejectedCount = allQuotes.filter(q => q.status === 'rejected').length;
+            document.getElementById('count-pending').textContent  = pendingCount;
+            document.getElementById('count-rejected').textContent = rejectedCount;
+
+            // Pending: oudste eerst (FIFO). Rejected: nieuwste eerst (meest relevante info bovenaan).
+            const filtered = allQuotes
+                .filter(q => q.status === currentView)
+                .sort((a, b) => currentView === 'pending'
+                    ? a.submitted_at - b.submitted_at
+                    : b.submitted_at - a.submitted_at);
 
             const listEl = document.getElementById('pending-list');
 
-            if (items.length === 0) {
-                listEl.innerHTML = '<div class="empty-state">Geen quotes wachtend op goedkeuring 🎉</div>';
+            if (filtered.length === 0) {
+                listEl.innerHTML = currentView === 'pending'
+                    ? '<div class="empty-state">Geen quotes wachtend op goedkeuring 🎉</div>'
+                    : '<div class="empty-state">Geen afgekeurde quotes</div>';
                 return;
             }
 
-            listEl.innerHTML = items.map(q => `
-                <div class="pending-card" id="card-${q.id}">
-                    <p class="pending-quote-text">"${escapeHtml(q.text)}"</p>
-                    <p class="pending-meta">Ingediend op ${new Date(q.submitted_at).toLocaleString('nl-NL')}</p>
-                    <div class="pending-actions">
-                        <button class="approve-btn" id="approve-${q.id}" onclick="approve('${q.id}', this)">✓ Goedkeuren</button>
-                        <button class="reject-btn"  id="reject-${q.id}"  onclick="reject('${q.id}', this)">✗ Afwijzen</button>
-                    </div>
-                    <div class="card-status" id="status-${q.id}"></div>
-                </div>
-            `).join('');
+            listEl.innerHTML = filtered.map(q => {
+                const buttons = currentView === 'pending'
+                    ? `<button class="approve-btn" id="approve-${q.id}" onclick="approve('${q.id}')">✓ Goedkeuren</button>
+                       <button class="reject-btn"  id="reject-${q.id}"  onclick="reject('${q.id}')">✗ Afwijzen</button>`
+                    : `<button class="approve-btn" id="approve-${q.id}" onclick="approve('${q.id}')">↩ Alsnog goedkeuren</button>`;
+
+                return `
+                    <div class="pending-card" id="card-${q.id}">
+                        <p class="pending-quote-text">"${escapeHtml(q.text)}"</p>
+                        <p class="pending-meta">Ingediend op ${new Date(q.submitted_at).toLocaleString('nl-NL')}</p>
+                        <div class="pending-actions">${buttons}</div>
+                        <div class="card-status" id="status-${q.id}"></div>
+                    </div>`;
+            }).join('');
         }
 
         function setCardBusy(id, busy) {
-            document.getElementById(`approve-${id}`).disabled = busy;
-            document.getElementById(`reject-${id}`).disabled  = busy;
+            const a = document.getElementById(`approve-${id}`);
+            const r = document.getElementById(`reject-${id}`);
+            if (a) a.disabled = busy;
+            if (r) r.disabled = busy;
         }
 
-        async function approve(id, btn) {
+        async function approve(id) {
             const card   = document.getElementById(`card-${id}`);
             const status = document.getElementById(`status-${id}`);
             const text   = card.querySelector('.pending-quote-text').textContent.slice(1, -1); // strip ""
@@ -389,9 +466,12 @@
             try {
                 await addToQuotesMd(text);
                 await db.ref(`pending_quotes/${id}`).update({ status: 'approved' });
+                const q = allQuotes.find(q => q.id === id);
+                if (q) q.status = 'approved';
                 card.classList.add('done');
                 status.textContent = '✓ Goedgekeurd en toegevoegd aan quotes.md';
                 status.className = 'card-status ok';
+                setTimeout(renderView, 1500);
             } catch (e) {
                 status.textContent = 'Fout: ' + e.message;
                 status.className = 'card-status err';
@@ -399,15 +479,18 @@
             }
         }
 
-        async function reject(id, btn) {
+        async function reject(id) {
             const card   = document.getElementById(`card-${id}`);
             const status = document.getElementById(`status-${id}`);
             setCardBusy(id, true);
 
             await db.ref(`pending_quotes/${id}`).update({ status: 'rejected' });
+            const q = allQuotes.find(q => q.id === id);
+            if (q) q.status = 'rejected';
             card.classList.add('done');
             status.textContent = '✗ Afgewezen';
             status.className = 'card-status';
+            setTimeout(renderView, 1000);
         }
 
         // ── GitHub API ────────────────────────────────────────────────────────
