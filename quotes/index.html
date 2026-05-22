@@ -363,6 +363,47 @@
 
         button#submit-quote-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; }
 
+        /* ── Nieuwe quotes toast ── */
+        #new-quotes-toast {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-color);
+            border: 2px solid var(--input-border);
+            border-radius: 20px;
+            padding: 8px 14px 8px 16px;
+            font-size: 0.85rem;
+            z-index: 20;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: calc(100vw - 40px);
+            white-space: nowrap;
+            animation: toastIn 0.3s ease;
+        }
+
+        #new-quotes-toast.visible { display: flex; }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        #new-quotes-toast .toast-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 0.85rem;
+            padding: 0;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        #new-quotes-toast .toast-close:hover { color: var(--text-color); }
+
         /* ── Mobile ── */
         @media (max-width: 600px) {
             h1#quote-text {
@@ -401,6 +442,11 @@
 
     <a href="/" class="back-link">← Terug</a>
     <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+    <div id="new-quotes-toast">
+        <span id="new-quotes-msg"></span>
+        <button class="toast-close" onclick="document.getElementById('new-quotes-toast').classList.remove('visible')" title="Sluiten">✕</button>
+    </div>
 
     <!-- Bottom buttons -->
     <div class="bottom-btns">
@@ -715,6 +761,22 @@
         function closeAddQuote() { document.getElementById('add-quote-overlay').classList.remove('open'); }
         function closeAddOnOverlay(e) { if (e.target === document.getElementById('add-quote-overlay')) closeAddQuote(); }
 
+        // ── Nieuwe quotes melding ─────────────────────────────────────────────
+
+        async function checkNewQuotes() {
+            const cutoff = Date.now() - 48 * 60 * 60 * 1000; // 48 uur geleden
+            const snap = await db.ref('approved_quotes').once('value');
+            let count = 0;
+            snap.forEach(child => {
+                if ((child.val().approved_at || 0) >= cutoff) count++;
+            });
+            if (count > 0) {
+                document.getElementById('new-quotes-msg').textContent =
+                    `✨ ${count} nieuwe quote${count === 1 ? '' : 's'} toegevoegd in de afgelopen 48 uur`;
+                document.getElementById('new-quotes-toast').classList.add('visible');
+            }
+        }
+
         // ── Theme ─────────────────────────────────────────────────────────────
 
         function toggleTheme() {
@@ -745,6 +807,7 @@
             .then(() => {
                 startWatchingTopQuote();
                 showNextQuote();
+                checkNewQuotes(); // los van de rest — mislukt stil als Firebase traag is
             })
             .catch(() => {
                 document.getElementById('quote-text').textContent = 'Kon quotes niet laden.';

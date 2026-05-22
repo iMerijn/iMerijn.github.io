@@ -521,6 +521,8 @@
             try {
                 await addToQuotesMd(text);
                 await db.ref(`pending_quotes/${id}`).update({ status: 'approved' });
+                // Sla goedkeuringstijd op zodat de quotes-pagina een "nieuw" melding kan tonen
+                await db.ref('approved_quotes').push({ text, approved_at: Date.now() });
                 const q = allQuotes.find(q => q.id === id);
                 if (q) q.status = 'approved';
                 card.classList.add('done');
