@@ -113,3 +113,7 @@ Dank all
 ---
 
 Als het jankt, wordt je later bedankt
+
+---
+
+We gaan als een Jekko
