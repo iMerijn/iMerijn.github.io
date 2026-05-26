@@ -133,3 +133,7 @@ Hi ladies,
 ---
 
 Even snel op een (Teams) call springen
+
+---
+
+Soms als ze hun mond open trekken, kunnen ze hem beter dicht houden
