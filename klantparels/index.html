@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klantparels — DNSSEC CS</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
+
+    <!-- Firebase Firestore via CDN -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <!-- Config (niet in git) -->
+    <script src="config.js"></script>
+
+    <style>
+        :root {
+            --bg:           #ffffff;
+            --surface:      #f5f5f5;
+            --text:         #333333;
+            --text-muted:   #888888;
+            --border:       #dddddd;
+            --polaroid-bg:  #fefefe;
+            --shadow:       rgba(0,0,0,0.12);
+            --accent:       hsl(220, 80%, 55%);
+        }
+
+        [data-theme="dark"] {
+            --bg:           #1a1a1a;
+            --surface:      #252525;
+            --text:         #f0f0f0;
+            --text-muted:   #888888;
+            --border:       #3a3a3a;
+            --polaroid-bg:  #2a2a2a;
+            --shadow:       rgba(0,0,0,0.4);
+            --accent:       hsl(220, 75%, 65%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* ── Top bar ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+
+        a.back-link {
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: opacity 0.15s;
+        }
+
+        a.back-link:hover { opacity: 0.7; }
+
+        .page-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+        .icon-btn {
+            background: none;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: opacity 0.15s;
+            white-space: nowrap;
+        }
+
+        .icon-btn:hover { opacity: 0.7; }
+
+        .admin-badge {
+            background: var(--accent);
+            color: #fff;
+            border-color: transparent;
+            font-size: 0.78rem;
+            padding: 5px 10px;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            padding: 48px 20px 32px;
+        }
+
+        .hero-emoji { font-size: 3rem; display: block; margin-bottom: 10px; }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 480px;
+            margin: 0 auto 24px;
+            line-height: 1.55;
+        }
+
+        .hero-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, hsl(220,80%,55%), hsl(270,75%,60%));
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(100,100,220,0.3);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .hero-add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(100,100,220,0.4);
+        }
+
+        /* ── Masonry grid ── */
+        .wall {
+            columns: 280px;
+            column-gap: 20px;
+            padding: 0 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ── Polaroid card ── */
+        .card {
+            break-inside: avoid;
+            margin-bottom: 20px;
+            background: var(--polaroid-bg);
+            border-radius: 4px;
+            box-shadow: 0 4px 18px var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            animation: cardIn 0.4s ease both;
+        }
+
+        .card:hover {
+            transform: translateY(-4px) rotate(0.3deg);
+            box-shadow: 0 10px 28px var(--shadow);
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Card with photo */
+        .card.has-photo .photo-wrap {
+            position: relative;
+            padding-top: 75%;
+            overflow: hidden;
+        }
+
+        .card.has-photo .photo-wrap img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-body {
+            padding: 16px 16px 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .card.has-photo .card-body {
+            border-top: none;
+            background: var(--polaroid-bg);
+            padding: 14px 16px 12px;
+        }
+
+        /* Polaroid tape effect for photo cards */
+        .card.has-photo::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-1deg);
+            width: 60px;
+            height: 18px;
+            background: rgba(255,230,100,0.55);
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        /* Quote text */
+        .card-quote {
+            font-size: 0.92rem;
+            line-height: 1.55;
+            color: var(--text);
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .card-quote::before { content: '\201C'; }
+        .card-quote::after  { content: '\201D'; }
+
+        /* Text-only cards — creative accent */
+        .card.text-only {
+            border-left: 4px solid var(--accent);
+            border-radius: 4px 8px 8px 4px;
+        }
+
+        .card.text-only .card-body {
+            border-top: none;
+            padding: 20px 18px 14px;
+        }
+
+        .card.text-only .card-quote {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Meta row */
+        .card-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .card-meta-left { display: flex; flex-direction: column; gap: 2px; }
+
+        .card-customer { font-weight: 600; color: var(--text); font-size: 0.8rem; }
+
+        .card-by { font-style: italic; }
+
+        .card-date { font-size: 0.7rem; color: var(--text-muted); }
+
+        /* Delete button (admin only) */
+        .delete-btn {
+            background: none;
+            border: 1.5px solid #e74c3c;
+            color: #e74c3c;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s, color 0.15s;
+            line-height: 1;
+        }
+
+        .delete-btn:hover { background: #e74c3c; color: #fff; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .empty-emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+        .empty-state p { font-size: 0.95rem; }
+
+        /* Loading state */
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 200;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 0;
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay { align-items: center; padding: 20px; }
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px 20px 0 0;
+            padding: 28px 24px 32px;
+            width: 100%;
+            max-width: 520px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 600px) {
+            .modal { border-radius: 16px; }
+        }
+
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 4px;
+            margin: 0 auto 20px;
+        }
+
+        @media (min-width: 600px) { .modal-handle { display: none; } }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+
+        .modal-close:hover { color: var(--text); }
+
+        .modal h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Form fields */
+        .field { margin-bottom: 14px; }
+
+        .field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            padding: 11px 13px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+
+        .field textarea { min-height: 90px; resize: vertical; }
+
+        .field input:focus,
+        .field textarea:focus { outline: none; border-color: var(--accent); }
+
+        /* Photo upload */
+        .photo-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            position: relative;
+        }
+
+        .photo-upload-area:hover { border-color: var(--accent); background: var(--surface); }
+
+        .photo-upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 0;
+        }
+
+        .photo-upload-area input[type="file"]:focus { outline: none; }
+
+        .upload-icon { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+        .upload-label { font-size: 0.85rem; color: var(--text-muted); pointer-events: none; }
+
+        .photo-preview {
+            margin-top: 10px;
+            display: none;
+            position: relative;
+        }
+
+        .photo-preview img {
+            max-height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .photo-preview-remove {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Progress bar */
+        .upload-progress {
+            height: 4px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .upload-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, hsl(220,80%,55%), hsl(270,75%,60%));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        /* Feedback messages */
+        .form-msg {
+            border-radius: 8px;
+            padding: 10px 13px;
+            font-size: 0.88rem;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .form-msg.success { background: #d4edda; color: #155724; }
+        .form-msg.error   { background: #f8d7da; color: #721c24; }
+
+        [data-theme="dark"] .form-msg.success { background: #1a3a22; color: #86efac; }
+        [data-theme="dark"] .form-msg.error   { background: #3a1a1c; color: #fca5a5; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 700;
+            background: linear-gradient(135deg, hsl(220,80%,55%), hsl(270,75%,60%));
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            letter-spacing: 0.02em;
+        }
+
+        .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ── Admin modal ── */
+        #admin-modal .field input { font-size: 1rem; letter-spacing: 0.1em; }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 0.88rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            z-index: 500;
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            opacity: 0;
+            white-space: nowrap;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ── Responsive ── */
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.5rem; }
+            .topbar { padding: 10px 14px; }
+            .page-title { font-size: 0.95rem; }
+            .wall { padding: 0 12px 32px; column-gap: 12px; }
+            .wall { columns: 1; }
+        }
+
+        @media (min-width: 481px) and (max-width: 720px) {
+            .wall { columns: 2; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top bar -->
+    <nav class="topbar">
+        <div class="topbar-left">
+            <a href="/" class="back-link">← Terug</a>
+            <span class="page-title">💎 Klantparels</span>
+        </div>
+        <div class="topbar-right">
+            <button class="icon-btn" id="admin-toggle-btn" onclick="openAdminModal()">🔐 Beheer</button>
+            <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <span class="hero-emoji">💎</span>
+        <h1>Klantparels</h1>
+        <p>De mooiste, gekste en onvergetelijkste uitspraken van onze klanten — verzameld door het CS-team.</p>
+        <button class="hero-add-btn" onclick="openAddModal()">
+            ✨ Quote toevoegen
+        </button>
+    </section>
+
+    <!-- Wall -->
+    <main class="wall" id="wall">
+        <div class="loading-state">Laden...</div>
+    </main>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ── Add quote modal ── -->
+    <div class="modal-overlay" id="add-modal" onclick="closeOnOverlay(event, 'add-modal')">
+        <div class="modal">
+            <div class="modal-handle"></div>
+            <button class="modal-close" onclick="closeModal('add-modal')">✕</button>
+            <h2>✨ Quote toevoegen</h2>
+
+            <div class="field">
+                <label>Quote <span style="color:#e74c3c">*</span></label>
+                <textarea id="input-quote" placeholder="Wat zei de klant?" oninput="clearMsg()"></textarea>
+            </div>
+
+            <div class="field">
+                <label>Naam klant <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
+                <input type="text" id="input-customer" placeholder="bijv. meneer Jansen">
+            </div>
+
+            <div class="field">
+                <label>Jouw naam <span style="color:#e74c3c">*</span></label>
+                <input type="text" id="input-added-by" placeholder="Jouw naam">
+            </div>
+
+            <div class="field">
+                <label>Foto <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
+                <div class="photo-upload-area" id="upload-area">
+                    <input type="file" id="input-photo" accept="image/*" onchange="onPhotoSelected(event)">
+                    <span class="upload-icon">📷</span>
+                    <span class="upload-label">Klik om een foto te kiezen</span>
+                </div>
+                <div class="upload-progress" id="upload-progress">
+                    <div class="upload-progress-bar" id="upload-progress-bar"></div>
+                </div>
+                <div class="photo-preview" id="photo-preview">
+                    <img id="photo-preview-img" src="" alt="Preview">
+                    <button class="photo-preview-remove" onclick="removePhoto()" title="Verwijderen">✕</button>
+                </div>
+            </div>
+
+            <div class="form-msg" id="form-msg"></div>
+
+            <button class="submit-btn" id="submit-btn" onclick="submitQuote()">Indienen</button>
+        </div>
+    </div>
+
+    <!-- ── Admin modal ── -->
+    <div class="modal-overlay" id="admin-modal" onclick="closeOnOverlay(event, 'admin-modal')">
+        <div class="modal" style="max-width:360px">
+            <div class="modal-handle"></div>
+            <button class="modal-close" onclick="closeModal('admin-modal')">✕</button>
+            <h2>🔐 Beheermodus</h2>
+            <div class="field">
+                <label>Wachtwoord</label>
+                <input type="password" id="admin-password-input" placeholder="••••••••"
+                       onkeydown="if(event.key==='Enter')checkAdminPassword()">
+            </div>
+            <div class="form-msg" id="admin-msg"></div>
+            <button class="submit-btn" onclick="checkAdminPassword()">Inloggen</button>
+        </div>
+    </div>
+
+    <script>
+        // ── Firebase init ──────────────────────────────────────────────────────
+        const FIREBASE_CONFIG = {
+            apiKey:            "AIzaSyBm136XADZqyBL6wgUMjlNKyTL255DSSFw",
+            authDomain:        "dnssec-cs.firebaseapp.com",
+            projectId:         "dnssec-cs",
+            storageBucket:     "dnssec-cs.firebasestorage.app",
+            messagingSenderId: "124601509536",
+            appId:             "1:124601509536:web:93a2023a9077cfe235cbc5"
+        };
+
+        firebase.initializeApp(FIREBASE_CONFIG);
+        const db = firebase.firestore();
+        const COLLECTION = 'klantenservice-quotes';
+
+        // ── State ──────────────────────────────────────────────────────────────
+        let isAdmin = false;
+        let selectedFile = null;
+        let uploadedImageUrl = null;
+        let unsubscribe = null;
+
+        // ── Theme ──────────────────────────────────────────────────────────────
+        (function initTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            if (saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-toggle').textContent = '☀️ Light';
+            }
+        })();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn  = document.getElementById('theme-toggle');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                btn.textContent = '🌙 Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️ Light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // ── Toast ──────────────────────────────────────────────────────────────
+        let toastTimer = null;
+
+        function showToast(msg, duration = 3000) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+        }
+
+        // ── Modal helpers ──────────────────────────────────────────────────────
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function closeOnOverlay(e, id) {
+            if (e.target === document.getElementById(id)) closeModal(id);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeModal('add-modal');
+                closeModal('admin-modal');
+            }
+        });
+
+        // ── Admin ──────────────────────────────────────────────────────────────
+        function openAdminModal() {
+            if (isAdmin) {
+                logoutAdmin();
+                return;
+            }
+            document.getElementById('admin-password-input').value = '';
+            document.getElementById('admin-msg').style.display = 'none';
+            openModal('admin-modal');
+            setTimeout(() => document.getElementById('admin-password-input').focus(), 100);
+        }
+
+        function checkAdminPassword() {
+            const pw = document.getElementById('admin-password-input').value;
+            if (pw === CONFIG.adminPassword) {
+                isAdmin = true;
+                closeModal('admin-modal');
+                document.getElementById('admin-toggle-btn').textContent = '🔓 Uitloggen';
+                document.getElementById('admin-toggle-btn').classList.add('admin-badge');
+                document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'flex');
+                showToast('✓ Beheermodus actief');
+            } else {
+                const msg = document.getElementById('admin-msg');
+                msg.textContent = 'Onjuist wachtwoord.';
+                msg.className = 'form-msg error';
+                msg.style.display = 'block';
+            }
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            document.getElementById('admin-toggle-btn').textContent = '🔐 Beheer';
+            document.getElementById('admin-toggle-btn').classList.remove('admin-badge');
+            document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'none');
+            showToast('Beheermodus uitgeschakeld');
+        }
+
+        // ── Add quote modal ────────────────────────────────────────────────────
+        function openAddModal() {
+            document.getElementById('input-quote').value = '';
+            document.getElementById('input-customer').value = '';
+            // Behoud naam van vorige keer
+            document.getElementById('input-photo').value = '';
+            removePhoto();
+            clearMsg();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = false;
+            btn.textContent = 'Indienen';
+            openModal('add-modal');
+            setTimeout(() => document.getElementById('input-quote').focus(), 100);
+        }
+
+        function clearMsg() {
+            document.getElementById('form-msg').style.display = 'none';
+        }
+
+        function showFormMsg(text, type) {
+            const el = document.getElementById('form-msg');
+            el.textContent = text;
+            el.className = 'form-msg ' + type;
+            el.style.display = 'block';
+        }
+
+        // ── Photo handling ─────────────────────────────────────────────────────
+        function onPhotoSelected(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 10 * 1024 * 1024) {
+                showFormMsg('Foto is te groot (max 10 MB).', 'error');
+                return;
+            }
+            selectedFile = file;
+            uploadedImageUrl = null;
+
+            const reader = new FileReader();
+            reader.onload = ev => {
+                document.getElementById('photo-preview-img').src = ev.target.result;
+                document.getElementById('photo-preview').style.display = 'block';
+                document.querySelector('.upload-label').textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto() {
+            selectedFile = null;
+            uploadedImageUrl = null;
+            document.getElementById('input-photo').value = '';
+            document.getElementById('photo-preview').style.display = 'none';
+            document.getElementById('photo-preview-img').src = '';
+            document.querySelector('.upload-label').textContent = 'Klik om een foto te kiezen';
+            document.getElementById('upload-progress').style.display = 'none';
+            document.getElementById('upload-progress-bar').style.width = '0%';
+        }
+
+        async function uploadToCloudinary(file) {
+            const progressBar  = document.getElementById('upload-progress-bar');
+            const progressWrap = document.getElementById('upload-progress');
+            progressWrap.style.display = 'block';
+            progressBar.style.width = '10%';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CONFIG.cloudinaryUploadPreset);
+
+            const url = `https://api.cloudinary.com/v1_1/${CONFIG.cloudinaryCloudName}/image/upload`;
+
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', url);
+
+                xhr.upload.onprogress = e => {
+                    if (e.lengthComputable) {
+                        progressBar.style.width = Math.round((e.loaded / e.total) * 90) + '%';
+                    }
+                };
+
+                xhr.onload = () => {
+                    progressBar.style.width = '100%';
+                    if (xhr.status === 200) {
+                        const res = JSON.parse(xhr.responseText);
+                        resolve(res.secure_url);
+                    } else {
+                        reject(new Error('Upload mislukt'));
+                    }
+                };
+
+                xhr.onerror = () => reject(new Error('Upload mislukt'));
+                xhr.send(formData);
+            });
+        }
+
+        // ── Submit ─────────────────────────────────────────────────────────────
+        async function submitQuote() {
+            const quote    = document.getElementById('input-quote').value.trim();
+            const customer = document.getElementById('input-customer').value.trim();
+            const addedBy  = document.getElementById('input-added-by').value.trim();
+
+            if (!quote) { showFormMsg('Vul een quote in.', 'error'); return; }
+            if (!addedBy) { showFormMsg('Vul jouw naam in.', 'error'); return; }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Bezig…';
+            clearMsg();
+
+            try {
+                let imageUrl = null;
+                if (selectedFile) {
+                    btn.textContent = 'Foto uploaden…';
+                    imageUrl = await uploadToCloudinary(selectedFile);
+                }
+
+                const doc = {
+                    quote,
+                    addedBy,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                if (customer) doc.customerName = customer;
+                if (imageUrl)  doc.imageUrl    = imageUrl;
+
+                await db.collection(COLLECTION).add(doc);
+
+                localStorage.setItem('klantparels_name', addedBy);
+
+                btn.textContent = '✓ Verzonden!';
+                showFormMsg('Je quote is toegevoegd!', 'success');
+                removePhoto();
+
+                setTimeout(() => {
+                    closeModal('add-modal');
+                    btn.disabled = false;
+                    btn.textContent = 'Indienen';
+                }, 1800);
+
+            } catch (err) {
+                console.error(err);
+                showFormMsg('Er ging iets mis. Probeer opnieuw.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Indienen';
+            }
+        }
+
+        // ── Delete ─────────────────────────────────────────────────────────────
+        async function deleteQuote(id, cardEl) {
+            if (!isAdmin) return;
+            if (!confirm('Weet je zeker dat je deze quote wilt verwijderen?')) return;
+            try {
+                await db.collection(COLLECTION).doc(id).delete();
+                cardEl.style.transition = 'opacity 0.3s, transform 0.3s';
+                cardEl.style.opacity = '0';
+                cardEl.style.transform = 'scale(0.9)';
+                setTimeout(() => cardEl.remove(), 300);
+                showToast('Quote verwijderd');
+            } catch (e) {
+                showToast('Verwijderen mislukt');
+            }
+        }
+
+        // ── Render card ────────────────────────────────────────────────────────
+        function formatDate(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        function buildCard(id, data) {
+            const card = document.createElement('div');
+            const hasPhoto = !!data.imageUrl;
+            card.className = 'card ' + (hasPhoto ? 'has-photo' : 'text-only');
+            card.dataset.id = id;
+
+            const customerHtml = data.customerName
+                ? `<span class="card-customer">${escapeHtml(data.customerName)}</span>`
+                : '';
+
+            const byHtml = `<span class="card-by">via ${escapeHtml(data.addedBy)}</span>`;
+
+            const dateHtml = data.timestamp
+                ? `<span class="card-date">${formatDate(data.timestamp)}</span>`
+                : '';
+
+            const deleteHtml = `<button class="delete-btn" style="display:${isAdmin ? 'flex' : 'none'}"
+                onclick="deleteQuote('${id}', this.closest('.card'))" title="Verwijderen">✕</button>`;
+
+            if (hasPhoto) {
+                card.innerHTML = `
+                    <div class="photo-wrap">
+                        <img src="${escapeHtml(data.imageUrl)}" alt="Quote foto" loading="lazy">
+                    </div>
+                    <div class="card-body">
+                        <p class="card-quote">${escapeHtml(data.quote)}</p>
+                        <div class="card-meta">
+                            <div class="card-meta-left">
+                                ${customerHtml}
+                                ${byHtml}
+                                ${dateHtml}
+                            </div>
+                            ${deleteHtml}
+                        </div>
+                    </div>`;
+            } else {
+                card.innerHTML = `
+                    <div class="card-body">
+                        <p class="card-quote">${escapeHtml(data.quote)}</p>
+                        <div class="card-meta">
+                            <div class="card-meta-left">
+                                ${customerHtml}
+                                ${byHtml}
+                                ${dateHtml}
+                            </div>
+                            ${deleteHtml}
+                        </div>
+                    </div>`;
+            }
+
+            return card;
+        }
+
+        // ── Live wall ──────────────────────────────────────────────────────────
+        function startWall() {
+            const wall = document.getElementById('wall');
+
+            const query = db.collection(COLLECTION)
+                .orderBy('timestamp', 'desc')
+                .limit(200);
+
+            unsubscribe = query.onSnapshot(snapshot => {
+                wall.innerHTML = '';
+
+                if (snapshot.empty) {
+                    wall.innerHTML = `<div class="empty-state">
+                        <span class="empty-emoji">💭</span>
+                        <p>Nog geen quotes. Voeg de eerste toe!</p>
+                    </div>`;
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const card = buildCard(doc.id, doc.data());
+                    wall.appendChild(card);
+                });
+            }, err => {
+                console.error(err);
+                wall.innerHTML = `<div class="empty-state">
+                    <span class="empty-emoji">⚠️</span>
+                    <p>Kon quotes niet laden. Probeer de pagina te vernieuwen.</p>
+                </div>`;
+            });
+        }
+
+        // ── Restore naam ───────────────────────────────────────────────────────
+        (function restoreName() {
+            const saved = localStorage.getItem('klantparels_name');
+            if (saved) document.getElementById('input-added-by').value = saved;
+        })();
+
+        // ── Start ──────────────────────────────────────────────────────────────
+        startWall();
+    </script>
+</body>
+</html>
