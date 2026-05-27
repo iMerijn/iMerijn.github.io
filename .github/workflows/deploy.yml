@@ -22,6 +22,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Genereer klantparels/config.js vanuit secrets
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_UPLOAD_PRESET: ${{ secrets.CLOUDINARY_UPLOAD_PRESET }}
+        run: |
+          cat > klantparels/config.js <<EOF
+          const CONFIG = {
+            adminPassword: "$ADMIN_PASSWORD",
+            cloudinaryCloudName: "$CLOUDINARY_CLOUD_NAME",
+            cloudinaryApiKey: "$CLOUDINARY_API_KEY",
+            cloudinaryUploadPreset: "$CLOUDINARY_UPLOAD_PRESET"
+          };
+          EOF
       - uses: actions/configure-pages@v5
         with:
           enablement: true
