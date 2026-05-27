@@ -268,7 +268,7 @@
 
         .card-customer { font-weight: 600; color: var(--text); font-size: 0.8rem; }
 
-        .card-by { font-style: italic; }
+        .card-by { display: none; }
 
         .card-date { font-size: 0.7rem; color: var(--text-muted); }
 
@@ -598,13 +598,8 @@
             </div>
 
             <div class="field">
-                <label>Naam klant <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
-                <input type="text" id="input-customer" placeholder="bijv. meneer Jansen">
-            </div>
-
-            <div class="field">
-                <label>Jouw naam <span style="color:#e74c3c">*</span></label>
-                <input type="text" id="input-added-by" placeholder="Jouw naam">
+                <label>Product <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
+                <input type="text" id="input-customer" placeholder="bijv. Lego City trein">
             </div>
 
             <div class="field">
@@ -857,10 +852,8 @@
         async function submitQuote() {
             const quote    = document.getElementById('input-quote').value.trim();
             const customer = document.getElementById('input-customer').value.trim();
-            const addedBy  = document.getElementById('input-added-by').value.trim();
 
             if (!quote) { showFormMsg('Vul een quote in.', 'error'); return; }
-            if (!addedBy) { showFormMsg('Vul jouw naam in.', 'error'); return; }
 
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
@@ -876,15 +869,12 @@
 
                 const doc = {
                     quote,
-                    addedBy,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 if (customer) doc.customerName = customer;
                 if (imageUrl)  doc.imageUrl    = imageUrl;
 
                 await db.collection(COLLECTION).add(doc);
-
-                localStorage.setItem('klantparels_name', addedBy);
 
                 btn.textContent = '✓ Verzonden!';
                 showFormMsg('Je quote is toegevoegd!', 'success');
@@ -1016,12 +1006,6 @@
                 </div>`;
             });
         }
-
-        // ── Restore naam ───────────────────────────────────────────────────────
-        (function restoreName() {
-            const saved = localStorage.getItem('klantparels_name');
-            if (saved) document.getElementById('input-added-by').value = saved;
-        })();
 
         // ── Start ──────────────────────────────────────────────────────────────
         startWall();
