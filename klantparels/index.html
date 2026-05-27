@@ -686,11 +686,14 @@
         <div class="modal" style="max-width:360px">
             <div class="modal-handle"></div>
             <button class="modal-close" onclick="closeModal('admin-panel')">✕</button>
-            <h2>🔓 Beheer</h2>
+            <h2>⚙️ Beheeropties</h2>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:18px;text-align:center">
+                Verwijderknoppen zijn zichtbaar op alle kaarten.
+            </p>
             <button class="submit-btn" style="background:linear-gradient(135deg,#e67e22,#e74c3c);margin-bottom:12px"
                 onclick="resetAllVotes()">🔄 Reset alle stemmen</button>
             <button class="submit-btn" style="background:var(--surface);color:var(--text);border:2px solid var(--border)"
-                onclick="logoutAdmin()">Uitloggen</button>
+                onclick="logoutAdmin()">🔓 Uitloggen</button>
         </div>
     </div>
 
@@ -788,7 +791,7 @@
             if (pw === CONFIG.adminPassword) {
                 isAdmin = true;
                 closeModal('admin-modal');
-                document.getElementById('admin-toggle-btn').textContent = '🔓 Uitloggen';
+                document.getElementById('admin-toggle-btn').textContent = '⚙️ Beheeropties';
                 document.getElementById('admin-toggle-btn').classList.add('admin-badge');
                 document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'flex');
                 showToast('✓ Beheermodus actief');
