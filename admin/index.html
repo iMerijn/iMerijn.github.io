@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beheer — DNSSEC</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --bg:       #ffffff;
+            --text:     #333333;
+            --border:   #dddddd;
+            --card-bg:  #f9f9f9;
+            --muted:    #888888;
+            --green:    #2ecc71;
+            --red:      #e74c3c;
+            --accent:   #3498db;
+        }
+
+        [data-theme="dark"] {
+            --bg:       #1a1a1a;
+            --text:     #f0f0f0;
+            --border:   #444444;
+            --card-bg:  #2d2d2d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+            padding: 40px 20px 80px;
+        }
+
+        /* ── Top bar ── */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            z-index: 50;
+        }
+
+        a.back-link {
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+
+        a.back-link:hover { opacity: 0.7; }
+
+        .topbar-right { display: flex; gap: 8px; align-items: center; }
+
+        .icon-btn {
+            background: none;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+
+        .icon-btn:hover { opacity: 0.7; }
+
+        /* ── Page ── */
+        .page {
+            max-width: 680px;
+            margin: 60px auto 0;
+            padding-top: 20px;
+        }
+
+        /* ── Login ── */
+        #login-section { text-align: center; padding-top: 40px; }
+
+        h1 { font-size: 2rem; margin-bottom: 8px; }
+
+        .subtitle { color: var(--muted); margin-bottom: 28px; font-size: 0.95rem; line-height: 1.5; }
+
+        .pat-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input[type="password"] {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: inherit;
+        }
+
+        input[type="password"]:focus { outline: none; border-color: var(--accent); }
+
+        .btn-primary {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover { opacity: 0.8; }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .login-hint { font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
+        .login-hint a { color: var(--muted); }
+
+        #login-error { color: var(--red); font-size: 0.9rem; margin-top: 10px; display: none; }
+
+        /* ── Admin section ── */
+        #admin-section { display: none; }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .admin-title { font-size: 1.5rem; font-weight: 700; }
+
+        .logout-btn {
+            background: none;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+
+        .logout-btn:hover { opacity: 0.7; }
+
+        /* ── App tabs ── */
+        .app-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 28px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .app-tab {
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            opacity: 0.5;
+            transition: opacity 0.15s, border-color 0.15s;
+            font-weight: 600;
+        }
+
+        .app-tab:hover { opacity: 0.8; }
+        .app-tab.active { opacity: 1; border-bottom-color: var(--text); }
+
+        /* ── Sub-tabs (within each app) ── */
+        .sub-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sub-tab {
+            background: none;
+            border: none;
+            color: var(--text);
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-family: inherit;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            opacity: 0.5;
+            transition: opacity 0.15s;
+        }
+
+        .sub-tab:hover { opacity: 0.8; }
+        .sub-tab.active { opacity: 1; border-bottom-color: var(--text); font-weight: 600; }
+
+        .tab-count {
+            display: inline-block;
+            background: var(--border);
+            font-size: 0.75rem;
+            padding: 1px 7px;
+            border-radius: 10px;
+            margin-left: 5px;
+            font-weight: 600;
+        }
+
+        /* ── Cards ── */
+        .item-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+        }
+
+        .item-card.done { opacity: 0.4; }
+
+        .quote-text {
+            font-size: 1.05rem;
+            line-height: 1.5;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .item-meta {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .meta-tag {
+            background: var(--border);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .item-thumb {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            float: right;
+            margin: 0 0 8px 12px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-approve {
+            padding: 7px 16px;
+            font-size: 0.88rem;
+            background: var(--green);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .btn-reject, .btn-delete {
+            padding: 7px 16px;
+            font-size: 0.88rem;
+            background: none;
+            color: var(--red);
+            border: 2px solid var(--red);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .btn-approve:hover { filter: brightness(1.1); }
+        .btn-reject:hover, .btn-delete:hover { background: var(--red); color: #fff; }
+        .btn-approve:disabled, .btn-reject:disabled, .btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .card-status {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--muted);
+            min-height: 1.2em;
+        }
+
+        .card-status.ok  { color: var(--green); }
+        .card-status.err { color: var(--red); }
+
+        /* ── Empty / debug ── */
+        .empty-state {
+            text-align: center;
+            color: var(--muted);
+            font-style: italic;
+            padding: 40px 0;
+        }
+
+        .debug-info {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 12px;
+            min-height: 1.2em;
+        }
+
+        /* ── Danger zone ── */
+        .danger-zone {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .danger-zone h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .btn-danger {
+            padding: 8px 18px;
+            font-size: 0.88rem;
+            background: none;
+            color: var(--red);
+            border: 2px solid var(--red);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .btn-danger:hover { background: var(--red); color: #fff; }
+    </style>
+</head>
+<body>
+
+    <nav class="topbar">
+        <a href="/" class="back-link">← Terug</a>
+        <div class="topbar-right">
+            <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+        </div>
+    </nav>
+
+    <div class="page">
+
+        <!-- ── Login ── -->
+        <div id="login-section">
+            <h1>🔐 Beheer</h1>
+            <p class="subtitle">Log in met je GitHub Personal Access Token om beide pagina's te beheren.</p>
+
+            <div class="pat-row">
+                <input type="password" id="pat-input" placeholder="ghp_..."
+                       onkeydown="if(event.key==='Enter')login()">
+                <button class="btn-primary" id="login-btn" onclick="login()">Inloggen</button>
+            </div>
+            <p class="login-hint">
+                Token aanmaken via <a href="https://github.com/settings/tokens/new" target="_blank">GitHub → Settings → Tokens</a>
+                met scope <strong>repo</strong> (Contents: write).
+            </p>
+            <p id="login-error">Token werkt niet. Controleer of je de juiste scope hebt.</p>
+        </div>
+
+        <!-- ── Admin ── -->
+        <div id="admin-section">
+            <div class="admin-header">
+                <span class="admin-title">⚙️ Beheer</span>
+                <button class="logout-btn" onclick="logout()">Uitloggen</button>
+            </div>
+
+            <!-- App-tabs -->
+            <div class="app-tabs">
+                <button class="app-tab active" id="apptab-quotes"      onclick="switchApp('quotes')">💬 Quotes</button>
+                <button class="app-tab"        id="apptab-klantparels" onclick="switchApp('klantparels')">💎 Klantparels</button>
+            </div>
+
+            <!-- ════ QUOTES PANEEL ════ -->
+            <div id="panel-quotes">
+                <div class="sub-tabs">
+                    <button class="sub-tab active" id="subtab-pending"  onclick="switchQuotesView('pending')">
+                        📥 Ingediend <span class="tab-count" id="count-pending">0</span>
+                    </button>
+                    <button class="sub-tab"        id="subtab-rejected" onclick="switchQuotesView('rejected')">
+                        🗑 Afgekeurd <span class="tab-count" id="count-rejected">0</span>
+                    </button>
+                    <button class="sub-tab" onclick="forceRefreshQuotes()" style="margin-left:auto" title="Herladen">🔄</button>
+                </div>
+
+                <div class="debug-info" id="quotes-debug"></div>
+                <div id="quotes-list"><div class="empty-state">Laden...</div></div>
+
+                <div class="danger-zone">
+                    <h3>⚠️ Danger zone</h3>
+                    <button class="btn-danger" onclick="resetQuotesVotes()">🗑 Reset alle stemmen (Quotes)</button>
+                </div>
+            </div>
+
+            <!-- ════ KLANTPARELS PANEEL ════ -->
+            <div id="panel-klantparels" style="display:none">
+                <div class="debug-info" id="klantparels-debug"></div>
+                <div id="klantparels-list"><div class="empty-state">Laden...</div></div>
+
+                <div class="danger-zone">
+                    <h3>⚠️ Danger zone</h3>
+                    <button class="btn-danger" onclick="resetKlantparelsVotes()">🔄 Reset alle stemmen (Klantparels)</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ── Firebase: Quotes (Realtime Database) ──────────────────────────────
+        const QUOTES_CONFIG = {
+            apiKey:            "AIzaSyDeH8CLVTQBedgLrKNU3cvrpjs7J2eAL4o",
+            authDomain:        "dnssec-quotes.firebaseapp.com",
+            databaseURL:       "https://dnssec-quotes-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId:         "dnssec-quotes",
+            storageBucket:     "dnssec-quotes.firebasestorage.app",
+            messagingSenderId: "40756484574",
+            appId:             "1:40756484574:web:95655704564cfac23d654f",
+        };
+
+        // ── Firebase: Klantparels (Firestore) ─────────────────────────────────
+        const KLANTPARELS_CONFIG = {
+            apiKey:            "AIzaSyBm136XADZqyBL6wgUMjlNKyTL255DSSFw",
+            authDomain:        "dnssec-cs.firebaseapp.com",
+            projectId:         "dnssec-cs",
+            storageBucket:     "dnssec-cs.firebasestorage.app",
+            messagingSenderId: "124601509536",
+            appId:             "1:124601509536:web:93a2023a9077cfe235cbc5",
+        };
+
+        const quotesApp      = firebase.initializeApp(QUOTES_CONFIG, 'quotes');
+        const klantparelsApp = firebase.initializeApp(KLANTPARELS_CONFIG, 'klantparels');
+
+        const rtdb = quotesApp.database();
+        const fsdb = klantparelsApp.firestore();
+
+        const GITHUB_REPO    = 'iMerijn/iMerijn.github.io';
+        const QUOTES_PATH    = 'quotes/quotes.md';
+        const KP_COLLECTION  = 'klantenservice-quotes';
+
+        let githubToken  = '';
+        let currentApp   = 'quotes';
+
+        // ── Theme ─────────────────────────────────────────────────────────────
+        (function initTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            if (saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-toggle').textContent = '☀️ Light';
+            }
+        })();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn  = document.getElementById('theme-toggle');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                btn.textContent = '🌙 Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️ Light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // ── Auth ──────────────────────────────────────────────────────────────
+        async function login() {
+            const token = document.getElementById('pat-input').value.trim();
+            if (!token) return;
+
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.textContent = 'Controleren...';
+            document.getElementById('login-error').style.display = 'none';
+
+            try {
+                const resp = await fetch(
+                    `https://api.github.com/repos/${GITHUB_REPO}/contents/${QUOTES_PATH}`,
+                    { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } }
+                );
+                if (!resp.ok) throw new Error();
+                githubToken = token;
+                localStorage.setItem('admin_pat', token);
+                showAdmin();
+            } catch {
+                document.getElementById('login-error').style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Inloggen';
+            }
+        }
+
+        function logout() {
+            githubToken = '';
+            localStorage.removeItem('admin_pat');
+            rtdb.ref('pending_quotes').off();
+            quotesFirstLoad = true;
+            clearTimeout(quotesRenderTimer);
+            allQuotes = [];
+            document.getElementById('admin-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('pat-input').value = '';
+        }
+
+        function showAdmin() {
+            document.getElementById('login-section').style.display  = 'none';
+            document.getElementById('admin-section').style.display  = 'block';
+            loadQuotes();
+            loadKlantparels();
+        }
+
+        // ── App switching ─────────────────────────────────────────────────────
+        function switchApp(app) {
+            currentApp = app;
+            document.getElementById('apptab-quotes').classList.toggle('active',      app === 'quotes');
+            document.getElementById('apptab-klantparels').classList.toggle('active', app === 'klantparels');
+            document.getElementById('panel-quotes').style.display      = app === 'quotes'      ? 'block' : 'none';
+            document.getElementById('panel-klantparels').style.display = app === 'klantparels' ? 'block' : 'none';
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // QUOTES
+        // ════════════════════════════════════════════════════════════════════
+        let allQuotes         = [];
+        let quotesView        = 'pending';
+        let quotesFirstLoad   = true;
+        let quotesRenderTimer = null;
+
+        function loadQuotes() {
+            rtdb.ref('pending_quotes').on('value', snap => {
+                allQuotes = [];
+                snap.forEach(child => {
+                    const val = child.val();
+                    if (val && typeof val === 'object') allQuotes.push({ id: child.key, ...val });
+                });
+                if (quotesFirstLoad) {
+                    quotesFirstLoad = false;
+                    renderQuotesView();
+                } else {
+                    clearTimeout(quotesRenderTimer);
+                    quotesRenderTimer = setTimeout(renderQuotesView, 800);
+                }
+            }, err => {
+                document.getElementById('quotes-debug').textContent = `⚠️ Firebase fout: ${err.message}`;
+                document.getElementById('quotes-list').innerHTML = `<div class="empty-state" style="color:var(--red)">Kan data niet laden.</div>`;
+            });
+        }
+
+        function forceRefreshQuotes() {
+            rtdb.ref('pending_quotes').off();
+            quotesFirstLoad = true;
+            allQuotes = [];
+            document.getElementById('quotes-list').innerHTML = '<div class="empty-state">Herladen...</div>';
+            document.getElementById('quotes-debug').textContent = '';
+            loadQuotes();
+        }
+
+        function switchQuotesView(view) {
+            quotesView = view;
+            document.getElementById('subtab-pending').classList.toggle('active',  view === 'pending');
+            document.getElementById('subtab-rejected').classList.toggle('active', view === 'rejected');
+            renderQuotesView();
+        }
+
+        const isPending  = q => !q.status || q.status === 'pending';
+        const isRejected = q => q.status === 'rejected';
+
+        function renderQuotesView() {
+            const pendingList  = allQuotes.filter(isPending);
+            const rejectedList = allQuotes.filter(isRejected);
+
+            document.getElementById('count-pending').textContent  = pendingList.length;
+            document.getElementById('count-rejected').textContent = rejectedList.length;
+            document.getElementById('quotes-debug').textContent =
+                `${allQuotes.length} entries · ${pendingList.length} ingediend · ${rejectedList.length} afgekeurd`;
+
+            const filtered = (quotesView === 'pending' ? pendingList : rejectedList)
+                .sort((a, b) => quotesView === 'pending'
+                    ? a.submitted_at - b.submitted_at
+                    : b.submitted_at - a.submitted_at);
+
+            const listEl = document.getElementById('quotes-list');
+            if (filtered.length === 0) {
+                listEl.innerHTML = quotesView === 'pending'
+                    ? '<div class="empty-state">Geen quotes wachtend 🎉</div>'
+                    : '<div class="empty-state">Geen afgekeurde quotes</div>';
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(q => {
+                const buttons = quotesView === 'pending'
+                    ? `<button class="btn-approve" id="approve-${q.id}" onclick="approveQuote('${q.id}')">✓ Goedkeuren</button>
+                       <button class="btn-reject"  id="reject-${q.id}"  onclick="rejectQuote('${q.id}')">✗ Afwijzen</button>`
+                    : `<button class="btn-approve" id="approve-${q.id}" onclick="approveQuote('${q.id}')">↩ Alsnog goedkeuren</button>`;
+                return `<div class="item-card" id="qcard-${q.id}">
+                    <p class="quote-text">"${escHtml(q.text)}"</p>
+                    <div class="item-meta">${new Date(q.submitted_at).toLocaleString('nl-NL')}</div>
+                    <div class="item-actions">${buttons}</div>
+                    <div class="card-status" id="qstatus-${q.id}"></div>
+                </div>`;
+            }).join('');
+        }
+
+        function setQuotesBusy(id, busy) {
+            ['approve','reject'].forEach(t => {
+                const el = document.getElementById(`${t}-${id}`);
+                if (el) el.disabled = busy;
+            });
+        }
+
+        async function approveQuote(id) {
+            const card   = document.getElementById(`qcard-${id}`);
+            const status = document.getElementById(`qstatus-${id}`);
+            const text   = card.querySelector('.quote-text').textContent.slice(1, -1);
+            setQuotesBusy(id, true);
+            status.textContent = 'Bezig...';
+            try {
+                await addToQuotesMd(text);
+                await rtdb.ref(`pending_quotes/${id}`).update({ status: 'approved' });
+                await rtdb.ref('approved_quotes').push({ text, approved_at: Date.now() });
+                const q = allQuotes.find(q => q.id === id);
+                if (q) q.status = 'approved';
+                card.classList.add('done');
+                status.textContent = '✓ Goedgekeurd en toegevoegd';
+                status.className = 'card-status ok';
+            } catch (e) {
+                status.textContent = 'Fout: ' + e.message;
+                status.className = 'card-status err';
+                setQuotesBusy(id, false);
+            }
+        }
+
+        async function rejectQuote(id) {
+            const card   = document.getElementById(`qcard-${id}`);
+            const status = document.getElementById(`qstatus-${id}`);
+            setQuotesBusy(id, true);
+            await rtdb.ref(`pending_quotes/${id}`).update({ status: 'rejected' });
+            const q = allQuotes.find(q => q.id === id);
+            if (q) q.status = 'rejected';
+            card.classList.add('done');
+            status.textContent = '✗ Afgewezen';
+            status.className = 'card-status';
+        }
+
+        async function addToQuotesMd(quoteText) {
+            const apiUrl  = `https://api.github.com/repos/${GITHUB_REPO}/contents/${QUOTES_PATH}`;
+            const headers = {
+                Authorization: `Bearer ${githubToken}`,
+                Accept: 'application/vnd.github+json',
+                'Content-Type': 'application/json',
+            };
+            const getResp = await fetch(apiUrl, { headers, cache: 'no-store' });
+            if (!getResp.ok) throw new Error('Kan quotes.md niet ophalen');
+            const fileData    = await getResp.json();
+            const current     = decodeURIComponent(escape(atob(fileData.content.replace(/\s/g, ''))));
+            const newContent  = current.trimEnd() + '\n\n---\n\n' + quoteText.trim() + '\n';
+            const putResp     = await fetch(apiUrl, {
+                method: 'PUT', headers,
+                body: JSON.stringify({
+                    message: `Voeg goedgekeurde quote toe: "${quoteText.substring(0, 50)}"`,
+                    content: btoa(unescape(encodeURIComponent(newContent))),
+                    sha: fileData.sha,
+                }),
+            });
+            if (!putResp.ok) { const err = await putResp.json(); throw new Error(err.message); }
+        }
+
+        async function resetQuotesVotes() {
+            if (!confirm('Reset ALLE stemmen van de Quotes-pagina? Dit kan niet ongedaan worden gemaakt.')) return;
+            const ts = Date.now();
+            await rtdb.ref('votes').remove();
+            await rtdb.ref('metadata/votes_reset_at').set(ts);
+            localStorage.removeItem('my_votes');
+            localStorage.setItem('votes_reset_at', ts);
+            alert('✓ Stemmen van Quotes gereset.');
+        }
+
+        // ════════════════════════════════════════════════════════════════════
+        // KLANTPARELS
+        // ════════════════════════════════════════════════════════════════════
+        let kpUnsubscribe = null;
+
+        function loadKlantparels() {
+            if (kpUnsubscribe) kpUnsubscribe();
+            document.getElementById('klantparels-list').innerHTML = '<div class="empty-state">Laden...</div>';
+
+            kpUnsubscribe = fsdb.collection(KP_COLLECTION)
+                .orderBy('timestamp', 'desc')
+                .onSnapshot(snapshot => {
+                    const listEl  = document.getElementById('klantparels-list');
+                    const debugEl = document.getElementById('klantparels-debug');
+                    debugEl.textContent = `${snapshot.size} quote${snapshot.size !== 1 ? 's' : ''} in de database`;
+
+                    if (snapshot.empty) {
+                        listEl.innerHTML = '<div class="empty-state">Nog geen klantparels 💎</div>';
+                        return;
+                    }
+
+                    listEl.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        const date = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString('nl-NL') : '—';
+                        const votes = d.votes || 0;
+
+                        const thumb = d.imageUrl
+                            ? `<img class="item-thumb" src="${escHtml(d.imageUrl)}" alt="">`
+                            : '';
+
+                        const tags = [
+                            d.customerName ? `🏷️ ${escHtml(d.customerName)}` : null,
+                            votes > 0 ? `⭐ ${votes} stem${votes !== 1 ? 'men' : ''}` : null,
+                            date,
+                        ].filter(Boolean).map(t => `<span class="meta-tag">${t}</span>`).join('');
+
+                        const card = document.createElement('div');
+                        card.className = 'item-card';
+                        card.id = `kpcard-${doc.id}`;
+                        card.innerHTML = `
+                            ${thumb}
+                            <p class="quote-text">"${escHtml(d.quote)}"</p>
+                            <div class="item-meta">${tags}</div>
+                            <div class="item-actions">
+                                <button class="btn-delete" onclick="deleteKlantparel('${doc.id}')">🗑 Verwijderen</button>
+                            </div>
+                            <div class="card-status" id="kpstatus-${doc.id}"></div>`;
+                        listEl.appendChild(card);
+                    });
+                }, err => {
+                    document.getElementById('klantparels-debug').textContent = `⚠️ Fout: ${err.message}`;
+                    document.getElementById('klantparels-list').innerHTML =
+                        `<div class="empty-state" style="color:var(--red)">Kan data niet laden.</div>`;
+                });
+        }
+
+        async function deleteKlantparel(id) {
+            if (!confirm('Deze klantparel verwijderen?')) return;
+            const btn    = document.querySelector(`#kpcard-${id} .btn-delete`);
+            const status = document.getElementById(`kpstatus-${id}`);
+            if (btn) btn.disabled = true;
+            try {
+                await fsdb.collection(KP_COLLECTION).doc(id).delete();
+                const card = document.getElementById(`kpcard-${id}`);
+                if (card) { card.style.transition = 'opacity 0.3s'; card.style.opacity = '0'; setTimeout(() => card.remove(), 300); }
+            } catch (e) {
+                status.textContent = 'Verwijderen mislukt: ' + e.message;
+                status.className = 'card-status err';
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function resetKlantparelsVotes() {
+            if (!confirm('Reset ALLE stemmen van Klantparels? Dit kan niet ongedaan worden gemaakt.')) return;
+            try {
+                const snapshot = await fsdb.collection(KP_COLLECTION).get();
+                const batch    = fsdb.batch();
+                snapshot.forEach(doc => batch.update(doc.ref, { votes: 0 }));
+                await batch.commit();
+                localStorage.removeItem('klantparels_vote');
+                alert('✓ Stemmen van Klantparels gereset.');
+            } catch (e) {
+                alert('Reset mislukt: ' + e.message);
+            }
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ── Auto-login ────────────────────────────────────────────────────────
+        const savedToken = localStorage.getItem('admin_pat');
+        if (savedToken) {
+            document.getElementById('pat-input').value = savedToken;
+            login();
+        }
+    </script>
+</body>
+</html>
