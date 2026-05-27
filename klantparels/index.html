@@ -58,7 +58,7 @@
             justify-content: space-between;
             padding: 12px 20px;
             background: var(--bg);
-            border-bottom: 1px solid var(--border);
+            border-bottom: none;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
@@ -297,9 +297,10 @@
             text-align: center;
             padding: 60px 20px;
             color: var(--text-muted);
+            column-span: all;
         }
 
-        .empty-state .empty-emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+        .empty-state .empty-emoji { display: none; }
         .empty-state p { font-size: 0.95rem; }
 
         /* Loading state */
@@ -559,7 +560,6 @@
     <nav class="topbar">
         <div class="topbar-left">
             <a href="/" class="back-link">← Terug</a>
-            <span class="page-title">💎 Klantparels</span>
         </div>
         <div class="topbar-right">
             <button class="icon-btn" id="admin-toggle-btn" onclick="openAdminModal()">🔐 Beheer</button>
