@@ -272,6 +272,48 @@
 
         .card-date { font-size: 0.7rem; color: var(--text-muted); }
 
+        /* ── Crown banner ── */
+        .crown-banner {
+            background: linear-gradient(90deg, #f1c40f, #f39c12);
+            color: #1a1000;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-align: center;
+            padding: 6px 10px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .card.top-voted { box-shadow: 0 4px 20px rgba(241,196,15,0.35), 0 0 0 2px #f1c40f; }
+
+        /* ── Vote button ── */
+        .card-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .vote-btn {
+            background: none;
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 3px 9px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex-shrink: 0;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+
+        .vote-btn:hover { border-color: #f1c40f; color: #f1c40f; }
+        .vote-btn.voted { border-color: #f1c40f; color: #f1c40f; background: rgba(241,196,15,0.1); }
+
         /* Delete button (admin only) */
         .delete-btn {
             background: none;
@@ -922,27 +964,36 @@
                       .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         }
 
-        function buildCard(id, data) {
+        function buildCard(id, data, isTop) {
             const card = document.createElement('div');
             const hasPhoto = !!data.imageUrl;
-            card.className = 'card ' + (hasPhoto ? 'has-photo' : 'text-only');
+            card.className = 'card ' + (hasPhoto ? 'has-photo' : 'text-only') + (isTop ? ' top-voted' : '');
             card.dataset.id = id;
 
             const customerHtml = data.customerName
                 ? `<span class="card-customer">${escapeHtml(data.customerName)}</span>`
                 : '';
 
-            const byHtml = '';
-
             const dateHtml = data.timestamp
                 ? `<span class="card-date">${formatDate(data.timestamp)}</span>`
                 : '';
 
+            const votes = data.votes || 0;
+            const isVoted = getMyVote() === id;
+            const voteLabel = votes > 0 ? `⭐ ${votes}` : '⭐';
+            const voteHtml = `<button class="vote-btn${isVoted ? ' voted' : ''}"
+                onclick="voteQuote('${id}')" title="${isVoted ? 'Stem intrekken' : 'Stem op deze quote'}">${voteLabel}</button>`;
+
             const deleteHtml = `<button class="delete-btn" style="display:${isAdmin ? 'flex' : 'none'}"
                 onclick="deleteQuote('${id}', this.closest('.card'))" title="Verwijderen">✕</button>`;
 
+            const actionsHtml = `<div class="card-actions">${voteHtml}${deleteHtml}</div>`;
+
+            const crownHtml = isTop ? `<div class="crown-banner">👑 Quote van de week</div>` : '';
+
             if (hasPhoto) {
                 card.innerHTML = `
+                    ${crownHtml}
                     <div class="photo-wrap">
                         <img src="${escapeHtml(data.imageUrl)}" alt="Quote foto" loading="lazy">
                     </div>
@@ -951,28 +1002,62 @@
                         <div class="card-meta">
                             <div class="card-meta-left">
                                 ${customerHtml}
-                                ${byHtml}
                                 ${dateHtml}
                             </div>
-                            ${deleteHtml}
+                            ${actionsHtml}
                         </div>
                     </div>`;
             } else {
                 card.innerHTML = `
+                    ${crownHtml}
                     <div class="card-body">
                         <p class="card-quote">${escapeHtml(data.quote)}</p>
                         <div class="card-meta">
                             <div class="card-meta-left">
                                 ${customerHtml}
-                                ${byHtml}
                                 ${dateHtml}
                             </div>
-                            ${deleteHtml}
+                            ${actionsHtml}
                         </div>
                     </div>`;
             }
 
             return card;
+        }
+
+        // ── Stemmen ────────────────────────────────────────────────────────────
+        function getMyVote() {
+            return localStorage.getItem('klantparels_vote') || null;
+        }
+
+        function saveMyVote(id) {
+            if (id) localStorage.setItem('klantparels_vote', id);
+            else     localStorage.removeItem('klantparels_vote');
+        }
+
+        async function voteQuote(id) {
+            const myVote = getMyVote();
+            try {
+                if (myVote === id) {
+                    await db.collection(COLLECTION).doc(id).update({
+                        votes: firebase.firestore.FieldValue.increment(-1)
+                    });
+                    saveMyVote(null);
+                } else {
+                    if (myVote) {
+                        await db.collection(COLLECTION).doc(myVote).update({
+                            votes: firebase.firestore.FieldValue.increment(-1)
+                        });
+                    }
+                    await db.collection(COLLECTION).doc(id).update({
+                        votes: firebase.firestore.FieldValue.increment(1)
+                    });
+                    saveMyVote(id);
+                }
+            } catch (e) {
+                console.error('Stem mislukt:', e);
+                showToast('Stemmen mislukt, probeer opnieuw.');
+            }
         }
 
         // ── Live wall ──────────────────────────────────────────────────────────
@@ -994,8 +1079,21 @@
                     return;
                 }
 
-                snapshot.forEach(doc => {
-                    const card = buildCard(doc.id, doc.data());
+                // Sorteer op stemmen (desc), dan timestamp (desc)
+                const docs = [];
+                snapshot.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
+                docs.sort((a, b) => {
+                    const vDiff = (b.data.votes || 0) - (a.data.votes || 0);
+                    if (vDiff !== 0) return vDiff;
+                    const ta = a.data.timestamp ? a.data.timestamp.toMillis() : 0;
+                    const tb = b.data.timestamp ? b.data.timestamp.toMillis() : 0;
+                    return tb - ta;
+                });
+
+                const topId = (docs[0].data.votes || 0) > 0 ? docs[0].id : null;
+
+                docs.forEach(({ id, data }) => {
+                    const card = buildCard(id, data, id === topId);
                     wall.appendChild(card);
                 });
             }, err => {
