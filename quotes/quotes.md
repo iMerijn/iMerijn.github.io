@@ -137,3 +137,7 @@ Even snel op een (Teams) call springen
 ---
 
 Soms als ze hun mond open trekken, kunnen ze hem beter dicht houden
+
+---
+
+Als we die ’loop' weten te sluiten, dan hebben we echt een mooie insight review tool in handen met daarin de mogelijkheid om op category niveau te schakelen.
