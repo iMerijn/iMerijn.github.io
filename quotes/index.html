@@ -45,10 +45,16 @@
             box-sizing: border-box;
         }
 
-        #theme-toggle {
+        .topbar-right-wrap {
             position: fixed;
             top: 20px;
             right: 20px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        #theme-toggle {
             background: none;
             border: 2px solid var(--input-border);
             color: var(--text-color);
@@ -56,6 +62,16 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 0.9rem;
+        }
+
+        a.admin-link {
+            background: none;
+            border: 2px solid var(--input-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-decoration: none;
         }
 
         a.back-link {
@@ -71,7 +87,7 @@
             text-decoration: none;
         }
 
-        a.back-link:hover, #theme-toggle:hover { opacity: 0.7; }
+        a.back-link:hover, #theme-toggle:hover, a.admin-link:hover { opacity: 0.7; }
 
         /* ── Quote + controls ── */
         .quote-area {
@@ -494,7 +510,7 @@
                 font-size: 1.2rem;
             }
 
-            a.back-link, #theme-toggle {
+            a.back-link, #theme-toggle, a.admin-link {
                 padding: 6px 10px;
                 font-size: 0.8rem;
             }
@@ -504,7 +520,10 @@
 <body>
 
     <a href="/" class="back-link">← Terug</a>
-    <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+    <div class="topbar-right-wrap">
+        <a href="/admin/" class="admin-link">🔐 Beheer</a>
+        <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+    </div>
 
     <div id="new-quotes-toast">
         <span id="new-quotes-msg"></span>

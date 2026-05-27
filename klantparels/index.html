@@ -100,14 +100,6 @@
 
         .icon-btn:hover { opacity: 0.7; }
 
-        .admin-badge {
-            background: var(--accent);
-            color: #fff;
-            border-color: transparent;
-            font-size: 0.78rem;
-            padding: 5px 10px;
-        }
-
         /* ── Hero ── */
         .hero {
             text-align: center;
@@ -312,26 +304,6 @@
 
         .vote-btn:hover { border-color: #f1c40f; color: #f1c40f; }
         .vote-btn.voted { border-color: #f1c40f; color: #f1c40f; background: rgba(241,196,15,0.1); }
-
-        /* Delete button (admin only) */
-        .delete-btn {
-            background: none;
-            border: 1.5px solid #e74c3c;
-            color: #e74c3c;
-            border-radius: 50%;
-            width: 26px;
-            height: 26px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: background 0.15s, color 0.15s;
-            line-height: 1;
-        }
-
-        .delete-btn:hover { background: #e74c3c; color: #fff; }
 
         /* Empty state */
         .empty-state {
@@ -603,7 +575,7 @@
             <a href="/" class="back-link">← Terug</a>
         </div>
         <div class="topbar-right">
-            <button class="icon-btn" id="admin-toggle-btn" onclick="openAdminModal()">🔐 Beheer</button>
+            <a href="/admin/" class="icon-btn" style="text-decoration:none">🔐 Beheer</a>
             <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
         </div>
     </nav>
@@ -665,38 +637,6 @@
         </div>
     </div>
 
-    <!-- ── Admin modal ── -->
-    <div class="modal-overlay" id="admin-modal" onclick="closeOnOverlay(event, 'admin-modal')">
-        <div class="modal" style="max-width:360px">
-            <div class="modal-handle"></div>
-            <button class="modal-close" onclick="closeModal('admin-modal')">✕</button>
-            <h2>🔐 Beheermodus</h2>
-            <div class="field">
-                <label>Wachtwoord</label>
-                <input type="password" id="admin-password-input" placeholder="••••••••"
-                       onkeydown="if(event.key==='Enter')checkAdminPassword()">
-            </div>
-            <div class="form-msg" id="admin-msg"></div>
-            <button class="submit-btn" onclick="checkAdminPassword()">Inloggen</button>
-        </div>
-    </div>
-
-    <!-- Admin paneel (zichtbaar na inloggen) -->
-    <div class="modal-overlay" id="admin-panel" onclick="closeOnOverlay(event, 'admin-panel')">
-        <div class="modal" style="max-width:360px">
-            <div class="modal-handle"></div>
-            <button class="modal-close" onclick="closeModal('admin-panel')">✕</button>
-            <h2>⚙️ Beheeropties</h2>
-            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:18px;text-align:center">
-                Verwijderknoppen zijn zichtbaar op alle kaarten.
-            </p>
-            <button class="submit-btn" style="background:linear-gradient(135deg,#e67e22,#e74c3c);margin-bottom:12px"
-                onclick="resetAllVotes()">🔄 Reset alle stemmen</button>
-            <button class="submit-btn" style="background:var(--surface);color:var(--text);border:2px solid var(--border)"
-                onclick="logoutAdmin()">🔓 Uitloggen</button>
-        </div>
-    </div>
-
     <script>
         // ── Firebase init ──────────────────────────────────────────────────────
         const FIREBASE_CONFIG = {
@@ -713,7 +653,6 @@
         const COLLECTION = 'klantenservice-quotes';
 
         // ── State ──────────────────────────────────────────────────────────────
-        let isAdmin = false;
         let selectedFile = null;
         let uploadedImageUrl = null;
         let unsubscribe = null;
@@ -768,66 +707,8 @@
         }
 
         document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') {
-                closeModal('add-modal');
-                closeModal('admin-modal');
-            }
+            if (e.key === 'Escape') closeModal('add-modal');
         });
-
-        // ── Admin ──────────────────────────────────────────────────────────────
-        function openAdminModal() {
-            if (isAdmin) {
-                openModal('admin-panel');
-                return;
-            }
-            document.getElementById('admin-password-input').value = '';
-            document.getElementById('admin-msg').style.display = 'none';
-            openModal('admin-modal');
-            setTimeout(() => document.getElementById('admin-password-input').focus(), 100);
-        }
-
-        function checkAdminPassword() {
-            const pw = document.getElementById('admin-password-input').value;
-            if (pw === CONFIG.adminPassword) {
-                isAdmin = true;
-                closeModal('admin-modal');
-                document.getElementById('admin-toggle-btn').textContent = '⚙️ Beheeropties';
-                document.getElementById('admin-toggle-btn').classList.add('admin-badge');
-                document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'flex');
-                showToast('✓ Beheermodus actief');
-            } else {
-                const msg = document.getElementById('admin-msg');
-                msg.textContent = 'Onjuist wachtwoord.';
-                msg.className = 'form-msg error';
-                msg.style.display = 'block';
-            }
-        }
-
-        function logoutAdmin() {
-            isAdmin = false;
-            closeModal('admin-panel');
-            document.getElementById('admin-toggle-btn').textContent = '🔐 Beheer';
-            document.getElementById('admin-toggle-btn').classList.remove('admin-badge');
-            document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'none');
-            showToast('Beheermodus uitgeschakeld');
-        }
-
-        async function resetAllVotes() {
-            if (!isAdmin) return;
-            if (!confirm('Alle stemmen resetten? Dit kan niet ongedaan worden gemaakt.')) return;
-            try {
-                const snapshot = await db.collection(COLLECTION).get();
-                const batch = db.batch();
-                snapshot.forEach(doc => batch.update(doc.ref, { votes: 0 }));
-                await batch.commit();
-                saveMyVote(null);
-                closeModal('admin-panel');
-                showToast('✓ Alle stemmen gereset');
-            } catch (e) {
-                console.error(e);
-                showToast('Reset mislukt, probeer opnieuw.');
-            }
-        }
 
         // ── Add quote modal ────────────────────────────────────────────────────
         function openAddModal() {
@@ -969,22 +850,6 @@
             }
         }
 
-        // ── Delete ─────────────────────────────────────────────────────────────
-        async function deleteQuote(id, cardEl) {
-            if (!isAdmin) return;
-            if (!confirm('Weet je zeker dat je deze quote wilt verwijderen?')) return;
-            try {
-                await db.collection(COLLECTION).doc(id).delete();
-                cardEl.style.transition = 'opacity 0.3s, transform 0.3s';
-                cardEl.style.opacity = '0';
-                cardEl.style.transform = 'scale(0.9)';
-                setTimeout(() => cardEl.remove(), 300);
-                showToast('Quote verwijderd');
-            } catch (e) {
-                showToast('Verwijderen mislukt');
-            }
-        }
-
         // ── Render card ────────────────────────────────────────────────────────
         function formatDate(ts) {
             if (!ts) return '';
@@ -1017,10 +882,7 @@
             const voteHtml = `<button class="vote-btn${isVoted ? ' voted' : ''}"
                 onclick="voteQuote('${id}')" title="${isVoted ? 'Stem intrekken' : 'Stem op deze quote'}">${voteLabel}</button>`;
 
-            const deleteHtml = `<button class="delete-btn" style="display:${isAdmin ? 'flex' : 'none'}"
-                onclick="deleteQuote('${id}', this.closest('.card'))" title="Verwijderen">✕</button>`;
-
-            const actionsHtml = `<div class="card-actions">${voteHtml}${deleteHtml}</div>`;
+            const actionsHtml = `<div class="card-actions">${voteHtml}</div>`;
 
             const crownHtml = isTop ? `<div class="crown-banner">🐐 GOAT</div>` : '';
 
