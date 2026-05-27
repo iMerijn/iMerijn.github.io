@@ -681,6 +681,19 @@
         </div>
     </div>
 
+    <!-- Admin paneel (zichtbaar na inloggen) -->
+    <div class="modal-overlay" id="admin-panel" onclick="closeOnOverlay(event, 'admin-panel')">
+        <div class="modal" style="max-width:360px">
+            <div class="modal-handle"></div>
+            <button class="modal-close" onclick="closeModal('admin-panel')">✕</button>
+            <h2>🔓 Beheer</h2>
+            <button class="submit-btn" style="background:linear-gradient(135deg,#e67e22,#e74c3c);margin-bottom:12px"
+                onclick="resetAllVotes()">🔄 Reset alle stemmen</button>
+            <button class="submit-btn" style="background:var(--surface);color:var(--text);border:2px solid var(--border)"
+                onclick="logoutAdmin()">Uitloggen</button>
+        </div>
+    </div>
+
     <script>
         // ── Firebase init ──────────────────────────────────────────────────────
         const FIREBASE_CONFIG = {
@@ -761,7 +774,7 @@
         // ── Admin ──────────────────────────────────────────────────────────────
         function openAdminModal() {
             if (isAdmin) {
-                logoutAdmin();
+                openModal('admin-panel');
                 return;
             }
             document.getElementById('admin-password-input').value = '';
@@ -789,10 +802,28 @@
 
         function logoutAdmin() {
             isAdmin = false;
+            closeModal('admin-panel');
             document.getElementById('admin-toggle-btn').textContent = '🔐 Beheer';
             document.getElementById('admin-toggle-btn').classList.remove('admin-badge');
             document.querySelectorAll('.delete-btn').forEach(b => b.style.display = 'none');
             showToast('Beheermodus uitgeschakeld');
+        }
+
+        async function resetAllVotes() {
+            if (!isAdmin) return;
+            if (!confirm('Alle stemmen resetten? Dit kan niet ongedaan worden gemaakt.')) return;
+            try {
+                const snapshot = await db.collection(COLLECTION).get();
+                const batch = db.batch();
+                snapshot.forEach(doc => batch.update(doc.ref, { votes: 0 }));
+                await batch.commit();
+                saveMyVote(null);
+                closeModal('admin-panel');
+                showToast('✓ Alle stemmen gereset');
+            } catch (e) {
+                console.error(e);
+                showToast('Reset mislukt, probeer opnieuw.');
+            }
         }
 
         // ── Add quote modal ────────────────────────────────────────────────────
