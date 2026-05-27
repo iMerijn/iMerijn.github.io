@@ -65,6 +65,7 @@
 
         a.back-link:hover { opacity: 0.7; }
 
+        .topbar-left  { display: flex; gap: 8px; align-items: center; }
         .topbar-right { display: flex; gap: 8px; align-items: center; }
 
         .icon-btn {
@@ -356,7 +357,11 @@
 <body>
 
     <nav class="topbar">
-        <a href="/" class="back-link">← Terug</a>
+        <div class="topbar-left">
+            <a href="/" class="back-link">← Terug</a>
+            <a href="/quotes/" class="back-link">💬 Quotes</a>
+            <a href="/klantparels/" class="back-link">💎 Klantparels</a>
+        </div>
         <div class="topbar-right">
             <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
         </div>
