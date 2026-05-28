@@ -43,10 +43,17 @@
             position: relative;
         }
 
-        #theme-toggle {
+        .topbar-right-wrap {
             position: absolute;
             top: 20px;
             right: 20px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #theme-toggle, a.admin-link {
             background: none;
             border: 2px solid var(--input-border);
             color: var(--text-color);
@@ -54,8 +61,11 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 0.9rem;
-            z-index: 10;
+            text-decoration: none;
+            font-family: inherit;
         }
+
+        #theme-toggle:hover, a.admin-link:hover { opacity: 0.7; }
 
         .container {
             text-align: center;
@@ -169,7 +179,10 @@
 </head>
 <body>
 
-    <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+    <div class="topbar-right-wrap">
+        <a href="/admin/" class="admin-link">🔐 Beheer</a>
+        <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+    </div>
     <div id="rocket">🚀</div>
 
     <div class="container">
