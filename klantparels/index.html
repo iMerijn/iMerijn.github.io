@@ -501,6 +501,11 @@
         .field input:focus,
         .field textarea:focus { outline: none; border-color: var(--accent); }
 
+        /* Calendar-icoon kleur in dark mode */
+        [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.75);
+        }
+
         /* Photo upload */
         .photo-upload-area {
             border: 2px dashed var(--border);
@@ -811,6 +816,11 @@
             </div>
 
             <div class="field">
+                <label>Datum <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
+                <input type="date" id="input-date">
+            </div>
+
+            <div class="field">
                 <label>Foto of video <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
                 <div class="photo-upload-area" id="upload-area">
                     <input type="file" id="input-photo" accept="image/*,video/*" onchange="onMediaSelected(event)">
@@ -958,10 +968,14 @@
 
         // ── Add quote modal ────────────────────────────────────────────────────
         function openAddModal() {
-            document.getElementById('input-quote').value = '';
+            document.getElementById('input-quote').value    = '';
             document.getElementById('input-customer').value = '';
-            // Behoud naam van vorige keer
-            document.getElementById('input-photo').value = '';
+            document.getElementById('input-photo').value    = '';
+            // Datum standaard op vandaag, geen toekomstige data
+            const todayStr = new Date().toISOString().split('T')[0];
+            const dateEl   = document.getElementById('input-date');
+            dateEl.value   = todayStr;
+            dateEl.max     = todayStr;
             removePhoto();
             clearMsg();
             const btn = document.getElementById('submit-btn');
@@ -1084,6 +1098,7 @@
         async function submitQuote() {
             const quote    = document.getElementById('input-quote').value.trim();
             const customer = document.getElementById('input-customer').value.trim();
+            const dateVal  = document.getElementById('input-date').value; // 'YYYY-MM-DD' of leeg
 
             if (!quote) { showFormMsg('Vul een quote in.', 'error'); return; }
 
@@ -1099,10 +1114,13 @@
                     imageUrl = await uploadToCloudinary(selectedFile);
                 }
 
-                const doc = {
-                    quote,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
+                // Gebruik gekozen datum (middag lokale tijd om tijdzone-verschuiving te voorkomen),
+                // val back op servertimestamp als het veld leeg is
+                const timestamp = dateVal
+                    ? firebase.firestore.Timestamp.fromDate(new Date(dateVal + 'T12:00:00'))
+                    : firebase.firestore.FieldValue.serverTimestamp();
+
+                const doc = { quote, timestamp };
                 if (customer)  doc.customerName = customer;
                 if (imageUrl) {
                     doc.imageUrl   = imageUrl;
