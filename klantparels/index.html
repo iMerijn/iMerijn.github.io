@@ -1325,6 +1325,12 @@
                       .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         }
 
+        // Voegt e_blur_faces toe aan Cloudinary-URL (werkt voor image én video)
+        function applyBlur(url) {
+            if (!url) return url;
+            return url.replace('/upload/', '/upload/e_blur_faces/');
+        }
+
         function buildCard(id, data, isTop) {
             const card = document.createElement('div');
             const hasMedia  = !!data.imageUrl;
@@ -1354,7 +1360,9 @@
             const crownHtml   = isTop ? `<div class="crown-banner">🐐 GOAT</div>` : '';
 
             // Media-blok: klik opent lightbox
-            const safeUrl = escapeHtml(data.imageUrl || '');
+            // Pas Cloudinary blur-transformatie toe indien ingeschakeld door admin
+            const mediaUrl = data.blurFaces ? applyBlur(data.imageUrl) : data.imageUrl;
+            const safeUrl  = escapeHtml(mediaUrl || '');
             let mediaHtml = '';
             if (hasMedia) {
                 mediaHtml = isVideo

@@ -408,6 +408,27 @@
 
         .btn-comment-delete:hover { color: var(--red); }
 
+        .btn-blur {
+            padding: 7px 16px;
+            font-size: 0.88rem;
+            background: none;
+            color: var(--muted);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+
+        .btn-blur.on {
+            color: var(--green);
+            border-color: var(--green);
+            background: rgba(46,204,113,0.08);
+        }
+
+        .btn-blur:disabled { opacity: 0.4; cursor: not-allowed; }
+
         .btn-edit {
             padding: 7px 16px;
             font-size: 0.88rem;
@@ -992,6 +1013,10 @@
                             <div class="item-meta">${tags}</div>
                             <div class="item-actions">
                                 <button class="btn-edit"   onclick="openEditModal('${doc.id}')">✏️ Bewerken</button>
+                                <button class="btn-blur ${d.blurFaces ? 'on' : ''}" id="kp-blur-${doc.id}"
+                                        onclick="toggleBlurFaces('${doc.id}', ${!!d.blurFaces})">
+                                    👁 Blur: ${d.blurFaces ? 'aan' : 'uit'}
+                                </button>
                                 <button class="btn-delete" onclick="deleteKlantparel('${doc.id}')">🗑 Verwijderen</button>
                             </div>
                             <div class="card-status" id="kpstatus-${doc.id}"></div>
@@ -1062,6 +1087,25 @@
             if (titleEl) titleEl.textContent = remaining > 0
                 ? `💬 ${remaining} reactie${remaining !== 1 ? 's' : ''}`
                 : '💬 Geen reacties';
+        }
+
+        async function toggleBlurFaces(id, currentState) {
+            const newState = !currentState;
+            const btn = document.getElementById(`kp-blur-${id}`);
+            if (btn) btn.disabled = true;
+            try {
+                await fsdb.collection(KP_COLLECTION).doc(id).update({ blurFaces: newState });
+                if (kpDocsMap[id]) kpDocsMap[id].blurFaces = newState;
+                if (btn) {
+                    btn.textContent = `👁 Blur: ${newState ? 'aan' : 'uit'}`;
+                    btn.classList.toggle('on', newState);
+                    btn.disabled = false;
+                    btn.onclick = () => toggleBlurFaces(id, newState);
+                }
+            } catch (e) {
+                alert('Bijwerken mislukt: ' + e.message);
+                if (btn) btn.disabled = false;
+            }
         }
 
         async function deleteKlantparel(id) {
