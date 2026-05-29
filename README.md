@@ -15,7 +15,6 @@ Welke functies zijn er?
 ### Dien je eigen quote in
 Heb jij nog een goede quote die er echt bij moet komen te staan? Stuur hem nu in via de knop onderaan het quote scherm. Één van de admins beoordeelt dan je quote en bepaald of ze hem toe willen voegen of niet. Kom regelmatig terug om te zien of jouw nieuwe quote al goedgekeurd is! 
 
-Ben je een admin? Log dan in met je Github PAT op doetdednssechetnogwel.nl/quotes/admin om nieuwe quotes te beoordelen. 
 
 ## Klantparels
 ### De mooiste, gekste en onvergetelijkste uitspraken van klanten. Ga naar doetdednssechetnogwel.nl/klantparels
@@ -26,7 +25,6 @@ Wat kunnen onze klanten zeggen. Echt waar. Bekijk de hele collectie op de Klantp
 - Filteren: Sorteer op stemmen, nieuwste of oudste. Filter op alleen foto's, video's of tekst. Of kijk alleen naar wat er deze week of maand is binnengekomen. Jij bepaalt wat je ziet.
 - Vergroten: Klik op een foto of video om hem groter te bekijken. Want soms wil je gewoon even goed kijken wat er nou precies op de achtergrond staat.
 
-Ben je een admin? Log in via doetdednssechetnogwel.nl/admin om klantparels te verwijderen of alle stemmen te resetten.
 
 ## Belangrijk
 Deze website is absoluut niet bedoeld om iets of iemand belachelijk te maken of slecht te zetten. Het is een uit de hand gelopen geintje die vooral ook grappig moet blijven. Zodra ook maar iets of iemand hier onprettige of negatieve gevoelens bij heeft gaat het direct offline
