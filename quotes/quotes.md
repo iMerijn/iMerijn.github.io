@@ -149,3 +149,7 @@ Dit is wel een mooie hook aan content elementen waarop je een Personal Commercia
 ---
 
 Een klant krijgt zowel pakketten vanuit PostNL als vanuit DPD, dat kan toch niet?
+
+---
+
+Mijn stagiair zal om 16.00 bier halen
