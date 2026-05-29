@@ -1325,10 +1325,12 @@
                       .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         }
 
-        // Voegt e_blur_faces toe aan Cloudinary-URL (werkt voor image én video)
+        // Gebruikt Named Transformation 't_blur_faces' (werkt op gratis Cloudinary-plan)
+        // Maak deze aan in Cloudinary: Transformations → Named Transformations
+        //   Name: blur_faces  |  Transformation: e_blur_faces
         function applyBlur(url) {
             if (!url) return url;
-            return url.replace('/upload/', '/upload/e_blur_faces/');
+            return url.replace('/upload/', '/upload/t_blur_faces/');
         }
 
         function buildCard(id, data, isTop) {
