@@ -204,8 +204,30 @@
             padding: 14px 16px 12px;
         }
 
-        /* Polaroid tape effect for photo cards */
-        .card.has-photo::before {
+        /* ── Video card ── */
+        .card.has-video .video-wrap {
+            overflow: hidden;
+            background: #000;
+            max-height: 320px;
+        }
+
+        .card.has-video .video-wrap video {
+            width: 100%;
+            max-height: 320px;
+            object-fit: cover;
+            display: block;
+            cursor: pointer;
+        }
+
+        .card.has-video .card-body {
+            border-top: none;
+            background: var(--polaroid-bg);
+            padding: 14px 16px 12px;
+        }
+
+        /* Polaroid tape effect for photo + video cards */
+        .card.has-photo::before,
+        .card.has-video::before {
             content: '';
             position: absolute;
             top: -6px;
@@ -455,7 +477,8 @@
             position: relative;
         }
 
-        .photo-preview img {
+        .photo-preview img,
+        .photo-preview video {
             max-height: 120px;
             border-radius: 8px;
             object-fit: cover;
@@ -529,9 +552,6 @@
 
         .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-        /* ── Admin modal ── */
-        #admin-modal .field input { font-size: 1rem; letter-spacing: 0.1em; }
 
         /* ── Toast ── */
         .toast {
@@ -616,17 +636,18 @@
             </div>
 
             <div class="field">
-                <label>Foto <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
+                <label>Foto of video <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
                 <div class="photo-upload-area" id="upload-area">
-                    <input type="file" id="input-photo" accept="image/*" onchange="onPhotoSelected(event)">
-                    <span class="upload-icon">📷</span>
-                    <span class="upload-label">Klik om een foto te kiezen</span>
+                    <input type="file" id="input-photo" accept="image/*,video/*" onchange="onMediaSelected(event)">
+                    <span class="upload-icon" id="upload-icon">📷</span>
+                    <span class="upload-label" id="upload-label">Klik om een foto of video te kiezen</span>
                 </div>
                 <div class="upload-progress" id="upload-progress">
                     <div class="upload-progress-bar" id="upload-progress-bar"></div>
                 </div>
                 <div class="photo-preview" id="photo-preview">
                     <img id="photo-preview-img" src="" alt="Preview">
+                    <video id="video-preview-el" src="" muted playsinline style="display:none"></video>
                     <button class="photo-preview-remove" onclick="removePhoto()" title="Verwijderen">✕</button>
                 </div>
             </div>
@@ -655,6 +676,7 @@
         // ── State ──────────────────────────────────────────────────────────────
         let selectedFile = null;
         let uploadedImageUrl = null;
+        let isVideoFile = false;
         let unsubscribe = null;
 
         // ── Theme ──────────────────────────────────────────────────────────────
@@ -736,33 +758,61 @@
             el.style.display = 'block';
         }
 
-        // ── Photo handling ─────────────────────────────────────────────────────
-        function onPhotoSelected(e) {
+        // ── Media handling ─────────────────────────────────────────────────────
+        function onMediaSelected(e) {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 10 * 1024 * 1024) {
-                showFormMsg('Foto is te groot (max 10 MB).', 'error');
+
+            const isVideo = file.type.startsWith('video/');
+            const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+            const maxLabel = isVideo ? '50 MB' : '10 MB';
+
+            if (file.size > maxSize) {
+                showFormMsg(`Bestand is te groot (max ${maxLabel}).`, 'error');
                 return;
             }
+
             selectedFile = file;
             uploadedImageUrl = null;
+            isVideoFile = isVideo;
 
-            const reader = new FileReader();
-            reader.onload = ev => {
-                document.getElementById('photo-preview-img').src = ev.target.result;
-                document.getElementById('photo-preview').style.display = 'block';
-                document.querySelector('.upload-label').textContent = file.name;
-            };
-            reader.readAsDataURL(file);
+            const imgEl   = document.getElementById('photo-preview-img');
+            const videoEl = document.getElementById('video-preview-el');
+
+            if (isVideo) {
+                imgEl.style.display   = 'none';
+                imgEl.src             = '';
+                videoEl.style.display = 'block';
+                videoEl.src           = URL.createObjectURL(file);
+                document.getElementById('upload-icon').textContent  = '🎬';
+            } else {
+                videoEl.style.display = 'none';
+                videoEl.src           = '';
+                imgEl.style.display   = 'block';
+                const reader = new FileReader();
+                reader.onload = ev => { imgEl.src = ev.target.result; };
+                reader.readAsDataURL(file);
+                document.getElementById('upload-icon').textContent  = '📷';
+            }
+
+            document.getElementById('photo-preview').style.display = 'block';
+            document.getElementById('upload-label').textContent    = file.name;
         }
 
         function removePhoto() {
-            selectedFile = null;
-            uploadedImageUrl = null;
-            document.getElementById('input-photo').value = '';
-            document.getElementById('photo-preview').style.display = 'none';
-            document.getElementById('photo-preview-img').src = '';
-            document.querySelector('.upload-label').textContent = 'Klik om een foto te kiezen';
+            selectedFile      = null;
+            uploadedImageUrl  = null;
+            isVideoFile       = false;
+
+            document.getElementById('input-photo').value             = '';
+            document.getElementById('photo-preview').style.display   = 'none';
+            document.getElementById('photo-preview-img').src         = '';
+            document.getElementById('photo-preview-img').style.display = 'block';
+            const videoEl = document.getElementById('video-preview-el');
+            videoEl.src           = '';
+            videoEl.style.display = 'none';
+            document.getElementById('upload-icon').textContent   = '📷';
+            document.getElementById('upload-label').textContent  = 'Klik om een foto of video te kiezen';
             document.getElementById('upload-progress').style.display = 'none';
             document.getElementById('upload-progress-bar').style.width = '0%';
         }
@@ -777,7 +827,9 @@
             formData.append('file', file);
             formData.append('upload_preset', CONFIG.cloudinaryUploadPreset);
 
-            const url = `https://api.cloudinary.com/v1_1/${CONFIG.cloudinaryCloudName}/image/upload`;
+            // Gebruik resource-type specifieke endpoint zodat het preset geen aanpassing nodig heeft
+            const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+            const url = `https://api.cloudinary.com/v1_1/${CONFIG.cloudinaryCloudName}/${resourceType}/upload`;
 
             return new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
@@ -819,7 +871,7 @@
             try {
                 let imageUrl = null;
                 if (selectedFile) {
-                    btn.textContent = 'Foto uploaden…';
+                    btn.textContent = isVideoFile ? 'Video uploaden…' : 'Foto uploaden…';
                     imageUrl = await uploadToCloudinary(selectedFile);
                 }
 
@@ -827,8 +879,11 @@
                     quote,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 };
-                if (customer) doc.customerName = customer;
-                if (imageUrl)  doc.imageUrl    = imageUrl;
+                if (customer)  doc.customerName = customer;
+                if (imageUrl) {
+                    doc.imageUrl   = imageUrl;
+                    doc.mediaType  = isVideoFile ? 'video' : 'image';
+                }
 
                 await db.collection(COLLECTION).add(doc);
 
@@ -864,8 +919,10 @@
 
         function buildCard(id, data, isTop) {
             const card = document.createElement('div');
-            const hasPhoto = !!data.imageUrl;
-            card.className = 'card ' + (hasPhoto ? 'has-photo' : 'text-only') + (isTop ? ' top-voted' : '');
+            const hasMedia  = !!data.imageUrl;
+            const isVideo   = data.mediaType === 'video';
+            const cardClass = hasMedia ? (isVideo ? 'has-video' : 'has-photo') : 'text-only';
+            card.className  = 'card ' + cardClass + (isTop ? ' top-voted' : '');
             card.dataset.id = id;
 
             const customerHtml = data.customerName
@@ -876,46 +933,43 @@
                 ? `<span class="card-date">${formatDate(data.timestamp)}</span>`
                 : '';
 
-            const votes = data.votes || 0;
-            const isVoted = getMyVote() === id;
+            const votes    = data.votes || 0;
+            const isVoted  = getMyVote() === id;
             const voteLabel = votes > 0 ? `⭐ ${votes}` : '⭐';
             const voteHtml = `<button class="vote-btn${isVoted ? ' voted' : ''}"
                 onclick="voteQuote('${id}')" title="${isVoted ? 'Stem intrekken' : 'Stem op deze quote'}">${voteLabel}</button>`;
 
             const actionsHtml = `<div class="card-actions">${voteHtml}</div>`;
+            const crownHtml   = isTop ? `<div class="crown-banner">🐐 GOAT</div>` : '';
 
-            const crownHtml = isTop ? `<div class="crown-banner">🐐 GOAT</div>` : '';
-
-            if (hasPhoto) {
-                card.innerHTML = `
-                    ${crownHtml}
-                    <div class="photo-wrap">
-                        <img src="${escapeHtml(data.imageUrl)}" alt="Quote foto" loading="lazy">
-                    </div>
-                    <div class="card-body">
-                        <p class="card-quote">${escapeHtml(data.quote)}</p>
-                        <div class="card-meta">
-                            <div class="card-meta-left">
-                                ${customerHtml}
-                                ${dateHtml}
-                            </div>
-                            ${actionsHtml}
-                        </div>
-                    </div>`;
-            } else {
-                card.innerHTML = `
-                    ${crownHtml}
-                    <div class="card-body">
-                        <p class="card-quote">${escapeHtml(data.quote)}</p>
-                        <div class="card-meta">
-                            <div class="card-meta-left">
-                                ${customerHtml}
-                                ${dateHtml}
-                            </div>
-                            ${actionsHtml}
-                        </div>
-                    </div>`;
+            // Media-blok: video speelt stil en automatisch af, klik pauzeert/hervat
+            let mediaHtml = '';
+            if (hasMedia) {
+                mediaHtml = isVideo
+                    ? `<div class="video-wrap">
+                           <video src="${escapeHtml(data.imageUrl)}" autoplay muted loop playsinline
+                                  preload="metadata"
+                                  onclick="this.paused ? this.play() : this.pause()"
+                                  title="Klik om te pauzeren / hervatten"></video>
+                       </div>`
+                    : `<div class="photo-wrap">
+                           <img src="${escapeHtml(data.imageUrl)}" alt="Quote foto" loading="lazy">
+                       </div>`;
             }
+
+            card.innerHTML = `
+                ${crownHtml}
+                ${mediaHtml}
+                <div class="card-body">
+                    <p class="card-quote">${escapeHtml(data.quote)}</p>
+                    <div class="card-meta">
+                        <div class="card-meta-left">
+                            ${customerHtml}
+                            ${dateHtml}
+                        </div>
+                        ${actionsHtml}
+                    </div>
+                </div>`;
 
             return card;
         }
