@@ -17,5 +17,16 @@ Heb jij nog een goede quote die er echt bij moet komen te staan? Stuur hem nu in
 
 Ben je een admin? Log dan in met je Github PAT op doetdednssechetnogwel.nl/quotes/admin om nieuwe quotes te beoordelen. 
 
+## Klantparels
+### De mooiste, gekste en onvergetelijkste uitspraken van klanten. Ga naar doetdednssechetnogwel.nl/klantparels
+Wat kunnen onze klanten zeggen. Echt waar. Bekijk de hele collectie op de Klantparels pagina!
+- Quote toevoegen: Heb jij een quote meegekregen die er écht bij moet? Voeg hem toe! Tekst alleen is al genoeg, maar je kan ook een foto of video meesturen voor extra context. Of bewijs. Of allebei.
+- Stemmen: Welke quote is de absolute ster? Stem op je favoriet met een ⭐. Maar kies wel verstandig, want je hebt er maar één.
+- 🐐 GOAT: De quote met de meeste stemmen krijgt de GOAT-kroon. Topklasse status. Wordt elke week opnieuw beslist? Nee. Is hij daardoor minder speciaal? Ook nee.
+- Filteren: Sorteer op stemmen, nieuwste of oudste. Filter op alleen foto's, video's of tekst. Of kijk alleen naar wat er deze week of maand is binnengekomen. Jij bepaalt wat je ziet.
+- Vergroten: Klik op een foto of video om hem groter te bekijken. Want soms wil je gewoon even goed kijken wat er nou precies op de achtergrond staat.
+
+Ben je een admin? Log in via doetdednssechetnogwel.nl/admin om klantparels te verwijderen of alle stemmen te resetten.
+
 ## Belangrijk
 Deze website is absoluut niet bedoeld om iets of iemand belachelijk te maken of slecht te zetten. Het is een uit de hand gelopen geintje die vooral ook grappig moet blijven. Zodra ook maar iets of iemand hier onprettige of negatieve gevoelens bij heeft gaat het direct offline
