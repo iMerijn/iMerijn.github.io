@@ -1361,16 +1361,23 @@
 
             // Media-blok: klik opent lightbox
             // Pas Cloudinary blur-transformatie toe indien ingeschakeld door admin
+            const origUrl  = escapeHtml(data.imageUrl || '');
             const mediaUrl = data.blurFaces ? applyBlur(data.imageUrl) : data.imageUrl;
             const safeUrl  = escapeHtml(mediaUrl || '');
+            // onerror-fallback: als de blur-transformatie mislukt (add-on niet actief /
+            // strict transformations), laad dan de originele afbeelding/video
+            const onErrImg = data.blurFaces
+                ? `onerror="this.onerror=null;this.src='${origUrl}'"` : '';
+            const onErrVid = data.blurFaces
+                ? `onerror="this.onerror=null;this.src='${origUrl}'"` : '';
             let mediaHtml = '';
             if (hasMedia) {
                 mediaHtml = isVideo
                     ? `<div class="video-wrap" onclick="openLightbox('${safeUrl}','video')" title="Klik om te vergroten">
-                           <video src="${safeUrl}" autoplay muted loop playsinline preload="metadata"></video>
+                           <video src="${safeUrl}" autoplay muted loop playsinline preload="metadata" ${onErrVid}></video>
                        </div>`
                     : `<div class="photo-wrap" onclick="openLightbox('${safeUrl}','image')" title="Klik om te vergroten">
-                           <img src="${safeUrl}" alt="Quote foto" loading="lazy">
+                           <img src="${safeUrl}" alt="Quote foto" loading="lazy" ${onErrImg}>
                        </div>`;
             }
 
