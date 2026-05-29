@@ -386,6 +386,128 @@
         .vote-btn:hover { border-color: #f1c40f; color: #f1c40f; }
         .vote-btn.voted { border-color: #f1c40f; color: #f1c40f; background: rgba(241,196,15,0.1); }
 
+        /* ── Comment-toggle knop (zelfde stijl als vote-btn) ── */
+        .comment-toggle-btn {
+            background: none;
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 3px 9px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex-shrink: 0;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+            font-family: inherit;
+            line-height: 1.4;
+        }
+
+        .comment-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .comment-toggle-btn.open  { border-color: var(--accent); color: var(--accent);
+                                     background: rgba(52,152,219,0.08); }
+
+        /* ── Comment-sectie ── */
+        .comment-section {
+            border-top: 1px solid var(--border);
+            padding: 12px 16px 14px;
+        }
+
+        .comment-item {
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comment-item:last-of-type { border-bottom: none; padding-bottom: 2px; }
+
+        .comment-header {
+            display: flex;
+            align-items: baseline;
+            gap: 7px;
+            margin-bottom: 3px;
+        }
+
+        .comment-name { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+        .comment-time { font-size: 0.68rem; color: var(--text-muted); }
+
+        .comment-body {
+            font-size: 0.82rem;
+            color: var(--text);
+            line-height: 1.45;
+        }
+
+        .comment-empty, .comment-loading {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 2px 0 8px;
+        }
+
+        .comment-more-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 0.78rem;
+            cursor: pointer;
+            padding: 6px 0 0;
+            font-family: inherit;
+            display: block;
+            text-decoration: underline;
+        }
+
+        /* Formulier */
+        .comment-form { margin-top: 10px; }
+
+        .comment-form-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .comment-input {
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 9px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color 0.2s;
+            min-width: 0;
+        }
+
+        .comment-input:focus { outline: none; border-color: var(--accent); }
+
+        .comment-name-input { width: 88px; flex-shrink: 0; }
+        .comment-text-input  { flex: 1; }
+
+        .comment-submit-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.15s;
+        }
+
+        .comment-submit-btn:hover    { opacity: 0.85; }
+        .comment-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .comment-form-msg {
+            font-size: 0.73rem;
+            color: #e74c3c;
+            margin-top: 4px;
+            min-height: 1em;
+        }
+
         /* Empty state */
         .empty-state {
             text-align: center;
@@ -1225,7 +1347,10 @@
             const voteHtml = `<button class="vote-btn${isVoted ? ' voted' : ''}"
                 onclick="voteQuote('${id}')" title="${isVoted ? 'Stem intrekken' : 'Stem op deze quote'}">${voteLabel}</button>`;
 
-            const actionsHtml = `<div class="card-actions">${voteHtml}</div>`;
+            const commentHtml = `<button class="comment-toggle-btn" id="ctoggle-${id}"
+                onclick="toggleComments('${id}')" title="Reacties">💬</button>`;
+
+            const actionsHtml = `<div class="card-actions">${voteHtml}${commentHtml}</div>`;
             const crownHtml   = isTop ? `<div class="crown-banner">🐐 GOAT</div>` : '';
 
             // Media-blok: klik opent lightbox
@@ -1253,9 +1378,139 @@
                         </div>
                         ${actionsHtml}
                     </div>
+                </div>
+                <div class="comment-section" id="comments-${id}" style="display:none">
+                    <div class="comment-list" id="comment-list-${id}">
+                        <div class="comment-loading">Laden…</div>
+                    </div>
+                    <div class="comment-form">
+                        <div class="comment-form-row">
+                            <input class="comment-input comment-name-input" id="cname-${id}"
+                                   placeholder="Jouw naam *" maxlength="50"
+                                   onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('ctext-${id}').focus()}">
+                            <input class="comment-input comment-text-input" id="ctext-${id}"
+                                   placeholder="Schrijf een reactie…" maxlength="280"
+                                   onkeydown="if(event.key==='Enter')submitComment('${id}')">
+                            <button class="comment-submit-btn" onclick="submitComment('${id}')" title="Plaatsen">↵</button>
+                        </div>
+                        <div class="comment-form-msg" id="cmsg-${id}"></div>
+                    </div>
                 </div>`;
 
             return card;
+        }
+
+        // ── Comments ───────────────────────────────────────────────────────────
+        const commentLoadedSet = new Set();
+        const MAX_VISIBLE = 3;
+
+        function toggleComments(id) {
+            const section = document.getElementById(`comments-${id}`);
+            const btn     = document.getElementById(`ctoggle-${id}`);
+            if (!section) return;
+
+            const isOpen = section.style.display !== 'none';
+            section.style.display = isOpen ? 'none' : 'block';
+            btn.classList.toggle('open', !isOpen);
+
+            if (!isOpen && !commentLoadedSet.has(id)) {
+                loadComments(id);
+                // Vul opgeslagen naam in
+                const saved = localStorage.getItem('comment_name') || '';
+                const nameEl = document.getElementById(`cname-${id}`);
+                if (nameEl && !nameEl.value) nameEl.value = saved;
+            }
+        }
+
+        async function loadComments(id) {
+            commentLoadedSet.add(id);
+            const listEl = document.getElementById(`comment-list-${id}`);
+            if (!listEl) return;
+            try {
+                const snap = await db.collection(COLLECTION).doc(id)
+                    .collection('comments')
+                    .orderBy('timestamp', 'asc')
+                    .get();
+                listEl._allDocs = snap.docs;
+                renderComments(id, snap.docs, false);
+                // Teller op toggle-knop
+                const btn = document.getElementById(`ctoggle-${id}`);
+                if (btn && snap.size > 0) btn.textContent = `💬 ${snap.size}`;
+            } catch (e) {
+                if (listEl) listEl.innerHTML = '<div class="comment-empty">Reacties konden niet worden geladen.</div>';
+            }
+        }
+
+        function renderComments(id, docs, showAll) {
+            const listEl = document.getElementById(`comment-list-${id}`);
+            if (!listEl) return;
+
+            if (docs.length === 0) {
+                listEl.innerHTML = '<div class="comment-empty">Nog geen reacties. Wees de eerste!</div>';
+                return;
+            }
+
+            const visible   = showAll ? docs : docs.slice(0, MAX_VISIBLE);
+            const remaining = docs.length - visible.length;
+
+            const itemsHtml = visible.map(doc => {
+                const c  = doc.data();
+                const ts = c.timestamp
+                    ? c.timestamp.toDate().toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
+                    : '';
+                return `<div class="comment-item">
+                    <div class="comment-header">
+                        <span class="comment-name">${escapeHtml(c.name)}</span>
+                        <span class="comment-time">${ts}</span>
+                    </div>
+                    <div class="comment-body">${escapeHtml(c.text)}</div>
+                </div>`;
+            }).join('');
+
+            const moreHtml = remaining > 0
+                ? `<button class="comment-more-btn" onclick="showAllComments('${id}')">
+                       Meer reacties tonen (${remaining} meer)
+                   </button>`
+                : '';
+
+            listEl.innerHTML = itemsHtml + moreHtml;
+        }
+
+        function showAllComments(id) {
+            const listEl = document.getElementById(`comment-list-${id}`);
+            if (listEl && listEl._allDocs) renderComments(id, listEl._allDocs, true);
+        }
+
+        async function submitComment(id) {
+            const nameEl = document.getElementById(`cname-${id}`);
+            const textEl = document.getElementById(`ctext-${id}`);
+            const msgEl  = document.getElementById(`cmsg-${id}`);
+            const submitBtn = document.querySelector(`#comments-${id} .comment-submit-btn`);
+
+            const name = nameEl.value.trim();
+            const text = textEl.value.trim();
+
+            if (!name) { if (msgEl) msgEl.textContent = 'Vul je naam in.'; nameEl.focus(); return; }
+            if (!text) { if (msgEl) msgEl.textContent = 'Schrijf een reactie.'; textEl.focus(); return; }
+            if (msgEl) msgEl.textContent = '';
+
+            if (submitBtn) submitBtn.disabled = true;
+            try {
+                await db.collection(COLLECTION).doc(id).collection('comments').add({
+                    name,
+                    text,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                localStorage.setItem('comment_name', name);
+                textEl.value = '';
+                // Herlaad reacties
+                commentLoadedSet.delete(id);
+                await loadComments(id);
+            } catch (e) {
+                if (msgEl) msgEl.textContent = 'Plaatsen mislukt, probeer opnieuw.';
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
         }
 
         // ── Stemmen ────────────────────────────────────────────────────────────
