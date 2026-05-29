@@ -356,6 +356,58 @@
 
         .btn-danger:hover { background: var(--red); color: #fff; }
 
+        /* ── Comment-sectie in admin ── */
+        .kp-comments {
+            margin-top: 12px;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+
+        .kp-comments-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .kp-comment-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .kp-comment-row:last-of-type { border-bottom: none; }
+
+        .kp-comment-body { flex: 1; min-width: 0; }
+
+        .kp-comment-meta {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .kp-comment-name { font-weight: 700; color: var(--text); }
+
+        .kp-comment-text { font-size: 0.85rem; line-height: 1.4; }
+
+        .btn-comment-delete {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            transition: color 0.15s;
+        }
+
+        .btn-comment-delete:hover { color: var(--red); }
+
         .btn-edit {
             padding: 7px 16px;
             font-size: 0.88rem;
@@ -942,14 +994,74 @@
                                 <button class="btn-edit"   onclick="openEditModal('${doc.id}')">✏️ Bewerken</button>
                                 <button class="btn-delete" onclick="deleteKlantparel('${doc.id}')">🗑 Verwijderen</button>
                             </div>
-                            <div class="card-status" id="kpstatus-${doc.id}"></div>`;
+                            <div class="card-status" id="kpstatus-${doc.id}"></div>
+                            <div class="kp-comments" id="kp-comments-${doc.id}">
+                                <div class="kp-comments-title">💬 Reacties laden…</div>
+                            </div>`;
                         listEl.appendChild(card);
+                        loadKpComments(doc.id);
                     });
                 }, err => {
                     document.getElementById('klantparels-debug').textContent = `⚠️ Fout: ${err.message}`;
                     document.getElementById('klantparels-list').innerHTML =
                         `<div class="empty-state" style="color:var(--red)">Kan data niet laden.</div>`;
                 });
+        }
+
+        async function loadKpComments(docId) {
+            const wrap = document.getElementById(`kp-comments-${docId}`);
+            if (!wrap) return;
+            try {
+                const snap = await fsdb.collection(KP_COLLECTION).doc(docId)
+                    .collection('comments').orderBy('timestamp', 'asc').get();
+
+                if (snap.empty) {
+                    wrap.innerHTML = '<div class="kp-comments-title" style="color:var(--muted)">💬 Geen reacties</div>';
+                    return;
+                }
+
+                const rowsHtml = snap.docs.map(doc => {
+                    const c  = doc.data();
+                    const ts = c.timestamp
+                        ? c.timestamp.toDate().toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
+                        : '—';
+                    return `<div class="kp-comment-row" id="kpcrow-${doc.id}">
+                        <div class="kp-comment-body">
+                            <div class="kp-comment-meta">
+                                <span class="kp-comment-name">${escHtml(c.name)}</span> · ${ts}
+                            </div>
+                            <div class="kp-comment-text">${escHtml(c.text)}</div>
+                        </div>
+                        <button class="btn-comment-delete" title="Reactie verwijderen"
+                            onclick="deleteKpComment('${docId}','${doc.id}')">🗑</button>
+                    </div>`;
+                }).join('');
+
+                wrap.innerHTML = `<div class="kp-comments-title">💬 ${snap.size} reactie${snap.size !== 1 ? 's' : ''}</div>${rowsHtml}`;
+            } catch (e) {
+                if (wrap) wrap.innerHTML = `<div class="kp-comments-title" style="color:var(--red)">⚠️ Reacties laden mislukt</div>`;
+            }
+        }
+
+        async function deleteKpComment(docId, commentId) {
+            if (!confirm('Deze reactie verwijderen?')) return;
+            const row = document.getElementById(`kpcrow-${commentId}`);
+            try {
+                await fsdb.collection(KP_COLLECTION).doc(docId).collection('comments').doc(commentId).delete();
+                if (row) { row.style.transition = 'opacity 0.25s'; row.style.opacity = '0'; setTimeout(() => { row.remove(); refreshKpCommentsTitle(docId); }, 250); }
+            } catch (e) {
+                alert('Verwijderen mislukt: ' + e.message);
+            }
+        }
+
+        function refreshKpCommentsTitle(docId) {
+            const wrap = document.getElementById(`kp-comments-${docId}`);
+            if (!wrap) return;
+            const remaining = wrap.querySelectorAll('.kp-comment-row').length;
+            const titleEl   = wrap.querySelector('.kp-comments-title');
+            if (titleEl) titleEl.textContent = remaining > 0
+                ? `💬 ${remaining} reactie${remaining !== 1 ? 's' : ''}`
+                : '💬 Geen reacties';
         }
 
         async function deleteKlantparel(id) {
