@@ -145,3 +145,7 @@ Als we die ’loop' weten te sluiten, dan hebben we echt een mooie insight revie
 ---
 
 Dit is wel een mooie hook aan content elementen waarop je een Personal Commercial Advisor kunt opbouwen, in het kader van agentic commerce en GEO/AIO searchqueries.
+
+---
+
+Een klant krijgt zowel pakketten vanuit PostNL als vanuit DPD, dat kan toch niet?
