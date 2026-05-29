@@ -802,6 +802,7 @@
             <button class="chip"        id="chip-category-speeltoestellen" onclick="setFilter('category','speeltoestellen')">Speeltoestellen</button>
             <button class="chip"        id="chip-category-skelters"        onclick="setFilter('category','skelters')">Skelters</button>
             <button class="chip"        id="chip-category-onderdelen"      onclick="setFilter('category','onderdelen')">Onderdelen</button>
+            <button class="chip"        id="chip-category-overig"          onclick="setFilter('category','overig')">Overig</button>
         </div>
 
         <span class="filter-count" id="filter-count" style="display:none"></span>
@@ -841,7 +842,7 @@
             </div>
 
             <div class="field">
-                <label>Categorie <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
+                <label>Categorie <span style="color:#e74c3c">*</span></label>
                 <select id="input-category">
                     <option value="">— Kies een categorie —</option>
                     <option value="sport">Sport</option>
@@ -850,6 +851,7 @@
                     <option value="speeltoestellen">Speeltoestellen</option>
                     <option value="skelters">Skelters</option>
                     <option value="onderdelen">Onderdelen</option>
+                    <option value="overig">Overig</option>
                 </select>
             </div>
 
@@ -1140,7 +1142,8 @@
             const category = document.getElementById('input-category').value;
             const dateVal  = document.getElementById('input-date').value; // 'YYYY-MM-DD' of leeg
 
-            if (!quote) { showFormMsg('Vul een quote in.', 'error'); return; }
+            if (!quote)    { showFormMsg('Vul een quote in.', 'error'); return; }
+            if (!category) { showFormMsg('Kies een categorie.', 'error'); return; }
 
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;

@@ -566,15 +566,16 @@
                 <input type="text" id="edit-customer" placeholder="bijv. Zwembad liner">
             </div>
             <div class="edit-field">
-                <label>Categorie</label>
+                <label>Categorie <span style="color:#e74c3c">*</span></label>
                 <select id="edit-category">
-                    <option value="">— Geen categorie —</option>
+                    <option value="">— Kies een categorie —</option>
                     <option value="sport">Sport</option>
                     <option value="trampolines">Trampolines</option>
                     <option value="zwembaden">Zwembaden</option>
                     <option value="speeltoestellen">Speeltoestellen</option>
                     <option value="skelters">Skelters</option>
                     <option value="onderdelen">Onderdelen</option>
+                    <option value="overig">Overig</option>
                 </select>
             </div>
             <div class="edit-field">
@@ -915,7 +916,7 @@
                         const votes = d.votes || 0;
 
                         const CATEGORY_LABELS = { sport:'Sport', trampolines:'Trampolines', zwembaden:'Zwembaden',
-                            speeltoestellen:'Speeltoestellen', skelters:'Skelters', onderdelen:'Onderdelen' };
+                            speeltoestellen:'Speeltoestellen', skelters:'Skelters', onderdelen:'Onderdelen', overig:'Overig' };
 
                         const thumb = d.imageUrl
                             ? (d.mediaType === 'video'
@@ -1104,8 +1105,10 @@
 
         async function saveEdit() {
             if (!editDocId) return;
-            const quote = document.getElementById('edit-quote').value.trim();
-            if (!quote) { showEditMsg('Vul een quote in.', 'error'); return; }
+            const quote    = document.getElementById('edit-quote').value.trim();
+            const category = document.getElementById('edit-category').value;
+            if (!quote)    { showEditMsg('Vul een quote in.', 'error'); return; }
+            if (!category) { showEditMsg('Kies een categorie.', 'error'); return; }
 
             const saveBtn = document.getElementById('edit-save-btn');
             saveBtn.disabled    = true;
