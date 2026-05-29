@@ -1379,11 +1379,11 @@
                         ${actionsHtml}
                     </div>
                 </div>
-                <div class="comment-section" id="comments-${id}" style="display:none">
+                <div class="comment-section" id="comments-${id}">
                     <div class="comment-list" id="comment-list-${id}">
                         <div class="comment-loading">Laden…</div>
                     </div>
-                    <div class="comment-form">
+                    <div class="comment-form" id="comment-form-${id}" style="display:none">
                         <div class="comment-form-row">
                             <input class="comment-input comment-name-input" id="cname-${id}"
                                    placeholder="Jouw naam *" maxlength="50"
@@ -1401,44 +1401,54 @@
         }
 
         // ── Comments ───────────────────────────────────────────────────────────
-        const commentLoadedSet = new Set();
-        const MAX_VISIBLE = 3;
+        const MAX_VISIBLE    = 3;
+        const CACHE_TTL_MS   = 5 * 60 * 1000;   // 5 minuten
+        const commentCache   = {};               // id → { docs, ts }
 
+        // Toggling opent/sluit alleen het FORMULIER; de lijst is altijd zichtbaar
         function toggleComments(id) {
-            const section = document.getElementById(`comments-${id}`);
-            const btn     = document.getElementById(`ctoggle-${id}`);
-            if (!section) return;
+            const form = document.getElementById(`comment-form-${id}`);
+            const btn  = document.getElementById(`ctoggle-${id}`);
+            if (!form) return;
 
-            const isOpen = section.style.display !== 'none';
-            section.style.display = isOpen ? 'none' : 'block';
+            const isOpen = form.style.display !== 'none';
+            form.style.display = isOpen ? 'none' : 'block';
             btn.classList.toggle('open', !isOpen);
 
-            if (!isOpen && !commentLoadedSet.has(id)) {
-                loadComments(id);
-                // Vul opgeslagen naam in
-                const saved = localStorage.getItem('comment_name') || '';
+            if (!isOpen) {
+                const saved  = localStorage.getItem('comment_name') || '';
                 const nameEl = document.getElementById(`cname-${id}`);
                 if (nameEl && !nameEl.value) nameEl.value = saved;
+                setTimeout(() => { const t = document.getElementById(`ctext-${id}`); if (t) t.focus(); }, 50);
             }
         }
 
         async function loadComments(id) {
-            commentLoadedSet.add(id);
             const listEl = document.getElementById(`comment-list-${id}`);
             if (!listEl) return;
+
+            // Gebruik cache als die nog vers is (voorkomt herlaad bij stem/filter)
+            const cached = commentCache[id];
+            if (cached && (Date.now() - cached.ts) < CACHE_TTL_MS) {
+                renderComments(id, cached.docs, false);
+                updateCommentBtn(id, cached.docs.length);
+                return;
+            }
+
             try {
                 const snap = await db.collection(COLLECTION).doc(id)
-                    .collection('comments')
-                    .orderBy('timestamp', 'asc')
-                    .get();
-                listEl._allDocs = snap.docs;
+                    .collection('comments').orderBy('timestamp', 'asc').get();
+                commentCache[id] = { docs: snap.docs, ts: Date.now() };
                 renderComments(id, snap.docs, false);
-                // Teller op toggle-knop
-                const btn = document.getElementById(`ctoggle-${id}`);
-                if (btn && snap.size > 0) btn.textContent = `💬 ${snap.size}`;
+                updateCommentBtn(id, snap.size);
             } catch (e) {
                 if (listEl) listEl.innerHTML = '<div class="comment-empty">Reacties konden niet worden geladen.</div>';
             }
+        }
+
+        function updateCommentBtn(id, count) {
+            const btn = document.getElementById(`ctoggle-${id}`);
+            if (btn) btn.textContent = count > 0 ? `💬 ${count}` : '💬';
         }
 
         function renderComments(id, docs, showAll) {
@@ -1503,8 +1513,8 @@
                 });
                 localStorage.setItem('comment_name', name);
                 textEl.value = '';
-                // Herlaad reacties
-                commentLoadedSet.delete(id);
+                // Cache wissen zodat de nieuwe reactie meteen verschijnt
+                delete commentCache[id];
                 await loadComments(id);
             } catch (e) {
                 if (msgEl) msgEl.textContent = 'Plaatsen mislukt, probeer opnieuw.';
@@ -1624,6 +1634,7 @@
 
             filtered.forEach(({ id, data }) => {
                 wall.appendChild(buildCard(id, data, id === topId));
+                loadComments(id);   // altijd zichtbaar — gebruikt cache bij herrender
             });
         }
 
