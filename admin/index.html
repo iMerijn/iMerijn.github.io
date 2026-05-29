@@ -11,6 +11,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+    <!-- Cloudinary config (gegenereerd door CI, zelfde als klantparels) -->
+    <script src="/klantparels/config.js"></script>
+
     <style>
         :root {
             --bg:       #ffffff;
@@ -352,6 +355,120 @@
         }
 
         .btn-danger:hover { background: var(--red); color: #fff; }
+
+        .btn-edit {
+            padding: 7px 16px;
+            font-size: 0.88rem;
+            background: none;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .btn-edit:hover { background: var(--accent); color: #fff; }
+        .btn-edit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Edit modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .edit-modal {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 24px 32px;
+            width: 100%;
+            max-width: 540px;
+            position: relative;
+            max-height: 88vh;
+            overflow-y: auto;
+            margin: auto;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 14px; right: 16px;
+            background: none; border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--muted);
+            line-height: 1;
+        }
+
+        .modal-close-btn:hover { color: var(--text); }
+
+        .edit-field { margin-bottom: 16px; }
+
+        .edit-field label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .edit-field input,
+        .edit-field textarea,
+        .edit-field select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+
+        .edit-field textarea { min-height: 80px; resize: vertical; }
+
+        .edit-field input:focus,
+        .edit-field textarea:focus,
+        .edit-field select:focus { outline: none; border-color: var(--accent); }
+
+        .btn-cancel {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            background: none;
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-cancel:hover { opacity: 0.7; }
+
+        .edit-msg {
+            padding: 10px 13px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            margin-bottom: 14px;
+            display: none;
+        }
+
+        .edit-msg.success { background: #d4edda; color: #155724; }
+        .edit-msg.error   { background: #f8d7da; color: #721c24; }
+
+        [data-theme="dark"] .edit-msg.success { background: #1a3a22; color: #86efac; }
+        [data-theme="dark"] .edit-msg.error   { background: #3a1a1c; color: #fca5a5; }
     </style>
 </head>
 <body>
@@ -432,6 +549,63 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- ── Bewerk Klantparel modal ── -->
+    <div class="modal-overlay" id="edit-modal" onclick="onEditOverlayClick(event)">
+        <div class="edit-modal" id="edit-modal-inner">
+            <button class="modal-close-btn" onclick="closeEditModal()">✕</button>
+            <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:22px">✏️ Klantparel bewerken</h2>
+
+            <div class="edit-field">
+                <label>Quote <span style="color:#e74c3c">*</span></label>
+                <textarea id="edit-quote" placeholder="Wat zei de klant?"></textarea>
+            </div>
+            <div class="edit-field">
+                <label>Product</label>
+                <input type="text" id="edit-customer" placeholder="bijv. Zwembad liner">
+            </div>
+            <div class="edit-field">
+                <label>Categorie</label>
+                <select id="edit-category">
+                    <option value="">— Geen categorie —</option>
+                    <option value="sport">Sport</option>
+                    <option value="trampolines">Trampolines</option>
+                    <option value="zwembaden">Zwembaden</option>
+                    <option value="speeltoestellen">Speeltoestellen</option>
+                    <option value="skelters">Skelters</option>
+                    <option value="onderdelen">Onderdelen</option>
+                </select>
+            </div>
+            <div class="edit-field">
+                <label>Datum</label>
+                <input type="date" id="edit-date">
+            </div>
+            <div class="edit-field">
+                <label>Afbeelding / Video</label>
+                <div id="edit-current-media" style="margin-bottom:10px;min-height:24px"></div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+                    <button class="btn-edit" onclick="document.getElementById('edit-media-input').click()">📂 Vervangen</button>
+                    <button class="btn-delete" id="edit-remove-btn" onclick="editRemoveMedia()">✕ Verwijderen</button>
+                </div>
+                <input type="file" id="edit-media-input" accept="image/*,video/*" style="display:none" onchange="onEditMediaSelected(event)">
+                <div id="edit-new-preview" style="display:none;margin-top:6px">
+                    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:4px" id="edit-new-filename"></div>
+                    <img   id="edit-new-img"   style="max-height:80px;border-radius:6px;display:none;max-width:100%">
+                    <video id="edit-new-video" style="max-height:80px;border-radius:6px;display:none;max-width:100%" muted playsinline></video>
+                </div>
+                <div id="edit-upload-wrap" style="display:none;height:4px;background:var(--border);border-radius:4px;margin-top:8px;overflow:hidden">
+                    <div id="edit-upload-bar" style="height:100%;background:var(--accent);width:0%;transition:width 0.2s"></div>
+                </div>
+            </div>
+
+            <div class="edit-msg" id="edit-msg"></div>
+
+            <div style="display:flex;gap:10px">
+                <button class="btn-primary" id="edit-save-btn" onclick="saveEdit()">Opslaan</button>
+                <button class="btn-cancel" onclick="closeEditModal()">Annuleren</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -703,10 +877,16 @@
             alert('✓ Stemmen van Quotes gereset.');
         }
 
+        // ── ESC sluit edit-modal ──────────────────────────────────────────────
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeEditModal();
+        });
+
         // ════════════════════════════════════════════════════════════════════
         // KLANTPARELS
         // ════════════════════════════════════════════════════════════════════
         let kpUnsubscribe = null;
+        let kpDocsMap     = {};   // id → data
 
         function loadKlantparels() {
             if (kpUnsubscribe) kpUnsubscribe();
@@ -725,19 +905,29 @@
                     }
 
                     listEl.innerHTML = '';
+                    kpDocsMap = {};
+
                     snapshot.forEach(doc => {
                         const d = doc.data();
-                        const date = d.timestamp ? new Date(d.timestamp.toDate()).toLocaleString('nl-NL') : '—';
+                        kpDocsMap[doc.id] = d;   // opslaan voor edit-modal
+
+                        const date  = d.timestamp ? d.timestamp.toDate().toLocaleDateString('nl-NL') : '—';
                         const votes = d.votes || 0;
 
+                        const CATEGORY_LABELS = { sport:'Sport', trampolines:'Trampolines', zwembaden:'Zwembaden',
+                            speeltoestellen:'Speeltoestellen', skelters:'Skelters', onderdelen:'Onderdelen' };
+
                         const thumb = d.imageUrl
-                            ? `<img class="item-thumb" src="${escHtml(d.imageUrl)}" alt="">`
+                            ? (d.mediaType === 'video'
+                                ? `<video class="item-thumb" src="${escHtml(d.imageUrl)}" muted></video>`
+                                : `<img   class="item-thumb" src="${escHtml(d.imageUrl)}" alt="">`)
                             : '';
 
                         const tags = [
-                            d.customerName ? `🏷️ ${escHtml(d.customerName)}` : null,
-                            votes > 0 ? `⭐ ${votes} stem${votes !== 1 ? 'men' : ''}` : null,
-                            date,
+                            d.customerName ? `🏷️ ${escHtml(d.customerName)}`          : null,
+                            d.category     ? `📦 ${CATEGORY_LABELS[d.category] || escHtml(d.category)}` : null,
+                            votes > 0      ? `⭐ ${votes} stem${votes !== 1 ? 'men' : ''}` : null,
+                            `📅 ${date}`,
                         ].filter(Boolean).map(t => `<span class="meta-tag">${t}</span>`).join('');
 
                         const card = document.createElement('div');
@@ -748,6 +938,7 @@
                             <p class="quote-text">"${escHtml(d.quote)}"</p>
                             <div class="item-meta">${tags}</div>
                             <div class="item-actions">
+                                <button class="btn-edit"   onclick="openEditModal('${doc.id}')">✏️ Bewerken</button>
                                 <button class="btn-delete" onclick="deleteKlantparel('${doc.id}')">🗑 Verwijderen</button>
                             </div>
                             <div class="card-status" id="kpstatus-${doc.id}"></div>`;
@@ -774,6 +965,190 @@
                 status.className = 'card-status err';
                 if (btn) btn.disabled = false;
             }
+        }
+
+        // ── Edit modal ────────────────────────────────────────────────────────
+        let editDocId        = null;
+        let editMediaState   = 'keep';   // 'keep' | 'remove' | 'replace'
+        let editSelectedFile = null;
+        let editIsVideo      = false;
+
+        function openEditModal(id) {
+            const d = kpDocsMap[id];
+            if (!d) return;
+            editDocId      = id;
+            editMediaState = 'keep';
+            editSelectedFile = null;
+            editIsVideo      = false;
+
+            document.getElementById('edit-quote').value    = d.quote        || '';
+            document.getElementById('edit-customer').value = d.customerName || '';
+            document.getElementById('edit-category').value = d.category     || '';
+
+            const dateInput = document.getElementById('edit-date');
+            dateInput.max   = new Date().toISOString().split('T')[0];
+            dateInput.value = d.timestamp
+                ? d.timestamp.toDate().toISOString().split('T')[0]
+                : '';
+
+            refreshEditMediaPreview(d);
+
+            document.getElementById('edit-new-preview').style.display    = 'none';
+            document.getElementById('edit-media-input').value            = '';
+            document.getElementById('edit-upload-wrap').style.display    = 'none';
+            document.getElementById('edit-upload-bar').style.width       = '0%';
+            const msgEl = document.getElementById('edit-msg');
+            msgEl.className = 'edit-msg';
+            msgEl.style.display = 'none';
+
+            const saveBtn = document.getElementById('edit-save-btn');
+            saveBtn.disabled    = false;
+            saveBtn.textContent = 'Opslaan';
+
+            document.getElementById('edit-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function refreshEditMediaPreview(d) {
+            const el = document.getElementById('edit-current-media');
+            if (editMediaState === 'remove') {
+                el.innerHTML = '<span style="font-size:0.85rem;color:var(--muted)">Geen media (verwijderd)</span>';
+                return;
+            }
+            if (d && d.imageUrl) {
+                el.innerHTML = d.mediaType === 'video'
+                    ? `<video src="${escHtml(d.imageUrl)}" muted style="max-height:80px;border-radius:6px;max-width:100%"></video>`
+                    : `<img   src="${escHtml(d.imageUrl)}" style="max-height:80px;border-radius:6px;max-width:100%">`;
+            } else {
+                el.innerHTML = '<span style="font-size:0.85rem;color:var(--muted)">Geen media</span>';
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.remove('open');
+            document.body.style.overflow = '';
+            editDocId = null;
+        }
+
+        function onEditOverlayClick(e) {
+            if (e.target === document.getElementById('edit-modal')) closeEditModal();
+        }
+
+        function editRemoveMedia() {
+            editMediaState   = 'remove';
+            editSelectedFile = null;
+            document.getElementById('edit-new-preview').style.display = 'none';
+            document.getElementById('edit-media-input').value         = '';
+            refreshEditMediaPreview(kpDocsMap[editDocId]);
+        }
+
+        function onEditMediaSelected(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const isVideo = file.type.startsWith('video/');
+            const maxMB   = isVideo ? 50 : 10;
+            if (file.size > maxMB * 1024 * 1024) {
+                alert(`Bestand te groot (max ${maxMB} MB).`);
+                return;
+            }
+            editSelectedFile = file;
+            editIsVideo      = isVideo;
+            editMediaState   = 'replace';
+
+            const imgEl  = document.getElementById('edit-new-img');
+            const vidEl  = document.getElementById('edit-new-video');
+            document.getElementById('edit-new-filename').textContent = file.name;
+
+            if (isVideo) {
+                imgEl.style.display = 'none';
+                vidEl.style.display = 'block';
+                vidEl.src = URL.createObjectURL(file);
+            } else {
+                vidEl.style.display = 'none';
+                imgEl.style.display = 'block';
+                const reader = new FileReader();
+                reader.onload = ev => { imgEl.src = ev.target.result; };
+                reader.readAsDataURL(file);
+            }
+            document.getElementById('edit-new-preview').style.display = 'block';
+        }
+
+        async function uploadEditMedia(file) {
+            const bar  = document.getElementById('edit-upload-bar');
+            const wrap = document.getElementById('edit-upload-wrap');
+            wrap.style.display = 'block';
+            bar.style.width    = '10%';
+
+            const type = file.type.startsWith('video/') ? 'video' : 'image';
+            const url  = `https://api.cloudinary.com/v1_1/${CONFIG.cloudinaryCloudName}/${type}/upload`;
+            const fd   = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', CONFIG.cloudinaryUploadPreset);
+
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', url);
+                xhr.upload.onprogress = e => {
+                    if (e.lengthComputable) bar.style.width = Math.round(e.loaded / e.total * 90) + '%';
+                };
+                xhr.onload = () => {
+                    bar.style.width = '100%';
+                    xhr.status === 200
+                        ? resolve(JSON.parse(xhr.responseText).secure_url)
+                        : reject(new Error('Upload mislukt'));
+                };
+                xhr.onerror = () => reject(new Error('Upload mislukt'));
+                xhr.send(fd);
+            });
+        }
+
+        async function saveEdit() {
+            if (!editDocId) return;
+            const quote = document.getElementById('edit-quote').value.trim();
+            if (!quote) { showEditMsg('Vul een quote in.', 'error'); return; }
+
+            const saveBtn = document.getElementById('edit-save-btn');
+            saveBtn.disabled    = true;
+            saveBtn.textContent = 'Bezig…';
+
+            try {
+                const DEL = firebase.firestore.FieldValue.delete();
+                const updates = { quote };
+
+                const customer = document.getElementById('edit-customer').value.trim();
+                updates.customerName = customer || DEL;
+
+                const category = document.getElementById('edit-category').value;
+                updates.category = category || DEL;
+
+                const dateVal = document.getElementById('edit-date').value;
+                if (dateVal) updates.timestamp =
+                    firebase.firestore.Timestamp.fromDate(new Date(dateVal + 'T12:00:00'));
+
+                if (editMediaState === 'remove') {
+                    updates.imageUrl  = DEL;
+                    updates.mediaType = DEL;
+                } else if (editMediaState === 'replace' && editSelectedFile) {
+                    saveBtn.textContent = editIsVideo ? 'Video uploaden…' : 'Foto uploaden…';
+                    updates.imageUrl  = await uploadEditMedia(editSelectedFile);
+                    updates.mediaType = editIsVideo ? 'video' : 'image';
+                }
+
+                await fsdb.collection(KP_COLLECTION).doc(editDocId).update(updates);
+                showEditMsg('✓ Wijzigingen opgeslagen', 'success');
+                setTimeout(closeEditModal, 1200);
+            } catch (e) {
+                showEditMsg('Opslaan mislukt: ' + e.message, 'error');
+                saveBtn.disabled    = false;
+                saveBtn.textContent = 'Opslaan';
+            }
+        }
+
+        function showEditMsg(text, type) {
+            const el = document.getElementById('edit-msg');
+            el.textContent  = text;
+            el.className    = 'edit-msg ' + type;
+            el.style.display = 'block';
         }
 
         async function resetKlantparelsVotes() {
