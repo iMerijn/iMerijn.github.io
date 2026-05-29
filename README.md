@@ -28,6 +28,7 @@ Wat kunnen onze klanten zeggen. Echt waar. Bekijk de hele collectie op de Klantp
 ### Beheer
 Ben je een admin? Log in via doetdednssechetnogwel.nl/admin met je GitHub Personal Access Token. Daar kun je:
 - Klantparels verwijderen of bewerken (tekst, categorie, datum, foto/video)
+- Gezichten automatisch blurren: per klantparel aan/uit te zetten. Cloudinary detecteert gezichten en blurt ze automatisch. Werkt het best bij duidelijke frontale gezichten.
 - Reacties per klantparel bekijken en verwijderen
 - Alle stemmen in één keer resetten
 - Ingediende quotes voor de Quotes-pagina goedkeuren of afwijzen
