@@ -1595,6 +1595,9 @@
 
             // 1 — Periode filteren
             let filtered = allDocs.filter(({ data }) => {
+                // Verberg inactieve inzendingen (ontbrekend veld = actief)
+                if (data.active === false) return false;
+
                 if (filterState.period !== 'all') {
                     const ms     = data.timestamp ? data.timestamp.toMillis() : 0;
                     const cutoff = now - (filterState.period === 'week' ? WEEK : MONTH);

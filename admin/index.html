@@ -408,6 +408,47 @@
 
         .btn-comment-delete:hover { color: var(--red); }
 
+        .btn-active {
+            padding: 7px 16px;
+            font-size: 0.88rem;
+            background: none;
+            color: var(--green);
+            border: 2px solid var(--green);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .btn-active.inactive {
+            color: var(--muted);
+            border-color: var(--border);
+        }
+
+        .btn-active:hover    { background: var(--green); color: #fff; }
+        .btn-active.inactive:hover { background: var(--border); color: var(--text); }
+        .btn-active:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .item-card.inactive {
+            opacity: 0.5;
+            border-style: dashed;
+        }
+
+        .inactive-badge {
+            display: inline-block;
+            background: var(--border);
+            color: var(--muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
         .btn-blur {
             padding: 7px 16px;
             font-size: 0.88rem;
@@ -1004,15 +1045,20 @@
                             `📅 ${date}`,
                         ].filter(Boolean).map(t => `<span class="meta-tag">${t}</span>`).join('');
 
+                        const isActive = d.active !== false;   // ontbrekend veld = actief
                         const card = document.createElement('div');
-                        card.className = 'item-card';
+                        card.className = `item-card${isActive ? '' : ' inactive'}`;
                         card.id = `kpcard-${doc.id}`;
                         card.innerHTML = `
                             ${thumb}
-                            <p class="quote-text">"${escHtml(d.quote)}"</p>
+                            <p class="quote-text">"${escHtml(d.quote)}"${isActive ? '' : '<span class="inactive-badge">Inactief</span>'}</p>
                             <div class="item-meta">${tags}</div>
                             <div class="item-actions">
                                 <button class="btn-edit"   onclick="openEditModal('${doc.id}')">✏️ Bewerken</button>
+                                <button class="btn-active ${isActive ? '' : 'inactive'}" id="kp-active-${doc.id}"
+                                        onclick="toggleActive('${doc.id}', ${isActive})">
+                                    ${isActive ? '✓ Actief' : '⏸ Inactief'}
+                                </button>
                                 <button class="btn-blur ${d.blurFaces ? 'on' : ''}" id="kp-blur-${doc.id}"
                                         onclick="toggleBlurFaces('${doc.id}', ${!!d.blurFaces})">
                                     👁 Blur: ${d.blurFaces ? 'aan' : 'uit'}
@@ -1087,6 +1133,35 @@
             if (titleEl) titleEl.textContent = remaining > 0
                 ? `💬 ${remaining} reactie${remaining !== 1 ? 's' : ''}`
                 : '💬 Geen reacties';
+        }
+
+        async function toggleActive(id, currentState) {
+            const newState = !currentState;
+            const btn  = document.getElementById(`kp-active-${id}`);
+            const card = document.getElementById(`kpcard-${id}`);
+            if (btn) btn.disabled = true;
+            try {
+                await fsdb.collection(KP_COLLECTION).doc(id).update({ active: newState });
+                if (kpDocsMap[id]) kpDocsMap[id].active = newState;
+                if (btn) {
+                    btn.textContent = newState ? '✓ Actief' : '⏸ Inactief';
+                    btn.classList.toggle('inactive', !newState);
+                    btn.disabled = false;
+                    btn.onclick = () => toggleActive(id, newState);
+                }
+                if (card) {
+                    card.classList.toggle('inactive', !newState);
+                    const quoteEl = card.querySelector('.quote-text');
+                    if (quoteEl) {
+                        const badge = quoteEl.querySelector('.inactive-badge');
+                        if (newState && badge)  badge.remove();
+                        if (!newState && !badge) quoteEl.insertAdjacentHTML('beforeend', '<span class="inactive-badge">Inactief</span>');
+                    }
+                }
+            } catch (e) {
+                alert('Bijwerken mislukt: ' + e.message);
+                if (btn) btn.disabled = false;
+            }
         }
 
         async function toggleBlurFaces(id, currentState) {
