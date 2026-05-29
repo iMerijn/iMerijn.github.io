@@ -889,8 +889,8 @@
     <div class="filter-bar" id="filter-bar">
         <div class="filter-group">
             <span class="filter-label">Sortering</span>
-            <button class="chip active" id="chip-sort-votes"   onclick="setFilter('sort','votes')">⭐ Stemmen</button>
-            <button class="chip"        id="chip-sort-newest"  onclick="setFilter('sort','newest')">🕐 Nieuwste</button>
+            <button class="chip"        id="chip-sort-votes"   onclick="setFilter('sort','votes')">⭐ Stemmen</button>
+            <button class="chip active" id="chip-sort-newest"  onclick="setFilter('sort','newest')">🕐 Nieuwste</button>
             <button class="chip"        id="chip-sort-oldest"  onclick="setFilter('sort','oldest')">📅 Oudste</button>
         </div>
 
@@ -1026,7 +1026,7 @@
         let isVideoFile = false;
         let unsubscribe = null;
         let allDocs = [];
-        let filterState = { sort: 'votes', type: 'all', period: 'all', category: 'all' };
+        let filterState = { sort: 'newest', type: 'all', period: 'all', category: 'all' };
 
         // ── Theme ──────────────────────────────────────────────────────────────
         (function initTheme() {
