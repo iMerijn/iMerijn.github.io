@@ -145,6 +145,79 @@
             box-shadow: 0 6px 20px rgba(100,100,220,0.4);
         }
 
+        /* ── Filter bar ── */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 20px;
+            padding: 0 20px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-right: 2px;
+        }
+
+        .chip {
+            background: none;
+            border: 1.5px solid var(--border);
+            color: var(--text-muted);
+            padding: 4px 11px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+            white-space: nowrap;
+            line-height: 1.5;
+        }
+
+        .chip:hover { border-color: var(--text); color: var(--text); }
+
+        .chip.active {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+            font-weight: 600;
+        }
+
+        .filter-sep {
+            width: 1px;
+            height: 22px;
+            background: var(--border);
+            flex-shrink: 0;
+        }
+
+        .filter-count {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 11px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .filter-sep { display: none; }
+            .filter-bar  { gap: 10px 14px; }
+        }
+
         /* ── Masonry grid ── */
         .wall {
             columns: 280px;
@@ -687,6 +760,37 @@
         </button>
     </section>
 
+    <!-- Filter bar -->
+    <div class="filter-bar" id="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">Sortering</span>
+            <button class="chip active" id="chip-sort-votes"   onclick="setFilter('sort','votes')">⭐ Stemmen</button>
+            <button class="chip"        id="chip-sort-newest"  onclick="setFilter('sort','newest')">🕐 Nieuwste</button>
+            <button class="chip"        id="chip-sort-oldest"  onclick="setFilter('sort','oldest')">📅 Oudste</button>
+        </div>
+
+        <div class="filter-sep"></div>
+
+        <div class="filter-group">
+            <span class="filter-label">Type</span>
+            <button class="chip active" id="chip-type-all"   onclick="setFilter('type','all')">Alles</button>
+            <button class="chip"        id="chip-type-photo" onclick="setFilter('type','photo')">📷 Foto</button>
+            <button class="chip"        id="chip-type-video" onclick="setFilter('type','video')">🎬 Video</button>
+            <button class="chip"        id="chip-type-text"  onclick="setFilter('type','text')">💬 Tekst</button>
+        </div>
+
+        <div class="filter-sep"></div>
+
+        <div class="filter-group">
+            <span class="filter-label">Periode</span>
+            <button class="chip active" id="chip-period-all"   onclick="setFilter('period','all')">Altijd</button>
+            <button class="chip"        id="chip-period-week"  onclick="setFilter('period','week')">Deze week</button>
+            <button class="chip"        id="chip-period-month" onclick="setFilter('period','month')">Deze maand</button>
+        </div>
+
+        <span class="filter-count" id="filter-count" style="display:none"></span>
+    </div>
+
     <!-- Wall -->
     <main class="wall" id="wall">
         <div class="loading-state">Laden...</div>
@@ -763,6 +867,8 @@
         let uploadedImageUrl = null;
         let isVideoFile = false;
         let unsubscribe = null;
+        let allDocs = [];
+        let filterState = { sort: 'votes', type: 'all', period: 'all' };
 
         // ── Theme ──────────────────────────────────────────────────────────────
         (function initTheme() {
@@ -1139,45 +1245,93 @@
             }
         }
 
+        // ── Filters ────────────────────────────────────────────────────────────
+        function setFilter(key, val) {
+            filterState[key] = val;
+
+            // Activeer de juiste chip in de groep
+            document.querySelectorAll(`[id^="chip-${key}-"]`).forEach(btn => {
+                btn.classList.toggle('active', btn.id === `chip-${key}-${val}`);
+            });
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const wall  = document.getElementById('wall');
+            const now   = Date.now();
+            const WEEK  = 7  * 24 * 60 * 60 * 1000;
+            const MONTH = 30 * 24 * 60 * 60 * 1000;
+
+            // 1 — Periode filteren
+            let filtered = allDocs.filter(({ data }) => {
+                if (filterState.period !== 'all') {
+                    const ms     = data.timestamp ? data.timestamp.toMillis() : 0;
+                    const cutoff = now - (filterState.period === 'week' ? WEEK : MONTH);
+                    if (ms < cutoff) return false;
+                }
+                // 2 — Type filteren
+                if (filterState.type === 'photo') return !!data.imageUrl && data.mediaType !== 'video';
+                if (filterState.type === 'video') return data.mediaType === 'video';
+                if (filterState.type === 'text')  return !data.imageUrl;
+                return true;
+            });
+
+            // 3 — Sorteren
+            filtered.sort((a, b) => {
+                const ta = a.data.timestamp ? a.data.timestamp.toMillis() : 0;
+                const tb = b.data.timestamp ? b.data.timestamp.toMillis() : 0;
+                if (filterState.sort === 'newest') return tb - ta;
+                if (filterState.sort === 'oldest') return ta - tb;
+                // votes: meeste stemmen eerst, dan nieuwste
+                const vd = (b.data.votes || 0) - (a.data.votes || 0);
+                return vd !== 0 ? vd : tb - ta;
+            });
+
+            // 4 — GOAT alleen bij stemmen-sortering
+            const topId = filterState.sort === 'votes'
+                && filtered.length > 0
+                && (filtered[0].data.votes || 0) > 0
+                ? filtered[0].id : null;
+
+            // 5 — Teller tonen als er gefilterd wordt
+            const countEl = document.getElementById('filter-count');
+            const isFiltered = filterState.type !== 'all' || filterState.period !== 'all';
+            if (isFiltered && allDocs.length > 0) {
+                countEl.textContent = `${filtered.length} van ${allDocs.length}`;
+                countEl.style.display = 'inline';
+            } else {
+                countEl.style.display = 'none';
+            }
+
+            // 6 — Wall renderen
+            wall.innerHTML = '';
+            if (filtered.length === 0) {
+                const msg = allDocs.length === 0
+                    ? 'Nog geen quotes. Voeg de eerste toe!'
+                    : 'Geen quotes gevonden voor deze filters.';
+                wall.innerHTML = `<div class="empty-state"><p>${msg}</p></div>`;
+                return;
+            }
+
+            filtered.forEach(({ id, data }) => {
+                wall.appendChild(buildCard(id, data, id === topId));
+            });
+        }
+
         // ── Live wall ──────────────────────────────────────────────────────────
         function startWall() {
-            const wall = document.getElementById('wall');
-
             const query = db.collection(COLLECTION)
                 .orderBy('timestamp', 'desc')
                 .limit(200);
 
             unsubscribe = query.onSnapshot(snapshot => {
-                wall.innerHTML = '';
-
-                if (snapshot.empty) {
-                    wall.innerHTML = `<div class="empty-state">
-                        <span class="empty-emoji">💭</span>
-                        <p>Nog geen quotes. Voeg de eerste toe!</p>
-                    </div>`;
-                    return;
-                }
-
-                // Sorteer op stemmen (desc), dan timestamp (desc)
-                const docs = [];
-                snapshot.forEach(doc => docs.push({ id: doc.id, data: doc.data() }));
-                docs.sort((a, b) => {
-                    const vDiff = (b.data.votes || 0) - (a.data.votes || 0);
-                    if (vDiff !== 0) return vDiff;
-                    const ta = a.data.timestamp ? a.data.timestamp.toMillis() : 0;
-                    const tb = b.data.timestamp ? b.data.timestamp.toMillis() : 0;
-                    return tb - ta;
-                });
-
-                const topId = (docs[0].data.votes || 0) > 0 ? docs[0].id : null;
-
-                docs.forEach(({ id, data }) => {
-                    const card = buildCard(id, data, id === topId);
-                    wall.appendChild(card);
-                });
+                allDocs = [];
+                snapshot.forEach(doc => allDocs.push({ id: doc.id, data: doc.data() }));
+                applyFilters();
             }, err => {
                 console.error(err);
-                wall.innerHTML = `<div class="empty-state">
+                document.getElementById('wall').innerHTML = `<div class="empty-state">
                     <span class="empty-emoji">⚠️</span>
                     <p>Kon quotes niet laden. Probeer de pagina te vernieuwen.</p>
                 </div>`;
