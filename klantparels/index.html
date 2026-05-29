@@ -1288,11 +1288,12 @@
                 return vd !== 0 ? vd : tb - ta;
             });
 
-            // 4 — GOAT alleen bij stemmen-sortering
-            const topId = filterState.sort === 'votes'
-                && filtered.length > 0
-                && (filtered[0].data.votes || 0) > 0
-                ? filtered[0].id : null;
+            // 4 — GOAT = altijd de globale stemmen-winnaar over ALLE docs
+            //     (niet alleen de gefilterde set, zodat de rand blijft bij filters)
+            const globalTop = allDocs.reduce((best, cur) =>
+                (cur.data.votes || 0) > (best ? (best.data.votes || 0) : -1) ? cur : best
+            , null);
+            const topId = globalTop && (globalTop.data.votes || 0) > 0 ? globalTop.id : null;
 
             // 5 — Teller tonen als er gefilterd wordt
             const countEl = document.getElementById('filter-count');
