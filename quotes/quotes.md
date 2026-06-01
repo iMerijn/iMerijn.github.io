@@ -153,3 +153,7 @@ Een klant krijgt zowel pakketten vanuit PostNL als vanuit DPD, dat kan toch niet
 ---
 
 Mijn stagiair zal om 16.00 bier halen
+
+---
+
+Waarom hebben jullie nog geen onbeperkt dan? Weet je wat dat kost? dat is voor de gewone mens niet weggelegd.
