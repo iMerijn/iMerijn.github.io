@@ -669,6 +669,32 @@
         .upload-icon { font-size: 1.6rem; display: block; margin-bottom: 6px; }
         .upload-label { font-size: 0.85rem; color: var(--text-muted); pointer-events: none; }
 
+        /* "Gezicht in beeld?"-vinkje — alleen zichtbaar als er media is gekozen */
+        /* .field-specificiteit overrulen zodat het geen label-look (uppercase/grijs) krijgt */
+        .field label.face-check {
+            display: none;
+            align-items: flex-start;
+            gap: 9px;
+            margin: 12px 0 0;
+            font-size: 0.88rem;
+            font-weight: 500;
+            line-height: 1.35;
+            letter-spacing: normal;
+            text-transform: none;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .field label.face-check.show { display: flex; }
+        .face-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin: 1px 0 0;
+            flex: 0 0 auto;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+        .face-check-hint { color: var(--text-muted); }
+
         .photo-preview {
             margin-top: 10px;
             display: none;
@@ -997,6 +1023,10 @@
                     <video id="video-preview-el" src="" muted playsinline style="display:none"></video>
                     <button class="photo-preview-remove" onclick="removePhoto()" title="Verwijderen">✕</button>
                 </div>
+                <label class="face-check" id="face-check">
+                    <input type="checkbox" id="input-face-visible">
+                    <span>Staat er een gezicht in beeld? <span class="face-check-hint">Dan worden gezichten automatisch geblurd.</span></span>
+                </label>
             </div>
 
             <div class="form-msg" id="form-msg"></div>
@@ -1198,6 +1228,7 @@
 
             document.getElementById('photo-preview').style.display = 'block';
             document.getElementById('upload-label').textContent    = file.name;
+            document.getElementById('face-check').classList.add('show');
         }
 
         function removePhoto() {
@@ -1216,6 +1247,8 @@
             document.getElementById('upload-label').textContent  = 'Klik om een foto of video te kiezen';
             document.getElementById('upload-progress').style.display = 'none';
             document.getElementById('upload-progress-bar').style.width = '0%';
+            document.getElementById('face-check').classList.remove('show');
+            document.getElementById('input-face-visible').checked = false;
         }
 
         async function uploadToCloudinary(file) {
@@ -1291,6 +1324,11 @@
                 if (imageUrl) {
                     doc.imageUrl   = imageUrl;
                     doc.mediaType  = isVideoFile ? 'video' : 'image';
+                    // Indiener gaf aan dat er een gezicht in beeld staat → blur meteen aan.
+                    // Admin kan dit later alsnog uitzetten in het beheerpaneel.
+                    if (document.getElementById('input-face-visible').checked) {
+                        doc.blurFaces = true;
+                    }
                 }
 
                 await db.collection(COLLECTION).add(doc);
