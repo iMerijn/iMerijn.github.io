@@ -169,3 +169,7 @@ Ja welke vorm van autisme dit is???
 ---
 
 "wat snel" - Dat hoor ik vaker
+
+---
+
+Ik kan niet even een houdini zetten
