@@ -165,3 +165,7 @@ Spannend, heren!
 ---
 
 Ja welke vorm van autisme dit is???
+
+---
+
+"wat snel" - Dat hoor ik vaker
