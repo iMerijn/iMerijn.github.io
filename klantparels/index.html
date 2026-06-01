@@ -358,6 +358,9 @@
 
         .card.top-voted { box-shadow: 0 4px 20px rgba(241,196,15,0.35), 0 0 0 2px #f1c40f; }
 
+        /* Subtiele groene rand voor klantparels die in de afgelopen 24 uur zijn toegevoegd */
+        .card.is-new { box-shadow: 0 4px 18px var(--shadow), 0 0 0 2px rgba(46,204,113,0.6); }
+
         /* ── Vote button ── */
         .card-actions {
             display: flex;
@@ -1358,6 +1361,13 @@
             return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
+        // True als de klantparel in de afgelopen 24 uur is toegevoegd
+        function isAddedWithin24h(ts) {
+            if (!ts) return false;
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return (Date.now() - d.getTime()) < 24 * 60 * 60 * 1000;
+        }
+
         function escapeHtml(str) {
             return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
                       .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -1376,7 +1386,8 @@
             const hasMedia  = !!data.imageUrl;
             const isVideo   = data.mediaType === 'video';
             const cardClass = hasMedia ? (isVideo ? 'has-video' : 'has-photo') : 'text-only';
-            card.className  = 'card ' + cardClass + (isTop ? ' top-voted' : '');
+            const isNew     = isAddedWithin24h(data.timestamp);
+            card.className  = 'card ' + cardClass + (isTop ? ' top-voted' : '') + (isNew ? ' is-new' : '');
             card.dataset.id = id;
 
             const customerHtml = data.customerName
