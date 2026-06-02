@@ -173,3 +173,7 @@ Ja welke vorm van autisme dit is???
 ---
 
 Ik kan niet even een houdini zetten
+
+---
+
+Kan ik net zo goed een hond nemen, die is nog loyaler ook
