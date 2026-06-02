@@ -311,6 +311,25 @@
         .card-quote::before { content: '\201C'; }
         .card-quote::after  { content: '\201D'; }
 
+        /* Vertaalknop — subtiel, onder de quote, alleen bij anderstalige parels */
+        .translate-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0 0 10px;
+            font-family: inherit;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.15s;
+        }
+        .translate-btn:hover    { color: var(--accent); }
+        .translate-btn:disabled { cursor: default; opacity: 0.7; }
+        .card-quote.is-translated { color: var(--text); }
+
         /* Text-only cards — creative accent */
         .card.text-only {
             border-radius: 8px;
@@ -1381,6 +1400,116 @@
             return url.replace('/upload/', '/upload/t_blur_faces/');
         }
 
+        // ── Vertaling ──────────────────────────────────────────────────────────
+        // Lichte client-side taalherkenning op basis van veelvoorkomende functiewoorden.
+        // Niet perfect, maar genoeg om duidelijk anderstalige parels te markeren.
+        const DUTCH_WORDS = new Set(('het een en ik je jij niet dat op te met voor maar ook ' +
+            'zijn heeft hebben heb wordt worden deze naar zou gewoon echt even nog wel waarom ' +
+            'omdat want mij mijn jou jouw onze kunnen moet mag nee daar toen uit aan hoe wij hun ' +
+            'ons niets niks ben bent eens hoor').split(' '));
+
+        const LANG_WORDS = {
+            de: ['ich','nicht','dass','und','ist','für','eine','ein','wird','wann','warum','sehr',
+                 'auch','bekomme','endlich','dieser','diese','vielleicht','sind','kann','oder',
+                 'schon','immer','weil','gibt','keine','möchte','müssen','über','wegen','jetzt',
+                 'mich','mir','dich','dir','euch','dem','wir'],
+            en: ['the','this','what','when','why','your','would','answer','please','with','that',
+                 'they','them','there','because','really','get','still','never','you','are','have',
+                 'has','my'],
+            fr: ['les','des','une','est','ne','pas','pour','quand','pourquoi','avec','très','aussi',
+                 'vous','nous','parce','votre','mais','cette'],
+            es: ['por','que','cuando','porque','con','muy','también','pero','los','las','una','uno',
+                 'usted','está'],
+            it: ['perché','molto','anche','gli','della','sono','questo','quando','perche','sei']
+        };
+
+        function detectLang(text) {
+            const words = (String(text || '').toLowerCase().match(/[a-zà-ÿ]+/g) || []);
+            const dutch = words.filter(w => DUTCH_WORDS.has(w)).length;
+            let best = null, bestScore = 0;
+            for (const [lang, list] of Object.entries(LANG_WORDS)) {
+                const set = new Set(list);
+                const score = words.filter(w => set.has(w)).length;
+                if (score > bestScore) { bestScore = score; best = lang; }
+            }
+            const hasEszett = /ß/.test(String(text || ''));
+            const nonDutch = words.length >= 3 &&
+                (hasEszett || (bestScore >= 2 && bestScore > dutch));
+            return { nonDutch, lang: hasEszett ? 'de' : best };
+        }
+
+        function looksNonDutch(text) {
+            return detectLang(text).nonDutch;
+        }
+
+        // Vertaalt naar Nederlands. Primair via Google (auto-detect), fallback MyMemory.
+        async function translateToDutch(text) {
+            try {
+                const url = 'https://translate.googleapis.com/translate_a/single' +
+                            '?client=gtx&sl=auto&tl=nl&dt=t&q=' + encodeURIComponent(text);
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    const translated = (data[0] || []).map(seg => seg[0]).join('');
+                    if (translated && translated.trim()) return translated;
+                }
+            } catch (e) { /* val terug op MyMemory */ }
+
+            const src = detectLang(text).lang || 'en';
+            const url2 = 'https://api.mymemory.translated.net/get?langpair=' +
+                         encodeURIComponent(src + '|nl') + '&q=' + encodeURIComponent(text);
+            const res2 = await fetch(url2);
+            const d2 = await res2.json();
+            const t2 = d2 && d2.responseData && d2.responseData.translatedText;
+            if (t2 && t2.trim()) return t2;
+            throw new Error('Vertaling mislukt');
+        }
+
+        const translationCache = {}; // id -> vertaalde tekst
+
+        async function toggleTranslation(id) {
+            const btn = document.getElementById('tbtn-' + id);
+            const p   = document.getElementById('quote-' + id);
+            if (!btn || !p) return;
+            const orig = p.dataset.orig != null ? p.dataset.orig : p.textContent;
+
+            // Terug naar origineel
+            if (btn.dataset.state === 'translated') {
+                p.textContent = orig;
+                p.classList.remove('is-translated');
+                btn.textContent = '🌐 Vertaal naar Nederlands';
+                btn.dataset.state = 'original';
+                return;
+            }
+
+            // Toon vertaling (uit cache indien beschikbaar)
+            if (translationCache[id]) {
+                p.textContent = translationCache[id];
+                p.classList.add('is-translated');
+                btn.textContent = '↩ Toon origineel';
+                btn.dataset.state = 'translated';
+                return;
+            }
+
+            const prevLabel = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '⏳ Vertalen…';
+            try {
+                const translated = await translateToDutch(orig);
+                translationCache[id] = translated;
+                p.textContent = translated;
+                p.classList.add('is-translated');
+                btn.textContent = '↩ Toon origineel';
+                btn.dataset.state = 'translated';
+            } catch (e) {
+                console.error(e);
+                showToast('Vertalen lukte even niet. Probeer het later opnieuw.');
+                btn.textContent = prevLabel;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
         function buildCard(id, data, isTop) {
             const card = document.createElement('div');
             const hasMedia  = !!data.imageUrl;
@@ -1410,6 +1539,12 @@
             const actionsHtml = `<div class="card-actions">${voteHtml}${commentHtml}</div>`;
             const crownHtml   = isTop ? `<div class="crown-banner">🐐 GOAT</div>` : '';
 
+            // Vertaalknop alleen tonen als de quote vermoedelijk niet-Nederlands is
+            const translateBtnHtml = looksNonDutch(data.quote)
+                ? `<button class="translate-btn" id="tbtn-${id}" data-state="original"
+                           onclick="toggleTranslation('${id}')">🌐 Vertaal naar Nederlands</button>`
+                : '';
+
             // Media-blok: klik opent lightbox
             // Pas Cloudinary blur-transformatie toe indien ingeschakeld door admin
             const origUrl  = escapeHtml(data.imageUrl || '');
@@ -1436,7 +1571,8 @@
                 ${crownHtml}
                 ${mediaHtml}
                 <div class="card-body">
-                    <p class="card-quote">${escapeHtml(data.quote)}</p>
+                    <p class="card-quote" id="quote-${id}" data-orig="${escapeHtml(data.quote)}">${escapeHtml(data.quote)}</p>
+                    ${translateBtnHtml}
                     <div class="card-meta">
                         <div class="card-meta-left">
                             ${customerHtml}
