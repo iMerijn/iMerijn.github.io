@@ -181,3 +181,8 @@ Kan ik net zo goed een hond nemen, die is nog loyaler ook
 ---
 
 helemaal viral
+
+---
+
+Hockeydames, is dat niet wat voor Sven?
+Marcel: Neeee, Sven is verliefd op AI
