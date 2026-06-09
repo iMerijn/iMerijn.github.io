@@ -186,3 +186,7 @@ helemaal viral
 
 Hockeydames, is dat niet wat voor Sven?
 Marcel: Neeee, Sven is verliefd op AI
+
+---
+
+Grote banaan? Dat ligt aan je referentiekader
