@@ -190,3 +190,7 @@ Marcel: Neeee, Sven is verliefd op AI
 ---
 
 Grote banaan? Dat ligt aan je referentiekader
+
+---
+
+Je hebt een behoorlijke achtergelaten!
