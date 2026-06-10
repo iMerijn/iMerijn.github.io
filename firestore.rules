@@ -1,0 +1,72 @@
+rules_version = '2';
+
+// Beveiligingsregels voor de klantparels-Firestore (project: dnssec-cs).
+//
+// Let op: de site gebruikt GEEN Firebase-authenticatie (de admin logt alleen
+// in met een GitHub-token, niet bij Firebase). Daarom kan schrijven/verwijderen
+// niet achter een login worden gezet zonder de publieke site én de admin te
+// breken. Deze regels beperken daarom de toegang tot precies de collectie die
+// de site gebruikt, en valideren de datavorm + maximale grootte bij het
+// aanmaken. Alles daarbuiten is dicht (standaard weigeren).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Toegestane velden op een klantparel-document.
+    function isValidQuote() {
+      return request.resource.data.keys().hasOnly(
+               ['quote', 'timestamp', 'customerName', 'category',
+                'imageUrl', 'mediaType', 'blurFaces', 'votes', 'active'])
+        && request.resource.data.quote is string
+        && request.resource.data.quote.size() > 0
+        && request.resource.data.quote.size() <= 2000
+        && request.resource.data.timestamp is timestamp
+        && (!('customerName' in request.resource.data)
+              || (request.resource.data.customerName is string
+                    && request.resource.data.customerName.size() <= 200))
+        && (!('category' in request.resource.data)
+              || (request.resource.data.category is string
+                    && request.resource.data.category.size() <= 100))
+        && (!('imageUrl' in request.resource.data)
+              || (request.resource.data.imageUrl is string
+                    && request.resource.data.imageUrl.size() <= 2000))
+        && (!('mediaType' in request.resource.data)
+              || request.resource.data.mediaType in ['image', 'video'])
+        && (!('blurFaces' in request.resource.data)
+              || request.resource.data.blurFaces is bool)
+        && (!('votes' in request.resource.data)
+              || request.resource.data.votes is number)
+        && (!('active' in request.resource.data)
+              || request.resource.data.active is bool);
+    }
+
+    // Toegestane velden op een reactie.
+    function isValidComment() {
+      return request.resource.data.keys().hasOnly(['name', 'text', 'timestamp'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000
+        && request.resource.data.timestamp is timestamp;
+    }
+
+    match /klantenservice-quotes/{quoteId} {
+      allow read: if true;
+      allow create, update: if isValidQuote();
+      allow delete: if true;
+
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isValidComment();
+        allow delete: if true;
+      }
+    }
+
+    // Al het andere expliciet dicht.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
