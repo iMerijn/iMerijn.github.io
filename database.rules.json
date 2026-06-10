@@ -1,0 +1,46 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "votes": {
+      ".read": true,
+      ".write": true,
+      "$quote": {
+        ".validate": "newData.hasChildren(['total', 'ups', 'downs'])",
+        "total": { ".validate": "newData.isNumber()" },
+        "ups":   { ".validate": "newData.isNumber() && newData.val() >= 0" },
+        "downs": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "pending_quotes": {
+      ".read": true,
+      ".write": true,
+      "$id": {
+        "text":         { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000" },
+        "submitted_at": { ".validate": "newData.isNumber()" },
+        "status":       { ".validate": "newData.isString() && newData.val().length <= 20" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "approved_quotes": {
+      ".read": true,
+      ".write": true,
+      "$id": {
+        "text":        { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000" },
+        "approved_at": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "metadata": {
+      ".read": true,
+      ".write": true,
+      "votes_reset_at": { ".validate": "newData.isNumber()" },
+      "$other": { ".validate": false }
+    }
+  }
+}
