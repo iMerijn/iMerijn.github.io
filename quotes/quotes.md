@@ -194,3 +194,7 @@ Grote banaan? Dat ligt aan je referentiekader
 ---
 
 Je hebt een behoorlijke achtergelaten!
+
+---
+
+Het is een groot larpbedrijf
