@@ -198,3 +198,7 @@ Je hebt een behoorlijke achtergelaten!
 ---
 
 Het is een groot larpbedrijf
+
+---
+
+Internet is een pijlsnel medium. Het is de kunst om bezoeker te bemoeien. Wij weten hoe.
