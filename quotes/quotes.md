@@ -202,3 +202,7 @@ Het is een groot larpbedrijf
 ---
 
 Internet is een pijlsnel medium. Het is de kunst om bezoeker te bemoeien. Wij weten hoe.
+
+---
+
+Als Product Data Automation Specialist zorg jij dat productdata als betrouwbare brandstof door deze ruggengraat stroomt.
