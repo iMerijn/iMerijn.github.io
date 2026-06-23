@@ -206,3 +206,7 @@ Internet is een pijlsnel medium. Het is de kunst om bezoeker te bemoeien. Wij we
 ---
 
 Als Product Data Automation Specialist zorg jij dat productdata als betrouwbare brandstof door deze ruggengraat stroomt.
+
+---
+
+Ik behandel mijn leerlingen straks als een soort marketplace
