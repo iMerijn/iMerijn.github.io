@@ -210,3 +210,7 @@ Als Product Data Automation Specialist zorg jij dat productdata als betrouwbare 
 ---
 
 Ik behandel mijn leerlingen straks als een soort marketplace
+
+---
+
+als ik hem er maar in kan douwen, ben ik tevreden
