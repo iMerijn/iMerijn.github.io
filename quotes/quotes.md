@@ -226,3 +226,9 @@ Dan is nu wel de tombola gestart
 ---
 
 Think before you larp
+
+---
+
+Scherp als een detective, enthousiast als een jonge hond, met het doorzettingsvermogen van een marathonloper. De mensen binnen ons team zijn zeer bijzondere karakters. Zonder uitzondering behept met een rotsvast karakter, up tot date programmeerkennis en zeer online gericht.
+
+Interesse? Stuur je cv naar info@dicode.nl of neem contact met ons op op 0570 - 750 680.
