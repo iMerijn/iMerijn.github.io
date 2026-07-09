@@ -1684,6 +1684,10 @@
                 ? `<button class="comment-more-btn" onclick="showAllComments('${id}')">
                        Meer reacties tonen (${remaining} meer)
                    </button>`
+                : showAll && docs.length > MAX_VISIBLE
+                ? `<button class="comment-more-btn" onclick="renderComments('${id}', document.getElementById('comment-list-${id}')._allDocs, false)">
+                       Reacties inklappen
+                   </button>`
                 : '';
 
             listEl.innerHTML = itemsHtml + moreHtml;
