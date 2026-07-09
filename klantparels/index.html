@@ -1656,6 +1656,7 @@
         function renderComments(id, docs, showAll) {
             const listEl = document.getElementById(`comment-list-${id}`);
             if (!listEl) return;
+            listEl._allDocs = docs;
 
             if (docs.length === 0) {
                 listEl.innerHTML = '<div class="comment-empty">Nog geen reacties. Wees de eerste!</div>';
