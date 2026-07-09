@@ -236,3 +236,7 @@ Interesse? Stuur je cv naar info@dicode.nl of neem contact met ons op op 0570 - 
 ---
 
 Customer journey
+
+---
+
+Die kerel heeft zo’n vette bek daar kan je patat in bakken
