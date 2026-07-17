@@ -240,3 +240,7 @@ Customer journey
 ---
 
 Die kerel heeft zo’n vette bek daar kan je patat in bakken
+
+---
+
+Thanks for touching base
