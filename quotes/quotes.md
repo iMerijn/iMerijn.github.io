@@ -244,3 +244,9 @@ Die kerel heeft zo’n vette bek daar kan je patat in bakken
 ---
 
 Thanks for touching base
+
+---
+
+Most tools give us another dashboard. Most agencies sell hours without owning the outcome. What makes working with Cataloops genuinely impactful is the partnership: we define our internal business KPIs and targets together, connect them in the Cataloops engine, and run a continuous system on our entire catalog from that foundation - AI-driven, with a human operator who owns the work end to end and is accountable for what changes, what works, and what doesn't. That shared accountability is what makes it work at our scale
+
+---
