@@ -281,21 +281,42 @@
         .card.has-video .video-wrap {
             overflow: hidden;
             background: #000;
-            max-height: 320px;
         }
 
         .card.has-video .video-wrap video {
             width: 100%;
-            max-height: 320px;
-            object-fit: cover;
+            max-height: 360px;
+            object-fit: contain;
             display: block;
-            cursor: pointer;
+            background: #000;
         }
 
         .card.has-video .card-body {
             border-top: none;
             background: var(--polaroid-bg);
             padding: 14px 16px 12px;
+        }
+
+        /* ── Audio card ── */
+        .card.has-audio .audio-wrap {
+            padding: 18px 16px 4px;
+            background: var(--polaroid-bg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card.has-audio .audio-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+        .card.has-audio .audio-wrap audio {
+            width: 100%;
+            display: block;
+        }
+
+        .card.has-audio .card-body {
+            border-top: none;
+            background: var(--polaroid-bg);
+            padding: 8px 16px 12px;
         }
 
 
@@ -731,6 +752,11 @@
             width: 100%;
         }
 
+        .photo-preview audio {
+            width: 100%;
+            display: block;
+        }
+
         .photo-preview-remove {
             position: absolute;
             top: 6px;
@@ -892,9 +918,8 @@
 
         .lightbox-close:hover { background: rgba(255,255,255,0.3); }
 
-        /* Klikcursor op media in kaart */
-        .card.has-photo .photo-wrap,
-        .card.has-video .video-wrap { cursor: zoom-in; }
+        /* Klikcursor op media in kaart (alleen foto opent de lightbox) */
+        .card.has-photo .photo-wrap { cursor: zoom-in; }
 
         /* ── Responsive ── */
         @media (max-width: 480px) {
@@ -949,6 +974,7 @@
             <button class="chip active" id="chip-type-all"   onclick="setFilter('type','all')">Alles</button>
             <button class="chip"        id="chip-type-photo" onclick="setFilter('type','photo')">📷 Foto</button>
             <button class="chip"        id="chip-type-video" onclick="setFilter('type','video')">🎬 Video</button>
+            <button class="chip"        id="chip-type-audio" onclick="setFilter('type','audio')">🎧 Audio</button>
             <button class="chip"        id="chip-type-text"  onclick="setFilter('type','text')">💬 Tekst</button>
         </div>
 
@@ -1031,18 +1057,19 @@
             </div>
 
             <div class="field">
-                <label>Foto of video <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
+                <label>Foto, video of audio <span style="color:var(--text-muted);font-weight:400">(optioneel)</span></label>
                 <div class="photo-upload-area" id="upload-area">
-                    <input type="file" id="input-photo" accept="image/*,video/*" onchange="onMediaSelected(event)">
+                    <input type="file" id="input-photo" accept="image/*,video/*,audio/*" onchange="onMediaSelected(event)">
                     <span class="upload-icon" id="upload-icon">📷</span>
-                    <span class="upload-label" id="upload-label">Klik om een foto of video te kiezen</span>
+                    <span class="upload-label" id="upload-label">Klik om een foto, video of audiofragment te kiezen</span>
                 </div>
                 <div class="upload-progress" id="upload-progress">
                     <div class="upload-progress-bar" id="upload-progress-bar"></div>
                 </div>
                 <div class="photo-preview" id="photo-preview">
                     <img id="photo-preview-img" src="" alt="Preview">
-                    <video id="video-preview-el" src="" muted playsinline style="display:none"></video>
+                    <video id="video-preview-el" src="" muted playsinline controls style="display:none"></video>
+                    <audio id="audio-preview-el" src="" controls style="display:none"></audio>
                     <button class="photo-preview-remove" onclick="removePhoto()" title="Verwijderen">✕</button>
                 </div>
                 <label class="face-check" id="face-check">
@@ -1075,7 +1102,7 @@
         // ── State ──────────────────────────────────────────────────────────────
         let selectedFile = null;
         let uploadedImageUrl = null;
-        let isVideoFile = false;
+        let mediaKind = null;   // 'image' | 'video' | 'audio'
         let unsubscribe = null;
         let allDocs = [];
         let filterState = { sort: 'newest', type: 'all', period: 'all', category: 'all' };
@@ -1217,8 +1244,16 @@
             if (!file) return;
 
             const isVideo = file.type.startsWith('video/');
-            const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
-            const maxLabel = isVideo ? '50 MB' : '10 MB';
+            const isAudio = file.type.startsWith('audio/');
+            const kind    = isVideo ? 'video' : (isAudio ? 'audio' : 'image');
+
+            // Grenswaarden per type
+            const limits = {
+                video: { size: 50 * 1024 * 1024, label: '50 MB', icon: '🎬' },
+                audio: { size: 20 * 1024 * 1024, label: '20 MB', icon: '🎧' },
+                image: { size: 10 * 1024 * 1024, label: '10 MB', icon: '📷' }
+            };
+            const { size: maxSize, label: maxLabel, icon } = limits[kind];
 
             if (file.size > maxSize) {
                 showFormMsg(`Bestand is te groot (max ${maxLabel}).`, 'error');
@@ -1227,36 +1262,41 @@
 
             selectedFile = file;
             uploadedImageUrl = null;
-            isVideoFile = isVideo;
+            mediaKind = kind;
 
             const imgEl   = document.getElementById('photo-preview-img');
             const videoEl = document.getElementById('video-preview-el');
+            const audioEl = document.getElementById('audio-preview-el');
 
-            if (isVideo) {
-                imgEl.style.display   = 'none';
-                imgEl.src             = '';
+            // Reset alle preview-elementen
+            imgEl.style.display = 'none';   imgEl.src = '';
+            videoEl.style.display = 'none'; videoEl.src = '';
+            audioEl.style.display = 'none'; audioEl.src = '';
+
+            if (kind === 'video') {
                 videoEl.style.display = 'block';
                 videoEl.src           = URL.createObjectURL(file);
-                document.getElementById('upload-icon').textContent  = '🎬';
+            } else if (kind === 'audio') {
+                audioEl.style.display = 'block';
+                audioEl.src           = URL.createObjectURL(file);
             } else {
-                videoEl.style.display = 'none';
-                videoEl.src           = '';
-                imgEl.style.display   = 'block';
+                imgEl.style.display = 'block';
                 const reader = new FileReader();
                 reader.onload = ev => { imgEl.src = ev.target.result; };
                 reader.readAsDataURL(file);
-                document.getElementById('upload-icon').textContent  = '📷';
             }
+            document.getElementById('upload-icon').textContent = icon;
 
             document.getElementById('photo-preview').style.display = 'block';
             document.getElementById('upload-label').textContent    = file.name;
-            document.getElementById('face-check').classList.add('show');
+            // "Gezicht blurren?" alleen relevant bij beeld (foto/video), niet bij audio
+            document.getElementById('face-check').classList.toggle('show', kind !== 'audio');
         }
 
         function removePhoto() {
             selectedFile      = null;
             uploadedImageUrl  = null;
-            isVideoFile       = false;
+            mediaKind         = null;
 
             document.getElementById('input-photo').value             = '';
             document.getElementById('photo-preview').style.display   = 'none';
@@ -1265,6 +1305,9 @@
             const videoEl = document.getElementById('video-preview-el');
             videoEl.src           = '';
             videoEl.style.display = 'none';
+            const audioEl = document.getElementById('audio-preview-el');
+            audioEl.src           = '';
+            audioEl.style.display = 'none';
             document.getElementById('upload-icon').textContent   = '📷';
             document.getElementById('upload-label').textContent  = 'Klik om een foto of video te kiezen';
             document.getElementById('upload-progress').style.display = 'none';
@@ -1283,8 +1326,10 @@
             formData.append('file', file);
             formData.append('upload_preset', CONFIG.cloudinaryUploadPreset);
 
-            // Gebruik resource-type specifieke endpoint zodat het preset geen aanpassing nodig heeft
-            const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+            // Gebruik resource-type specifieke endpoint zodat het preset geen aanpassing nodig heeft.
+            // Cloudinary behandelt audio onder het 'video'-resource-type.
+            const resourceType = (file.type.startsWith('video/') || file.type.startsWith('audio/'))
+                ? 'video' : 'image';
             const url = `https://api.cloudinary.com/v1_1/${CONFIG.cloudinaryCloudName}/${resourceType}/upload`;
 
             return new Promise((resolve, reject) => {
@@ -1330,7 +1375,8 @@
             try {
                 let imageUrl = null;
                 if (selectedFile) {
-                    btn.textContent = isVideoFile ? 'Video uploaden…' : 'Foto uploaden…';
+                    const uploadLabels = { video: 'Video uploaden…', audio: 'Audio uploaden…', image: 'Foto uploaden…' };
+                    btn.textContent = uploadLabels[mediaKind] || 'Uploaden…';
                     imageUrl = await uploadToCloudinary(selectedFile);
                 }
 
@@ -1345,7 +1391,7 @@
                 if (category)  doc.category     = category;
                 if (imageUrl) {
                     doc.imageUrl   = imageUrl;
-                    doc.mediaType  = isVideoFile ? 'video' : 'image';
+                    doc.mediaType  = mediaKind || 'image';
                     // Indiener gaf aan dat er een gezicht in beeld staat → blur meteen aan.
                     // Admin kan dit later alsnog uitzetten in het beheerpaneel.
                     if (document.getElementById('input-face-visible').checked) {
@@ -1514,7 +1560,10 @@
             const card = document.createElement('div');
             const hasMedia  = !!data.imageUrl;
             const isVideo   = data.mediaType === 'video';
-            const cardClass = hasMedia ? (isVideo ? 'has-video' : 'has-photo') : 'text-only';
+            const isAudio   = data.mediaType === 'audio';
+            const cardClass = hasMedia
+                ? (isVideo ? 'has-video' : (isAudio ? 'has-audio' : 'has-photo'))
+                : 'text-only';
             const isNew     = isAddedWithin24h(data.timestamp);
             card.className  = 'card ' + cardClass + (isTop ? ' top-voted' : '') + (isNew ? ' is-new' : '');
             card.dataset.id = id;
@@ -1558,13 +1607,22 @@
                 ? `onerror="this.onerror=null;this.src='${origUrl}'"` : '';
             let mediaHtml = '';
             if (hasMedia) {
-                mediaHtml = isVideo
-                    ? `<div class="video-wrap" onclick="openLightbox('${safeUrl}','video')" title="Klik om te vergroten">
-                           <video src="${safeUrl}" autoplay muted loop playsinline preload="metadata" ${onErrVid}></video>
-                       </div>`
-                    : `<div class="photo-wrap" onclick="openLightbox('${safeUrl}','image')" title="Klik om te vergroten">
+                if (isVideo) {
+                    // Native controls: speelt niet vanzelf af, met duidelijke play/pauzeknop
+                    mediaHtml = `<div class="video-wrap">
+                           <video src="${safeUrl}" controls preload="metadata" playsinline ${onErrVid}></video>
+                       </div>`;
+                } else if (isAudio) {
+                    // Audiofragment: speelt niet vanzelf af, met play/pauzeknop
+                    mediaHtml = `<div class="audio-wrap">
+                           <span class="audio-icon">🎧</span>
+                           <audio src="${safeUrl}" controls preload="metadata"></audio>
+                       </div>`;
+                } else {
+                    mediaHtml = `<div class="photo-wrap" onclick="openLightbox('${safeUrl}','image')" title="Klik om te vergroten">
                            <img src="${safeUrl}" alt="Quote foto" loading="lazy" ${onErrImg}>
                        </div>`;
+                }
             }
 
             card.innerHTML = `
@@ -1794,8 +1852,9 @@
                     if (ms < cutoff) return false;
                 }
                 // 2 — Type filteren
-                if (filterState.type === 'photo' && !(!!data.imageUrl && data.mediaType !== 'video')) return false;
+                if (filterState.type === 'photo' && !(!!data.imageUrl && data.mediaType !== 'video' && data.mediaType !== 'audio')) return false;
                 if (filterState.type === 'video' && data.mediaType !== 'video') return false;
+                if (filterState.type === 'audio' && data.mediaType !== 'audio') return false;
                 if (filterState.type === 'text'  && !!data.imageUrl) return false;
 
                 // 3 — Categorie filteren
