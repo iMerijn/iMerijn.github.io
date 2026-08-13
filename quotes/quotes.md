@@ -250,3 +250,7 @@ Thanks for touching base
 Most tools give us another dashboard. Most agencies sell hours without owning the outcome. What makes working with Cataloops genuinely impactful is the partnership: we define our internal business KPIs and targets together, connect them in the Cataloops engine, and run a continuous system on our entire catalog from that foundation - AI-driven, with a human operator who owns the work end to end and is accountable for what changes, what works, and what doesn't. That shared accountability is what makes it work at our scale
 
 ---
+
+---
+
+Ik zou graag eerst met elkaar in overleg willen bekijken of buy vs build per element in onze technology core wel of niet slim is om te doen. Dus totale holistische overview met elkaar definiëren en daarop audit doen ipv per losse tool of Technology deze keuze per element maken.
