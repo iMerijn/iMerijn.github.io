@@ -254,3 +254,7 @@ Most tools give us another dashboard. Most agencies sell hours without owning th
 ---
 
 Ik zou graag eerst met elkaar in overleg willen bekijken of buy vs build per element in onze technology core wel of niet slim is om te doen. Dus totale holistische overview met elkaar definiëren en daarop audit doen ipv per losse tool of Technology deze keuze per element maken.
+
+---
+
+Ik heb al voor de 5e keer gekakt vandaag
