@@ -266,3 +266,7 @@ Iets voor julie wizzkids?
 ---
 
 Ga even met die tank praten
+
+---
+
+Jij bent echt de meest uitgebuite persoon voor het loon dat je krijgt
