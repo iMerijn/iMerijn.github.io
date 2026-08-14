@@ -258,3 +258,7 @@ Ik zou graag eerst met elkaar in overleg willen bekijken of buy vs build per ele
 ---
 
 Ik heb al voor de 5e keer gekakt vandaag
+
+---
+
+Iets voor julie wizzkids?
