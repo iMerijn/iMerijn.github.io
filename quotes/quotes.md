@@ -286,3 +286,7 @@ Houston... We've got a go
 ---
 
 Vroeger was het de Apenrots. Nu is het de Api-rots
+
+---
+
+Klompen zijn eigenlijk een soort badslippers met stalen neus
