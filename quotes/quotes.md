@@ -290,3 +290,7 @@ Vroeger was het de Apenrots. Nu is het de Api-rots
 ---
 
 Klompen zijn eigenlijk een soort badslippers met stalen neus
+
+---
+
+Wij weten niet wat we niet weten
