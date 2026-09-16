@@ -298,3 +298,7 @@ Wij weten niet wat we niet weten
 ---
 
 Ons ChatGPT account is Bonnie Blue
+
+---
+
+vooral als we dingen gaan coden-releasen-shippen. Dat moet in control zijn
