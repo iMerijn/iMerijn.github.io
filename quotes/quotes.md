@@ -294,3 +294,7 @@ Klompen zijn eigenlijk een soort badslippers met stalen neus
 ---
 
 Wij weten niet wat we niet weten
+
+---
+
+Ons ChatGPT account is Bonnie Blue
