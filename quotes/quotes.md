@@ -306,3 +306,7 @@ vooral als we dingen gaan coden-releasen-shippen. Dat moet in control zijn
 ---
 
 vooral als we dingen gaan coden-releasen-shippen. Dat moet in control zijn
+
+---
+
+goedemorgen tech-wizards!
