@@ -314,3 +314,7 @@ goedemorgen tech-wizards!
 ---
 
 Beetje van the kastje to the wall dit…
+
+---
+
+Tijd om onze Spaanse account manager bij CE maar eens wakker te gaan schudden uit zijn siesta
