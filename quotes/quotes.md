@@ -323,3 +323,7 @@ Tijd om onze Spaanse account manager bij CE maar eens wakker te gaan schudden ui
 
 D·L·A’er
 Voelt oranje, denkt oranje, doet oranje
+
+---
+
+geef de man een kluif 🦴 en hij gaat rennen 🏃.... Sven 'Duuk' Dijk  mooi man! thanks!
