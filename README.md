@@ -10,7 +10,14 @@ Vul een domein in en druk op **Yusu?**. Weet je niet wat DNSSEC is? Klik op "Wat
 
 - 🚀 DNSSEC werkt? Raket de lucht in. We're so back.
 - 🌙 Dark mode. Light mode is niet de vibe.
+- 🗺️ Rechtsboven: naar het overzicht.
 - 🔐 Rechtsboven: naar het beheer.
+
+## Overzicht
+### doetdednssechetnogwel.nl/overzicht: alle pagina's op één plek
+Kwijt? Geen paniek. Hier staan alle URL's netjes op een rij. Understood the assignment.
+- **🗺️ Overzicht-knop:** Rechtsboven op de hoofdpagina, Quotes en Klantparels. Op je telefoon alleen het icoontje, want ruimte is schaars. Bestie, je vindt hem wel.
+- **← Terug:** Kom je via het overzicht? Dan brengt Terug je daar ook weer naartoe. Full circle moment.
 
 ## Quotes
 ### doetdednssechetnogwel.nl/quotes: de beste EXIT Toys quotes
