@@ -72,7 +72,7 @@
             color: var(--text-color);
         }
 
-        /* Regenboogstijl komt uit .btn-rainbow (/assets/base.css) */
+        /* Regenboogrand komt uit .rainbow-border (/assets/base.css) */
         button#check-btn {
             padding: 10px 20px;
             font-size: 1.2rem;
@@ -87,7 +87,7 @@
 
         .ja { color: var(--green); }
         .nee { color: var(--red); }
-        .laden { color: #bdc3c7; }
+        .laden { color: var(--neutral); }
         
         #details { font-size: 1.2rem; color: var(--text-muted); min-height: 1.5em; }
 
@@ -150,7 +150,7 @@
         <div id="lukt-het">Lukt het? 🎯</div>
         <h1>Kijk maar ff</h1>
         <input type="text" id="domainInput" placeholder="Vul domein in..." value="">
-        <button id="check-btn" class="btn-rainbow" onclick="checkDNSSEC()">Yusu?</button>
+        <button id="check-btn" class="btn-rainbow-border rainbow-border" onclick="checkDNSSEC()">Yusu?</button>
         <p id="status" class="laden">?</p>
         <p id="details">Check ff dan.</p>
     </div>

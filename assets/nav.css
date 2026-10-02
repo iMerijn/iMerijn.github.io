@@ -85,6 +85,6 @@ html { scrollbar-gutter: stable; }
 }
 
 /* Op smalle schermen bij Overzicht alleen het icoon */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .site-btn .nav-label { display: none; }
 }

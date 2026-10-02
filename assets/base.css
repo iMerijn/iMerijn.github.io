@@ -1,7 +1,9 @@
 /* ── Gedeelde huisstijl ───────────────────────────────────────────────────────
    Eén kleurenpalet en vaste maten voor het hele domein, gebaseerd op de
    Overzicht-pagina. Elke pagina laadt dit bestand vóór haar eigen <style>.
-   Kleur of maat aanpassen? Doe het hier, dan verandert het overal. */
+   Kleur of maat aanpassen? Doe het hier, dan verandert het overal.
+   Mobiel = max-width: 640px (min-width: 641px voor groter). Gebruik overal
+   dit omslagpunt, dan schakelt alles tegelijk. */
 
 :root {
     /* Kleuren */
@@ -10,10 +12,20 @@
     --text:       #333333;
     --text-muted: #888888;
     --border:     #dddddd;
+    --neutral:    #bdc3c7;   /* nog niet ingevuld / geen stem */
     --shadow:     rgba(0,0,0,0.12);
     --overlay:    rgba(0,0,0,0.55);
     --green:      #2ecc71;   /* ja / goedkeuren / omhoog */
     --red:        #e74c3c;   /* nee / afwijzen / omlaag */
+
+    /* Meldingen (gelukt / fout / waarschuwing) */
+    --success-bg:     #d4edda;
+    --success-text:   #155724;
+    --error-bg:       #f8d7da;
+    --error-text:     #721c24;
+    --warning-bg:     #fff8e1;
+    --warning-border: #ffc107;
+    --warning-text:   #7a5800;
 
     /* Vormen */
     --radius-pill:    20px;   /* pilknoppen, chips, tabs */
@@ -41,7 +53,15 @@
     --text:       #f0f0f0;
     --text-muted: #888888;
     --border:     #3a3a3a;
+    --neutral:    #555555;
     --shadow:     rgba(0,0,0,0.4);
+
+    --success-bg:     #1a3a22;
+    --success-text:   #86efac;
+    --error-bg:       #3a1a1c;
+    --error-text:     #fca5a5;
+    --warning-bg:     #332900;
+    --warning-text:   #ffd54f;
 }
 
 body {
@@ -52,40 +72,14 @@ body {
 }
 
 /* Eén animatie voor alle regenboog-effecten: 600px per 10s, naar links.
-   De eerste laag (vulling binnen een rand) blijft staan, de laatste schuift. */
-@keyframes regenboog-btn {
-    from { background-position: 0 0; }
-    to   { background-position: -600px 0; }
-}
-
+   De eerste laag (vulling binnen de rand) blijft staan, de regenboog schuift. */
 @keyframes regenboog-rand {
     from { background-position: 0 0, 0 0; }
     to   { background-position: 0 0, -600px 0; }
 }
 
-/* Hoofdknop (één per scherm): regenboog */
-.btn-rainbow {
-    background: var(--rainbow);
-    background-size: 600px 100%;
-    background-repeat: repeat-x;
-    animation: regenboog-btn 10s linear infinite;
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-control);
-    padding: 10px 22px;
-    font-family: inherit;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-}
-
-.btn-rainbow:hover { filter: brightness(1.15); }
-.btn-rainbow:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; filter: none; }
-
-/* Regenboogrand (zelfde kleuren en snelheid als .btn-rainbow), met schaduw.
-   Gebruikt door de nieuwe-quotes-melding, de Overzicht-kaarten (hover) en
-   de "Quote toevoegen"-knop op Klantparels. */
+/* Regenboogrand met schaduw: dé stijl voor hoofdknoppen en opvallende
+   meldingen. De Overzicht-kaarten gebruiken hetzelfde effect bij hover. */
 .rainbow-border {
     border: var(--border-width) solid transparent;
     background:
@@ -110,8 +104,20 @@ body {
 }
 
 .btn-rainbow-border:hover { transform: translateY(-3px); }
+.btn-rainbow-border:disabled { opacity: 0.5; cursor: not-allowed; animation: none; transform: none; }
+
+/* Sleepstreepje bovenin modals; alleen op mobiel, waar de modal van onderen inschuift */
+.modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    margin: 0 auto 20px;
+}
+
+@media (min-width: 641px) { .modal-handle { display: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-    .btn-rainbow, .rainbow-border { animation: none; }
+    .rainbow-border { animation: none; }
     .btn-rainbow-border:hover { transform: none; }
 }
