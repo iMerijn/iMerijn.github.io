@@ -11,23 +11,18 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/base.css">
     <link rel="stylesheet" href="/assets/nav.css">
     <script src="/assets/theme.js"></script>
     <title>DNSSEC?</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     <style>
+        /* Kleuren komen uit /assets/base.css */
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --input-bg: #ffffff;
-            --input-border: #dddddd;
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --text-color: #f0f0f0;
-            --input-bg: #2d2d2d;
-            --input-border: #444444;
+            --bg-color: var(--bg);
+            --text-color: var(--text);
+            --input-bg: var(--bg);
+            --input-border: var(--border);
         }
 
         body {
@@ -52,7 +47,7 @@
 
         #lukt-het {
             font-size: 1.2rem;
-            color: #888;
+            color: var(--text-muted);
             height: 1.5em;
             margin-bottom: 5px;
             font-style: italic;
@@ -68,42 +63,20 @@
         input[type="text"] {
             padding: 10px;
             font-size: 1.2rem;
-            border: 2px solid var(--input-border);
-            border-radius: 5px;
+            border: var(--border-width) solid var(--input-border);
+            border-radius: var(--radius-control);
+            font-family: inherit;
             width: 300px;
             margin-bottom: 10px;
             background-color: var(--input-bg);
             color: var(--text-color);
         }
 
-        @keyframes regenboog {
-            from { background-position-x: 0; }
-            to   { background-position-x: -600px; }
-        }
-
+        /* Regenboogstijl komt uit .btn-rainbow (/assets/base.css) */
         button#check-btn {
             padding: 10px 20px;
             font-size: 1.2rem;
-            background: linear-gradient(90deg,
-                hsl(0,   90%, 55%),
-                hsl(60,  90%, 52%),
-                hsl(120, 80%, 45%),
-                hsl(180, 85%, 45%),
-                hsl(240, 90%, 60%),
-                hsl(300, 90%, 55%),
-                hsl(360, 90%, 55%)
-            );
-            background-size: 600px 100%;
-            background-repeat: repeat-x;
-            animation: regenboog 10s linear infinite;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
         }
-
-        button#check-btn:hover { filter: brightness(1.15); }
 
         #status {
             font-size: 10rem;
@@ -112,11 +85,11 @@
             min-height: 1.2em;
         }
 
-        .ja { color: #2ecc71; }
-        .nee { color: #e74c3c; }
+        .ja { color: var(--green); }
+        .nee { color: var(--red); }
         .laden { color: #bdc3c7; }
         
-        #details { font-size: 1.2rem; color: #888; min-height: 1.5em; }
+        #details { font-size: 1.2rem; color: var(--text-muted); min-height: 1.5em; }
 
         #troll-btn {
             position: fixed;
@@ -124,11 +97,12 @@
             left: 50%;
             transform: translateX(-50%);
             text-decoration: none;
-            padding: 8px 15px;
+            padding: 8px 12px;
             font-size: 0.9rem;
-            background-color: #95a5a6;
-            color: white;
-            border-radius: 5px;
+            background-color: var(--bg);
+            border: var(--border-width) solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-pill);
             transition: all 0.1s ease;
             z-index: 1000;
             white-space: nowrap;
@@ -153,6 +127,11 @@
         }
 
         .launching { animation: launch 2s ease-in forwards; }
+
+        /* Koppen op mobiel: zelfde als Overzicht */
+        @media (max-width: 640px) {
+            h1 { font-size: 2rem; }
+        }
     </style>
 </head>
 <body>
@@ -171,7 +150,7 @@
         <div id="lukt-het">Lukt het? 🎯</div>
         <h1>Kijk maar ff</h1>
         <input type="text" id="domainInput" placeholder="Vul domein in..." value="">
-        <button id="check-btn" onclick="checkDNSSEC()">Yusu?</button>
+        <button id="check-btn" class="btn-rainbow" onclick="checkDNSSEC()">Yusu?</button>
         <p id="status" class="laden">?</p>
         <p id="details">Check ff dan.</p>
     </div>

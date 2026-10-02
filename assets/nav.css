@@ -3,14 +3,10 @@
    staan en eruitzien. Stijl gebaseerd op de Overzicht-pagina.
    Pas knoppen dus HIER aan, niet in de losse pagina's. */
 
+/* Kleuren komen uit assets/base.css */
 :root {
-    --nav-text:   #333333;
-    --nav-border: #dddddd;
-}
-
-[data-theme="dark"] {
-    --nav-text:   #f0f0f0;
-    --nav-border: #3a3a3a;
+    --nav-text:   var(--text);
+    --nav-border: var(--border);
 }
 
 .site-topbar {

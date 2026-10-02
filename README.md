@@ -67,6 +67,7 @@ Nerd alert, maar we respect it. 🤓
 | `klantparels/index.html` | Klantparels-pagina |
 | `overzicht/index.html` | Overzicht van alle URL's |
 | `admin/index.html` | Beheer |
+| `assets/base.css` | De huisstijl: kleuren, hoeken, lettertype en de regenboogknop. Eén bron of truth, voor de hele site. Consistency is the vibe |
 | `assets/nav.css` | De bovenbalk van álle pagina's. Knoppen aanpassen? Hier, en nergens anders |
 | `assets/theme.js` | Light/dark, gedeeld door alle pagina's |
 | `database.rules.json` | Regels Realtime Database (stemmen, ingestuurde quotes) |

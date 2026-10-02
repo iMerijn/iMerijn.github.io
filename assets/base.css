@@ -1,0 +1,81 @@
+/* ── Gedeelde huisstijl ───────────────────────────────────────────────────────
+   Eén kleurenpalet en vaste maten voor het hele domein, gebaseerd op de
+   Overzicht-pagina. Elke pagina laadt dit bestand vóór haar eigen <style>.
+   Kleur of maat aanpassen? Doe het hier, dan verandert het overal. */
+
+:root {
+    /* Kleuren */
+    --bg:         #ffffff;
+    --surface:    #f7f7f7;
+    --text:       #333333;
+    --text-muted: #888888;
+    --border:     #dddddd;
+    --shadow:     rgba(0,0,0,0.12);
+    --overlay:    rgba(0,0,0,0.55);
+    --green:      #2ecc71;   /* ja / goedkeuren / omhoog */
+    --red:        #e74c3c;   /* nee / afwijzen / omlaag */
+
+    /* Vormen */
+    --radius-pill:    20px;   /* pilknoppen, chips, tabs */
+    --radius-control: 10px;   /* invoervelden, actieknoppen */
+    --radius-box:     16px;   /* kaarten, modals, pop-ups */
+    --border-width:   2px;
+
+    /* Typografie */
+    --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* Regenboog: hét kenmerk van de site (hoofdknoppen, hover op kaarten) */
+    --rainbow: linear-gradient(90deg,
+        hsl(0,   90%, 55%),
+        hsl(60,  90%, 52%),
+        hsl(120, 80%, 45%),
+        hsl(180, 85%, 45%),
+        hsl(240, 90%, 60%),
+        hsl(300, 90%, 55%),
+        hsl(360, 90%, 55%));
+}
+
+[data-theme="dark"] {
+    --bg:         #1a1a1a;
+    --surface:    #252525;
+    --text:       #f0f0f0;
+    --text-muted: #888888;
+    --border:     #3a3a3a;
+    --shadow:     rgba(0,0,0,0.4);
+}
+
+body {
+    font-family: var(--font);
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+@keyframes regenboog-btn {
+    from { background-position: 0 0; }
+    to   { background-position: -600px 0; }
+}
+
+/* Hoofdknop (één per scherm): regenboog */
+.btn-rainbow {
+    background: var(--rainbow);
+    background-size: 600px 100%;
+    background-repeat: repeat-x;
+    animation: regenboog-btn 10s linear infinite;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-control);
+    padding: 10px 22px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+
+.btn-rainbow:hover { filter: brightness(1.15); }
+.btn-rainbow:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-rainbow { animation: none; }
+}

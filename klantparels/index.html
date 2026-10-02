@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/base.css">
     <link rel="stylesheet" href="/assets/nav.css">
     <script src="/assets/theme.js"></script>
-    <title>Klantparels — DNSSEC CS</title>
+    <title>Klantparels — DNSSEC</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
 
     <!-- Firebase Firestore via CDN -->
@@ -16,25 +17,14 @@
     <script src="config.js"></script>
 
     <style>
+        /* Basiskleuren komen uit /assets/base.css; hier alleen wat specifiek is voor Klantparels */
         :root {
-            --bg:           #ffffff;
-            --surface:      #f5f5f5;
-            --text:         #333333;
-            --text-muted:   #888888;
-            --border:       #dddddd;
             --polaroid-bg:  #fefefe;
-            --shadow:       rgba(0,0,0,0.12);
             --accent:       hsl(220, 80%, 55%);
         }
 
         [data-theme="dark"] {
-            --bg:           #1a1a1a;
-            --surface:      #252525;
-            --text:         #f0f0f0;
-            --text-muted:   #888888;
-            --border:       #3a3a3a;
             --polaroid-bg:  #2a2a2a;
-            --shadow:       rgba(0,0,0,0.4);
             --accent:       hsl(220, 75%, 65%);
         }
 
@@ -53,46 +43,29 @@
         /* ── Hero ── */
         .hero {
             text-align: center;
-            padding: 48px 20px 32px;
+            padding: 24px 20px 36px;
         }
 
         .hero-emoji { font-size: 3rem; display: block; margin-bottom: 10px; }
 
         .hero h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
+            font-size: 2.5rem;
             margin-bottom: 8px;
         }
 
         .hero p {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 1.2rem;
             max-width: 480px;
             margin: 0 auto 24px;
             line-height: 1.55;
         }
 
+        /* Regenboogstijl komt uit .btn-rainbow (/assets/base.css) */
         .hero-add-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, hsl(220,80%,55%), hsl(270,75%,60%));
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 1rem;
-            font-family: inherit;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(100,100,220,0.3);
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-
-        .hero-add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(100,100,220,0.4);
         }
 
         /* ── Filter bar ── */
@@ -125,7 +98,7 @@
 
         .chip {
             background: none;
-            border: 1.5px solid var(--border);
+            border: var(--border-width) solid var(--border);
             color: var(--text-muted);
             padding: 4px 11px;
             border-radius: 20px;
@@ -157,7 +130,7 @@
             font-size: 0.78rem;
             color: var(--text-muted);
             background: var(--surface);
-            border: 1.5px solid var(--border);
+            border: var(--border-width) solid var(--border);
             border-radius: 20px;
             padding: 4px 11px;
             white-space: nowrap;
@@ -360,7 +333,7 @@
 
         .vote-btn {
             background: none;
-            border: 1.5px solid var(--border);
+            border: var(--border-width) solid var(--border);
             border-radius: 20px;
             padding: 3px 9px;
             font-size: 0.72rem;
@@ -381,7 +354,7 @@
         /* ── Comment-toggle knop (zelfde stijl als vote-btn) ── */
         .comment-toggle-btn {
             background: none;
-            border: 1.5px solid var(--border);
+            border: var(--border-width) solid var(--border);
             border-radius: 20px;
             padding: 3px 9px;
             font-size: 0.72rem;
@@ -458,8 +431,8 @@
         }
 
         .comment-input {
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
+            border: var(--border-width) solid var(--border);
+            border-radius: var(--radius-control);
             padding: 6px 9px;
             font-size: 0.82rem;
             font-family: inherit;
@@ -469,16 +442,18 @@
             min-width: 0;
         }
 
-        .comment-input:focus { outline: none; border-color: var(--accent); }
+        .comment-input:focus { outline: none; border-color: var(--text-muted); }
 
         .comment-name-input { width: 88px; flex-shrink: 0; }
         .comment-text-input  { flex: 1; }
 
         .comment-submit-btn {
-            background: var(--accent);
+            background: var(--rainbow);
+            background-size: 600px 100%;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
             color: #fff;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-control);
             width: 30px;
             height: 30px;
             font-size: 1rem;
@@ -495,7 +470,7 @@
 
         .comment-form-msg {
             font-size: 0.73rem;
-            color: #e74c3c;
+            color: var(--red);
             margin-top: 4px;
             min-height: 1em;
         }
@@ -524,7 +499,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.55);
+            background: var(--overlay);
             z-index: 200;
             justify-content: center;
             align-items: flex-end;
@@ -539,8 +514,8 @@
 
         .modal {
             background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 20px 20px 0 0;
+            border: var(--border-width) solid var(--border);
+            border-radius: var(--radius-box) var(--radius-box) 0 0;
             padding: 28px 24px 32px;
             width: 100%;
             max-width: 520px;
@@ -550,7 +525,7 @@
         }
 
         @media (min-width: 600px) {
-            .modal { border-radius: 16px; }
+            .modal { border-radius: var(--radius-box); }
         }
 
         .modal-handle {
@@ -605,7 +580,7 @@
             font-size: 0.95rem;
             font-family: inherit;
             border: 2px solid var(--border);
-            border-radius: 10px;
+            border-radius: var(--radius-control);
             background: var(--bg);
             color: var(--text);
             transition: border-color 0.2s;
@@ -625,7 +600,7 @@
 
         .field input:focus,
         .field textarea:focus,
-        .field select:focus { outline: none; border-color: var(--accent); }
+        .field select:focus { outline: none; border-color: var(--text-muted); }
 
         /* Calendar-icoon kleur in dark mode */
         [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
@@ -635,7 +610,7 @@
         /* Photo upload */
         .photo-upload-area {
             border: 2px dashed var(--border);
-            border-radius: 10px;
+            border-radius: var(--radius-control);
             padding: 24px 16px;
             text-align: center;
             cursor: pointer;
@@ -696,7 +671,7 @@
         .photo-preview img,
         .photo-preview video {
             max-height: 120px;
-            border-radius: 8px;
+            border-radius: var(--radius-control);
             object-fit: cover;
             width: 100%;
         }
@@ -735,7 +710,7 @@
 
         .upload-progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, hsl(220,80%,55%), hsl(270,75%,60%));
+            background: var(--rainbow);
             border-radius: 4px;
             width: 0%;
             transition: width 0.2s;
@@ -743,7 +718,7 @@
 
         /* Feedback messages */
         .form-msg {
-            border-radius: 8px;
+            border-radius: var(--radius-control);
             padding: 10px 13px;
             font-size: 0.88rem;
             margin-bottom: 12px;
@@ -756,23 +731,8 @@
         [data-theme="dark"] .form-msg.success { background: #1a3a22; color: #86efac; }
         [data-theme="dark"] .form-msg.error   { background: #3a1a1c; color: #fca5a5; }
 
-        .submit-btn {
-            width: 100%;
-            padding: 13px;
-            font-size: 1rem;
-            font-family: inherit;
-            font-weight: 700;
-            background: linear-gradient(135deg, hsl(220,80%,55%), hsl(270,75%,60%));
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: opacity 0.15s, transform 0.1s;
-            letter-spacing: 0.02em;
-        }
-
-        .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        /* Regenboogstijl komt uit .btn-rainbow (/assets/base.css) */
+        .submit-btn { width: 100%; padding: 13px; }
 
         /* ── Toast ── */
         .toast {
@@ -780,12 +740,12 @@
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%) translateY(80px);
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 30px;
+            background: var(--bg);
+            border: var(--border-width) solid var(--border);
+            border-radius: var(--radius-pill);
             padding: 10px 20px;
             font-size: 0.88rem;
-            box-shadow: 0 4px 20px var(--shadow);
+            box-shadow: 0 8px 24px var(--shadow);
             z-index: 500;
             transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
             opacity: 0;
@@ -872,7 +832,8 @@
 
         /* ── Responsive ── */
         @media (max-width: 480px) {
-            .hero h1 { font-size: 1.5rem; }
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
             .wall { padding: 0 12px 32px; column-gap: 12px; }
             .wall { columns: 1; }
         }
@@ -902,7 +863,7 @@
         <span class="hero-emoji">💎</span>
         <h1>Klantparels</h1>
         <p>De mooiste, gekste en onvergetelijkste uitspraken van onze klanten — verzameld door het CS-team.</p>
-        <button class="hero-add-btn" onclick="openAddModal()">
+        <button class="hero-add-btn btn-rainbow" onclick="openAddModal()">
             ✨ Quote toevoegen
         </button>
     </section>
@@ -1029,7 +990,7 @@
 
             <div class="form-msg" id="form-msg"></div>
 
-            <button class="submit-btn" id="submit-btn" onclick="submitQuote()">Indienen</button>
+            <button class="submit-btn btn-rainbow" id="submit-btn" onclick="submitQuote()">Indienen</button>
         </div>
     </div>
 

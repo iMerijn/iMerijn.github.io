@@ -10,6 +10,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/base.css">
     <link rel="stylesheet" href="/assets/nav.css">
     <script src="/assets/theme.js"></script>
     <title>Quotes — DNSSEC</title>
@@ -20,19 +21,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <style>
+        /* Kleuren komen uit /assets/base.css */
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --input-border: #dddddd;
-            --vote-active-up: #2ecc71;
-            --vote-active-down: #e74c3c;
+            --bg-color: var(--bg);
+            --text-color: var(--text);
+            --input-border: var(--border);
+            --vote-active-up: var(--green);
+            --vote-active-down: var(--red);
             --vote-neutral: #bdc3c7;
         }
 
         [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --text-color: #f0f0f0;
-            --input-border: #444444;
             --vote-neutral: #555;
         }
 
@@ -106,7 +105,7 @@
 
         .vote-count {
             font-size: 0.72rem;
-            color: #888;
+            color: var(--text-muted);
             min-width: 40px;
             text-align: center;
         }
@@ -140,30 +139,8 @@
         #score-display.positive { color: var(--vote-active-up);   }
         #score-display.negative { color: var(--vote-active-down); }
 
-        @keyframes regenboog {
-            from { background-position-x: 0; }
-            to   { background-position-x: -600px; }
-        }
-
-        button#next-btn {
-            padding: 10px 24px;
-            font-size: 1rem;
-            background: linear-gradient(90deg,
-                hsl(0,   90%, 55%), hsl(60,  90%, 52%), hsl(120, 80%, 45%),
-                hsl(180, 85%, 45%), hsl(240, 90%, 60%), hsl(300, 90%, 55%),
-                hsl(360, 90%, 55%)
-            );
-            background-size: 600px 100%;
-            background-repeat: repeat-x;
-            animation: regenboog 10s linear infinite;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-        }
-
-        button#next-btn:hover { filter: brightness(1.15); }
+        /* Regenboogstijl komt uit .btn-rainbow (/assets/base.css) */
+        button#next-btn { padding: 10px 24px; }
 
         /* ── Bottom buttons ── */
         .bottom-btns {
@@ -172,23 +149,9 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            gap: 8px;
             z-index: 10;
         }
-
-        .bottom-btn {
-            background: none;
-            border: 2px solid var(--input-border);
-            color: var(--text-color);
-            padding: 6px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            font-family: inherit;
-        }
-
-        .bottom-btn:hover { opacity: 0.7; }
 
         /* Gecentreerd boven de knoppenrij */
         .quote-counter {
@@ -197,20 +160,20 @@
             left: 0;
             right: 0;
             text-align: center;
-            color: #888;
-            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
             white-space: nowrap;
         }
 
         @media (max-width: 480px) {
             .bottom-btns {
-                gap: 6px;
+                bottom: 14px;
+                gap: 8px;
                 flex-wrap: wrap;
                 justify-content: center;
-                width: calc(100% - 32px);
+                width: calc(100% - 28px);
             }
-            .bottom-btn { padding: 5px 9px; font-size: 0.75rem; }
-            .quote-counter { font-size: 0.75rem; }
+            .quote-counter { font-size: 0.8rem; }
             .bottom-btns #info-tooltip { left: 0; right: 0; width: auto; }
         }
 
@@ -219,7 +182,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: var(--overlay);
             z-index: 100;
             justify-content: center;
             align-items: center;
@@ -228,10 +191,10 @@
         .modal-overlay.open { display: flex; }
 
         .modal {
-            background: var(--bg-color);
-            border: 1px solid var(--input-border);
-            border-radius: 12px;
-            padding: 32px;
+            background: var(--bg);
+            border: var(--border-width) solid var(--border);
+            border-radius: var(--radius-box);
+            padding: 28px 24px 32px;
             max-width: 520px;
             width: 90%;
             position: relative;
@@ -241,8 +204,20 @@
 
         .modal h2 {
             margin: 0 0 20px;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
+            font-weight: 700;
             text-align: center;
+        }
+
+        .modal-close:hover { color: var(--text); }
+
+        /* Op mobiel schuift de modal van onderen in (zelfde als Klantparels) */
+        @media (max-width: 599px) {
+            .modal-overlay { align-items: flex-end; }
+            .modal {
+                width: 100%;
+                border-radius: var(--radius-box) var(--radius-box) 0 0;
+            }
         }
 
         .modal-close {
@@ -253,7 +228,7 @@
             border: none;
             font-size: 1.3rem;
             cursor: pointer;
-            color: var(--text-color);
+            color: var(--text-muted);
             line-height: 1;
         }
 
@@ -263,7 +238,7 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #888;
+            color: var(--text-muted);
             margin: 20px 0 4px;
         }
 
@@ -277,7 +252,7 @@
 
         .scoreboard-row:last-child { border-bottom: none; }
 
-        .sb-rank { font-size: 1.1rem; font-weight: bold; min-width: 28px; color: #888; }
+        .sb-rank { font-size: 1.1rem; font-weight: bold; min-width: 28px; color: var(--text-muted); }
         .sb-rank.gold   { color: #f1c40f; }
         .sb-rank.silver { color: #95a5a6; }
         .sb-rank.bronze { color: #cd7f32; }
@@ -294,8 +269,8 @@
             padding: 12px;
             font-size: 1rem;
             font-family: inherit;
-            border: 2px solid var(--input-border);
-            border-radius: 8px;
+            border: var(--border-width) solid var(--input-border);
+            border-radius: var(--radius-control);
             background: var(--bg-color);
             color: var(--text-color);
             resize: vertical;
@@ -304,12 +279,12 @@
             transition: border-color 0.2s;
         }
 
-        #add-quote-textarea:focus { outline: none; border-color: #888; }
+        #add-quote-textarea:focus { outline: none; border-color: var(--text-muted); }
 
         #duplicate-warning {
             background: #fff8e1;
             border: 1px solid #ffc107;
-            border-radius: 8px;
+            border-radius: var(--radius-control);
             padding: 10px 14px;
             margin-bottom: 12px;
             font-size: 0.88rem;
@@ -324,7 +299,7 @@
         }
 
         #add-result {
-            border-radius: 8px;
+            border-radius: var(--radius-control);
             padding: 10px 14px;
             margin-bottom: 12px;
             font-size: 0.9rem;
@@ -340,27 +315,6 @@
 
         .modal-footer { display: flex; justify-content: flex-end; }
 
-        button#submit-quote-btn {
-            padding: 10px 22px;
-            font-size: 1rem;
-            background: linear-gradient(90deg,
-                hsl(0,   90%, 55%), hsl(60,  90%, 52%), hsl(120, 80%, 45%),
-                hsl(180, 85%, 45%), hsl(240, 90%, 60%), hsl(300, 90%, 55%),
-                hsl(360, 90%, 55%)
-            );
-            background-size: 600px 100%;
-            background-repeat: repeat-x;
-            animation: regenboog 10s linear infinite;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-            font-family: inherit;
-        }
-
-        button#submit-quote-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; }
-
         /* ── Info knopje ── */
         /* Tooltip positioneert t.o.v. .bottom-btns, zodat hij ook op mobiel in beeld blijft */
         #info-wrap {
@@ -372,14 +326,14 @@
             bottom: calc(100% + 8px);
             right: 0;
             background: var(--bg-color);
-            border: 1px solid var(--input-border);
-            border-radius: 10px;
+            border: var(--border-width) solid var(--border);
+            border-radius: var(--radius-box);
             padding: 12px 14px;
             font-size: 0.8rem;
             line-height: 1.55;
             width: 260px;
             color: var(--text-color);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 24px var(--shadow);
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.15s;
@@ -391,7 +345,7 @@
             font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: #888;
+            color: var(--text-muted);
         }
 
         #info-wrap:hover #info-tooltip,
@@ -408,14 +362,14 @@
             transform: translateX(-50%);
             background: var(--bg-color);
             border: 2px solid var(--input-border);
-            border-radius: 20px;
+            border-radius: var(--radius-pill);
             padding: 8px 14px 8px 16px;
             font-size: 0.85rem;
             z-index: 20;
             display: none;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 24px var(--shadow);
             max-width: calc(100vw - 40px);
             white-space: nowrap;
             animation: toastIn 0.3s ease;
@@ -432,7 +386,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: #aaa;
+            color: var(--text-muted);
             font-size: 0.85rem;
             padding: 0;
             line-height: 1;
@@ -491,10 +445,10 @@
     <!-- Bottom buttons -->
     <div class="bottom-btns">
         <span id="quote-counter" class="quote-counter" title="Aantal quotes in de database"></span>
-        <button class="bottom-btn" onclick="openScoreboard()">🏆 Scoreboard</button>
-        <button class="bottom-btn" onclick="openAddQuote()">📝 Quote toevoegen</button>
+        <button class="site-btn" onclick="openScoreboard()">🏆 Scoreboard</button>
+        <button class="site-btn" onclick="openAddQuote()">📝 Quote toevoegen</button>
         <div id="info-wrap">
-            <button id="info-btn" class="bottom-btn" onclick="toggleInfo(event)">⚠️ Belangrijk</button>
+            <button id="info-btn" class="site-btn" onclick="toggleInfo(event)">⚠️ Belangrijk</button>
             <div id="info-tooltip">
                 <strong>Belangrijk</strong>
                 Deze website is absoluut niet bedoeld om iets of iemand belachelijk te maken of slecht te zetten. Het is een uit de hand gelopen geintje die vooral ook grappig moet blijven. Zodra ook maar iets of iemand hier onprettige of negatieve gevoelens bij heeft gaat het direct offline.
@@ -507,7 +461,7 @@
         <div class="modal">
             <button class="modal-close" onclick="closeScoreboard()">✕</button>
             <h2>🏆 Top 5 quotes</h2>
-            <div id="scoreboard-content"><div style="text-align:center;color:#888;font-style:italic;padding:16px 0">Laden...</div></div>
+            <div id="scoreboard-content"><div style="text-align:center;color:var(--text-muted);font-style:italic;padding:16px 0">Laden...</div></div>
         </div>
     </div>
 
@@ -520,7 +474,7 @@
             <div id="duplicate-warning"></div>
             <div id="add-result"></div>
             <div class="modal-footer">
-                <button id="submit-quote-btn" onclick="submitQuote()">Indienen</button>
+                <button id="submit-quote-btn" class="btn-rainbow" onclick="submitQuote()">Indienen</button>
             </div>
         </div>
     </div>
@@ -542,7 +496,7 @@
                 <span class="vote-count" id="down-count">0</span>
             </div>
         </div>
-        <button id="next-btn" onclick="showNextQuote()">Volgende quote</button>
+        <button id="next-btn" class="btn-rainbow" onclick="showNextQuote()">Volgende quote</button>
     </div>
 
     <script>
@@ -727,7 +681,7 @@
 
         async function openScoreboard() {
             document.getElementById('scoreboard-overlay').classList.add('open');
-            document.getElementById('scoreboard-content').innerHTML = '<div style="text-align:center;color:#888;font-style:italic;padding:16px 0">Laden...</div>';
+            document.getElementById('scoreboard-content').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-style:italic;padding:16px 0">Laden...</div>';
             const snap = await db.ref('votes').once('value');
             const allVotes = snap.val() || {};
             const scored = quotes.map(q => ({ text: q, score: (allVotes[quoteKey(q)] || {}).total || 0 }));
