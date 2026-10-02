@@ -16,8 +16,9 @@
     function apply(theme) {
         if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
         else document.documentElement.removeAttribute('data-theme');
+        // Het zichtbare label komt uit assets/nav.css; hier alleen voor schermlezers
         var btn = document.getElementById('theme-toggle');
-        if (btn) btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+        if (btn) btn.setAttribute('aria-label', theme === 'dark' ? 'Light mode' : 'Dark mode');
     }
 
     window.toggleTheme = function () {

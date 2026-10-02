@@ -58,6 +58,19 @@
 
 .site-btn:hover { opacity: 0.7; }
 
+/* Themaknop: label komt uit CSS (staat dus meteen goed) en de knop heeft een
+   vaste breedte, zodat de andere knoppen niet verspringen bij Dark ↔ Light. */
+#theme-toggle {
+    min-width: 5.6em;
+    text-align: center;
+}
+#theme-toggle::before { content: '🌙 Dark'; }
+[data-theme="dark"] #theme-toggle::before { content: '☀️ Light'; }
+
+/* Altijd ruimte voor de scrollbalk, zodat de knoppen niet opschuiven als een
+   pagina (bijv. Klantparels) lang genoeg wordt om te scrollen. */
+html { scrollbar-gutter: stable; }
+
 /* De knop van de pagina waar je nu bent */
 .site-btn[aria-current="page"] {
     background: var(--nav-border);
