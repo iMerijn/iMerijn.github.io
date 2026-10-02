@@ -50,7 +50,9 @@ Log in op doetdednssechetnogwel.nl/admin met je GitHub Personal Access Token.
 - Reacties verwijderen
 - Stemmen resetten
 
-## Onder de motorkap 🤓
+## Onder de motorkap
+Nerd alert, maar we respect it. 🤓
+
 | Pad | Wat |
 |---|---|
 | `index.html` | DNSSEC-check |
