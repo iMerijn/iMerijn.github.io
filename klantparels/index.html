@@ -1085,6 +1085,16 @@
     </div>
 
     <script>
+        // Via het overzicht binnengekomen? Dan gaat Terug daar ook weer heen.
+        try {
+            const ref = new URL(document.referrer);
+            if (ref.origin === location.origin && ref.pathname.startsWith('/overzicht')) {
+                document.querySelector('a.back-link').href = '/overzicht/';
+            }
+        } catch (e) {}
+    </script>
+
+    <script>
         // ── Firebase init ──────────────────────────────────────────────────────
         const FIREBASE_CONFIG = {
             apiKey:            "AIzaSyBm136XADZqyBL6wgUMjlNKyTL255DSSFw",
