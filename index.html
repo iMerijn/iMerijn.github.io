@@ -11,6 +11,8 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/nav.css">
+    <script src="/assets/theme.js"></script>
     <title>DNSSEC?</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     <style>
@@ -42,30 +44,6 @@
             overflow: hidden;
             position: relative;
         }
-
-        .topbar-right-wrap {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            z-index: 10;
-        }
-
-        #theme-toggle, a.admin-link {
-            background: none;
-            border: 2px solid var(--input-border);
-            color: var(--text-color);
-            padding: 8px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-decoration: none;
-            font-family: inherit;
-        }
-
-        #theme-toggle:hover, a.admin-link:hover { opacity: 0.7; }
 
         .container {
             text-align: center;
@@ -179,11 +157,14 @@
 </head>
 <body>
 
-    <div class="topbar-right-wrap">
-        <a href="/overzicht/" class="admin-link">🧭 Overzicht</a>
-        <a href="/admin/" class="admin-link">🔐 Beheer</a>
-        <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
-    </div>
+    <nav class="site-topbar">
+        <div class="site-topbar-left"></div>
+        <div class="site-topbar-right">
+            <a href="/overzicht/" class="site-btn" title="Overzicht" aria-label="Overzicht">🧭<span class="nav-label"> Overzicht</span></a>
+            <a href="/admin/" class="site-btn">🔐 Beheer</a>
+            <button id="theme-toggle" class="site-btn" onclick="toggleTheme()">🌙 Dark</button>
+        </div>
+    </nav>
     <div id="rocket">🚀</div>
 
     <div class="container">
@@ -203,30 +184,6 @@
 
     <script>
         let missCount = 0;
-
-        // Gekozen thema wordt gedeeld met de andere pagina's (localStorage 'theme')
-        (function initTheme() {
-            // Geen keuze gemaakt? Volg de instelling van het apparaat (zelfde op alle pagina's)
-            const saved = (localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-            if (saved === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.getElementById('theme-toggle').textContent = '☀️ Light Mode';
-            }
-        })();
-
-        function toggleTheme() {
-            const body = document.documentElement;
-            const btn = document.getElementById('theme-toggle');
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                btn.textContent = '🌙 Dark Mode';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                btn.textContent = '☀️ Light Mode';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
 
         function moveButton(btn) {
             missCount++;

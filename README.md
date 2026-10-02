@@ -9,14 +9,13 @@ Deze website is absoluut niet bedoeld om iets of iemand belachelijk te maken of 
 Vul een domein in en druk op **Yusu?**. Weet je niet wat DNSSEC is? Klik op "Wat is DNSSEC?". **Als je kan.**
 
 - 🚀 DNSSEC werkt? Raket de lucht in. We're so back.
-- 🌙 Dark mode. Light mode is niet de vibe.
-- 🧭 Rechtsboven: naar het overzicht.
-- 🔐 Rechtsboven: naar het beheer.
+- 🧭 Overzicht, 🔐 Beheer en 🌙 Dark staan rechtsboven, op élke pagina exact op dezelfde plek. Pixel perfect, no cap.
+- 🌙 Light of dark kiezen? Geldt meteen op alle pagina's. Nog niks gekozen? Dan doen we wat je apparaat doet. Light mode is niet de vibe, maar we judgen niet.
 
 ## Overzicht
 ### doetdednssechetnogwel.nl/overzicht: alle pagina's op één plek
 Kwijt? Geen paniek. Hier staan alle URL's netjes op een rij. Understood the assignment.
-- **🧭 Overzicht-knop:** Rechtsboven op de hoofdpagina, Quotes en Klantparels. Op je telefoon alleen het icoontje, want ruimte is schaars. Bestie, je vindt hem wel.
+- **🧭 Overzicht-knop:** Rechtsboven op elke pagina, ook in het beheer. Op je telefoon alleen het icoontje, want ruimte is schaars. Bestie, je vindt hem wel.
 - **← Terug:** Kom je via het overzicht? Dan brengt Terug je daar ook weer naartoe. Full circle moment.
 
 ## Quotes
@@ -68,6 +67,8 @@ Nerd alert, maar we respect it. 🤓
 | `klantparels/index.html` | Klantparels-pagina |
 | `overzicht/index.html` | Overzicht van alle URL's |
 | `admin/index.html` | Beheer |
+| `assets/nav.css` | De bovenbalk van álle pagina's. Knoppen aanpassen? Hier, en nergens anders |
+| `assets/theme.js` | Light/dark, gedeeld door alle pagina's |
 | `database.rules.json` | Regels Realtime Database (stemmen, ingestuurde quotes) |
 | `firestore.rules` | Regels Firestore (klantparels, reacties) |
 | `.github/workflows/deploy.yml` | Deploy naar GitHub Pages bij push naar `main` |

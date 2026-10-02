@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/nav.css">
+    <script src="/assets/theme.js"></script>
     <title>Beheer — DNSSEC</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
 
@@ -44,50 +46,10 @@
             padding: 40px 20px 80px;
         }
 
-        /* ── Top bar ── */
-        .topbar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 20px;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-            z-index: 50;
-        }
-
-        a.back-link {
-            border: 2px solid var(--border);
-            color: var(--text);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            text-decoration: none;
-        }
-
-        a.back-link:hover { opacity: 0.7; }
-
-        .topbar-left  { display: flex; gap: 8px; align-items: center; }
-        .topbar-right { display: flex; gap: 8px; align-items: center; }
-
-        .icon-btn {
-            background: none;
-            border: 2px solid var(--border);
-            color: var(--text);
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-family: inherit;
-        }
-
-        .icon-btn:hover { opacity: 0.7; }
-
         /* ── Page ── */
         .page {
             max-width: 680px;
-            margin: 60px auto 0;
+            margin: 0 auto;
             padding-top: 20px;
         }
 
@@ -587,16 +549,17 @@
 </head>
 <body>
 
-    <nav class="topbar">
-        <div class="topbar-left">
-            <a href="/" class="back-link">← Terug</a>
-            <a href="/quotes/" class="back-link">💬 Quotes</a>
-            <a href="/klantparels/" class="back-link">💎 Klantparels</a>
+    <nav class="site-topbar">
+        <div class="site-topbar-left">
+            <a href="/" class="site-btn back-link">← Terug</a>
         </div>
-        <div class="topbar-right">
-            <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+        <div class="site-topbar-right">
+            <a href="/overzicht/" class="site-btn" title="Overzicht" aria-label="Overzicht">🧭<span class="nav-label"> Overzicht</span></a>
+            <a href="/admin/" class="site-btn" aria-current="page">🔐 Beheer</a>
+            <button id="theme-toggle" class="site-btn" onclick="toggleTheme()">🌙 Dark</button>
         </div>
     </nav>
+    <div class="site-topbar-spacer"></div>
 
     <div class="page">
 
@@ -767,30 +730,6 @@
 
         let githubToken  = '';
         let currentApp   = 'quotes';
-
-        // ── Theme ─────────────────────────────────────────────────────────────
-        (function initTheme() {
-            // Geen keuze gemaakt? Volg de instelling van het apparaat (zelfde op alle pagina's)
-            const saved = (localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-            if (saved === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.getElementById('theme-toggle').textContent = '☀️ Light';
-            }
-        })();
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const btn  = document.getElementById('theme-toggle');
-            if (html.getAttribute('data-theme') === 'dark') {
-                html.removeAttribute('data-theme');
-                btn.textContent = '🌙 Dark';
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                btn.textContent = '☀️ Light';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
 
         // ── Auth ──────────────────────────────────────────────────────────────
         async function login() {

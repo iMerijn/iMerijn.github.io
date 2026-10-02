@@ -10,6 +10,8 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/nav.css">
+    <script src="/assets/theme.js"></script>
     <title>Overzicht — DNSSEC</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
     <style>
@@ -42,30 +44,6 @@
             display: flex;
             flex-direction: column;
         }
-
-        /* ── Top bar ── */
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-        }
-
-        .topbar-right { display: flex; align-items: center; gap: 8px; }
-
-        a.back-link, a.admin-link, #theme-toggle {
-            background: none;
-            border: 2px solid var(--border);
-            color: var(--text);
-            padding: 8px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-family: inherit;
-            text-decoration: none;
-        }
-
-        a.back-link:hover, a.admin-link:hover, #theme-toggle:hover { opacity: 0.7; }
 
         /* ── Inhoud ── */
         main {
@@ -166,13 +144,6 @@
         }
 
         @media (max-width: 640px) {
-            .topbar { padding: 14px; }
-
-            a.back-link, a.admin-link, #theme-toggle {
-                padding: 6px 10px;
-                font-size: 0.8rem;
-            }
-
             main { justify-content: flex-start; padding-top: 16px; }
 
             h1 { font-size: 2rem; }
@@ -190,13 +161,17 @@
 </head>
 <body>
 
-    <div class="topbar">
-        <a href="/" class="back-link">← Terug</a>
-        <div class="topbar-right">
-            <a href="/admin/" class="admin-link">🔐 Beheer</a>
-            <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+    <nav class="site-topbar">
+        <div class="site-topbar-left">
+            <a href="/" class="site-btn back-link">← Terug</a>
         </div>
-    </div>
+        <div class="site-topbar-right">
+            <a href="/overzicht/" class="site-btn" title="Overzicht" aria-label="Overzicht" aria-current="page">🧭<span class="nav-label"> Overzicht</span></a>
+            <a href="/admin/" class="site-btn">🔐 Beheer</a>
+            <button id="theme-toggle" class="site-btn" onclick="toggleTheme()">🌙 Dark</button>
+        </div>
+    </nav>
+    <div class="site-topbar-spacer"></div>
 
     <main>
         <div class="intro">
@@ -255,29 +230,5 @@
         </div>
     </main>
 
-    <script>
-        (function initTheme() {
-            // Geen keuze gemaakt? Volg de instelling van het apparaat (zelfde op alle pagina's)
-            const saved = (localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-            if (saved === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.getElementById('theme-toggle').textContent = '☀️ Light';
-            }
-        })();
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const btn  = document.getElementById('theme-toggle');
-            if (html.getAttribute('data-theme') === 'dark') {
-                html.removeAttribute('data-theme');
-                btn.textContent = '🌙 Dark';
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                btn.textContent = '☀️ Light';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-    </script>
 </body>
 </html>

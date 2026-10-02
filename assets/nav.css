@@ -1,0 +1,81 @@
+/* ── Gedeelde bovenbalk ──────────────────────────────────────────────────────
+   Wordt door elke pagina geladen, zodat de knoppen overal exact hetzelfde
+   staan en eruitzien. Stijl gebaseerd op de Overzicht-pagina.
+   Pas knoppen dus HIER aan, niet in de losse pagina's. */
+
+:root {
+    --nav-text:   #333333;
+    --nav-border: #dddddd;
+}
+
+[data-theme="dark"] {
+    --nav-text:   #f0f0f0;
+    --nav-border: #3a3a3a;
+}
+
+.site-topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    pointer-events: none;
+}
+
+.site-topbar-left,
+.site-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+/* Ruimte vrijhouden op pagina's waar de inhoud bovenaan begint */
+.site-topbar-spacer { height: 77px; }
+
+.site-btn {
+    box-sizing: border-box;
+    display: inline-block;
+    margin: 0;
+    background: none;
+    border: 2px solid var(--nav-border);
+    color: var(--nav-text);
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: normal;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.site-btn:hover { opacity: 0.7; }
+
+/* De knop van de pagina waar je nu bent */
+.site-btn[aria-current="page"] {
+    background: var(--nav-border);
+    cursor: default;
+}
+
+.site-btn[aria-current="page"]:hover { opacity: 1; }
+
+@media (max-width: 640px) {
+    .site-topbar { padding: 14px; }
+    .site-topbar-spacer { height: 59px; }
+    .site-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Op smalle schermen bij Overzicht alleen het icoon */
+@media (max-width: 480px) {
+    .site-btn .nav-label { display: none; }
+}

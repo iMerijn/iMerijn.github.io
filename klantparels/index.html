@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/nav.css">
+    <script src="/assets/theme.js"></script>
     <title>Klantparels — DNSSEC CS</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
 
@@ -47,58 +49,6 @@
             transition: background 0.3s, color 0.3s;
             min-height: 100vh;
         }
-
-        /* ── Top bar ── */
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 20px;
-            background: var(--bg);
-            border-bottom: none;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-
-        .topbar-left { display: flex; align-items: center; gap: 12px; }
-
-        a.back-link {
-            border: 2px solid var(--border);
-            color: var(--text);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            text-decoration: none;
-            transition: opacity 0.15s;
-        }
-
-        a.back-link:hover { opacity: 0.7; }
-
-        .page-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .topbar-right { display: flex; align-items: center; gap: 8px; }
-
-        .icon-btn {
-            background: none;
-            border: 2px solid var(--border);
-            color: var(--text);
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-family: inherit;
-            transition: opacity 0.15s;
-            white-space: nowrap;
-        }
-
-        .icon-btn:hover { opacity: 0.7; }
 
         /* ── Hero ── */
         .hero {
@@ -318,7 +268,6 @@
             background: var(--polaroid-bg);
             padding: 8px 16px 12px;
         }
-
 
         /* Quote text */
         .card-quote {
@@ -924,8 +873,6 @@
         /* ── Responsive ── */
         @media (max-width: 480px) {
             .hero h1 { font-size: 1.5rem; }
-            .topbar { padding: 10px 14px; }
-            .page-title { font-size: 0.95rem; }
             .wall { padding: 0 12px 32px; column-gap: 12px; }
             .wall { columns: 1; }
         }
@@ -933,25 +880,22 @@
         @media (min-width: 481px) and (max-width: 720px) {
             .wall { columns: 2; }
         }
-        /* Overzicht-knop: op smalle schermen alleen het icoon */
-        @media (max-width: 480px) {
-            .nav-label { display: none; }
-        }
     </style>
 </head>
 <body>
 
     <!-- Top bar -->
-    <nav class="topbar">
-        <div class="topbar-left">
-            <a href="/" class="back-link">← Terug</a>
+    <nav class="site-topbar">
+        <div class="site-topbar-left">
+            <a href="/" class="site-btn back-link">← Terug</a>
         </div>
-        <div class="topbar-right">
-            <a href="/overzicht/" class="icon-btn" style="text-decoration:none" title="Overzicht" aria-label="Overzicht">🧭<span class="nav-label"> Overzicht</span></a>
-            <a href="/admin/" class="icon-btn" style="text-decoration:none">🔐 Beheer</a>
-            <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+        <div class="site-topbar-right">
+            <a href="/overzicht/" class="site-btn" title="Overzicht" aria-label="Overzicht">🧭<span class="nav-label"> Overzicht</span></a>
+            <a href="/admin/" class="site-btn">🔐 Beheer</a>
+            <button id="theme-toggle" class="site-btn" onclick="toggleTheme()">🌙 Dark</button>
         </div>
     </nav>
+    <div class="site-topbar-spacer"></div>
 
     <!-- Hero -->
     <section class="hero">
@@ -1121,30 +1065,6 @@
         let unsubscribe = null;
         let allDocs = [];
         let filterState = { sort: 'newest', type: 'all', period: 'all', category: 'all' };
-
-        // ── Theme ──────────────────────────────────────────────────────────────
-        (function initTheme() {
-            // Geen keuze gemaakt? Volg de instelling van het apparaat (zelfde op alle pagina's)
-            const saved = (localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-            if (saved === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.getElementById('theme-toggle').textContent = '☀️ Light';
-            }
-        })();
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const btn  = document.getElementById('theme-toggle');
-            if (html.getAttribute('data-theme') === 'dark') {
-                html.removeAttribute('data-theme');
-                btn.textContent = '🌙 Dark';
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                btn.textContent = '☀️ Light';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
 
         // ── Toast ──────────────────────────────────────────────────────────────
         let toastTimer = null;
