@@ -15,7 +15,7 @@ Vul een domein in en druk op **Yusu?**. Weet je niet wat DNSSEC is? Klik op "Wat
 ## Overzicht
 ### doetdednssechetnogwel.nl/overzicht: alle pagina's op één plek
 Kwijt? Geen paniek. Hier staan alle URL's netjes op een rij. Understood the assignment.
-- **🧭 Overzicht-knop:** Rechtsboven op elke pagina, ook in het beheer. Op je telefoon alleen het icoontje, want ruimte is schaars. Bestie, je vindt hem wel.
+- **🧭 Overzicht-knop:** Rechtsboven op elke pagina, ook in het beheer. Ook op je telefoon gewoon met tekst. Alleen op hele kleine schermpjes blijft het icoontje over. Bestie, je vindt hem wel.
 - **← Terug:** Kom je via het overzicht? Dan brengt Terug je daar ook weer naartoe. Full circle moment.
 
 ## Quotes

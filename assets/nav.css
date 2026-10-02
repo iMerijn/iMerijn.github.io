@@ -84,7 +84,14 @@ html { scrollbar-gutter: stable; }
     }
 }
 
-/* Op smalle schermen bij Overzicht alleen het icoon */
-@media (max-width: 640px) {
+/* Smalle telefoons (bijv. 360px): knoppen iets compacter zodat alles met tekst past */
+@media (max-width: 400px) {
+    .site-topbar-left,
+    .site-topbar-right { gap: 6px; }
+    .site-btn { padding: 6px 8px; }
+}
+
+/* Alleen op hele kleine schermen (bijv. 320px) bij Overzicht alleen het icoon */
+@media (max-width: 359px) {
     .site-btn .nav-label { display: none; }
 }
