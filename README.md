@@ -75,6 +75,7 @@ Nerd alert, maar we respect it. 🤓
 | `.github/workflows/deploy.yml` | Deploy naar GitHub Pages bij push naar `main` |
 
 - **Data:** Firebase Realtime Database, Firestore en Cloudinary (media).
+- **Cache:** links naar `assets/` eindigen op `?v=dev`. Bij elke deploy wordt dat de commit-code, zodat iedereen meteen de nieuwste versie krijgt. Nieuw bestand in `assets/`? Zet er ook `?v=dev` achter. No stale vibes.
 - **Config:** `klantparels/config.js` wordt bij deploy gemaakt uit GitHub Secrets. Lokaal: kopieer `config.example.js`.
 
 Zie ook [Contributing.md](Contributing.md) en [security.md](security.md).

@@ -37,6 +37,13 @@ jobs:
             cloudinaryUploadPreset: "$CLOUDINARY_UPLOAD_PRESET"
           };
           EOF
+      - name: Versienummer op gedeelde assets (cache busting)
+        # Links naar /assets/ staan in de HTML als ?v=dev. Hier wordt dat de
+        # commit-code, zodat browsers na elke deploy de nieuwe CSS/JS ophalen
+        # in plaats van tot 10 minuten een oude versie uit de cache te gebruiken.
+        run: |
+          find . -name '*.html' -not -path './.git/*' \
+            -exec sed -i "s/?v=dev/?v=${GITHUB_SHA::7}/g" {} +
       - uses: actions/configure-pages@v5
         with:
           enablement: true
