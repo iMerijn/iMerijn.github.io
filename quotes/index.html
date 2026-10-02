@@ -240,8 +240,14 @@
         .quote-counter:hover { opacity: 0.75; }
 
         @media (max-width: 480px) {
-            .bottom-btns { gap: 6px; }
+            .bottom-btns {
+                gap: 6px;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: calc(100% - 32px);
+            }
             .bottom-btn { padding: 5px 9px; font-size: 0.75rem; }
+            .bottom-btns #info-tooltip { left: 0; right: 0; width: auto; }
         }
 
         /* ── Shared modal styles ── */
@@ -392,39 +398,15 @@
         button#submit-quote-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; }
 
         /* ── Info knopje ── */
+        /* Tooltip positioneert t.o.v. .bottom-btns, zodat hij ook op mobiel in beeld blijft */
         #info-wrap {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 10;
+            position: static;
         }
-
-        #info-btn {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 1.5px solid #bbb;
-            background: none;
-            color: #bbb;
-            font-size: 0.72rem;
-            font-style: italic;
-            font-weight: bold;
-            font-family: Georgia, serif;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            line-height: 1;
-            transition: border-color 0.15s, color 0.15s;
-        }
-
-        #info-btn:hover { border-color: #888; color: #888; }
 
         #info-tooltip {
             position: absolute;
-            bottom: 28px;
-            left: 0;
+            bottom: calc(100% + 8px);
+            right: 0;
             background: var(--bg-color);
             border: 1px solid var(--input-border);
             border-radius: 10px;
@@ -542,20 +524,18 @@
         <button class="toast-close" onclick="document.getElementById('new-quotes-toast').classList.remove('visible')" title="Sluiten">✕</button>
     </div>
 
-    <!-- Info knopje linksonder -->
-    <div id="info-wrap">
-        <button id="info-btn" onclick="toggleInfo(event)" aria-label="Belangrijk">i</button>
-        <div id="info-tooltip">
-            <strong>Belangrijk</strong>
-            Deze website is absoluut niet bedoeld om iets of iemand belachelijk te maken of slecht te zetten. Het is een uit de hand gelopen geintje die vooral ook grappig moet blijven. Zodra ook maar iets of iemand hier onprettige of negatieve gevoelens bij heeft gaat het direct offline.
-        </div>
-    </div>
-
     <!-- Bottom buttons -->
     <div class="bottom-btns">
         <button class="bottom-btn" onclick="openScoreboard()">🏆 Scoreboard</button>
         <button class="bottom-btn" onclick="openAddQuote()">📝 Quote toevoegen</button>
         <span id="quote-counter" class="bottom-btn quote-counter" title="Aantal quotes in de database">💬 – quotes</span>
+        <div id="info-wrap">
+            <button id="info-btn" class="bottom-btn" onclick="toggleInfo(event)">⚠️ Belangrijk</button>
+            <div id="info-tooltip">
+                <strong>Belangrijk</strong>
+                Deze website is absoluut niet bedoeld om iets of iemand belachelijk te maken of slecht te zetten. Het is een uit de hand gelopen geintje die vooral ook grappig moet blijven. Zodra ook maar iets of iemand hier onprettige of negatieve gevoelens bij heeft gaat het direct offline.
+            </div>
+        </div>
     </div>
 
     <!-- Scoreboard modal -->
