@@ -232,6 +232,18 @@
 
         .bottom-btn:hover { opacity: 0.7; }
 
+        .quote-counter {
+            cursor: default;
+            opacity: 0.75;
+        }
+
+        .quote-counter:hover { opacity: 0.75; }
+
+        @media (max-width: 480px) {
+            .bottom-btns { gap: 6px; }
+            .bottom-btn { padding: 5px 9px; font-size: 0.75rem; }
+        }
+
         /* ── Shared modal styles ── */
         .modal-overlay {
             display: none;
@@ -543,6 +555,7 @@
     <div class="bottom-btns">
         <button class="bottom-btn" onclick="openScoreboard()">🏆 Scoreboard</button>
         <button class="bottom-btn" onclick="openAddQuote()">📝 Quote toevoegen</button>
+        <span id="quote-counter" class="bottom-btn quote-counter" title="Aantal quotes in de database">💬 – quotes</span>
     </div>
 
     <!-- Scoreboard modal -->
@@ -710,6 +723,8 @@
                 .map(b => b.trim()).filter(b => b.length > 0)
                 .map(b => b.split('\n').map(l => l.trim()).filter(l => l).join(' '))
                 .filter(t => t.length > 0);
+            document.getElementById('quote-counter').textContent =
+                `💬 ${quotes.length} quote${quotes.length === 1 ? '' : 's'}`;
         }
 
         function updateCrown() {
