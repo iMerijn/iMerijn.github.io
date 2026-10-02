@@ -108,10 +108,6 @@ Dank all
 
 ---
 
-Dank all
-
----
-
 Als het jankt, wordt je later bedankt
 
 ---
@@ -251,8 +247,6 @@ Most tools give us another dashboard. Most agencies sell hours without owning th
 
 ---
 
----
-
 Ik zou graag eerst met elkaar in overleg willen bekijken of buy vs build per element in onze technology core wel of niet slim is om te doen. Dus totale holistische overview met elkaar definiëren en daarop audit doen ipv per losse tool of Technology deze keuze per element maken.
 
 ---
@@ -298,10 +292,6 @@ Wij weten niet wat we niet weten
 ---
 
 Ons ChatGPT account is Bonnie Blue
-
----
-
-vooral als we dingen gaan coden-releasen-shippen. Dat moet in control zijn
 
 ---
 
