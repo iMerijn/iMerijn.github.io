@@ -59,6 +59,7 @@ Nerd alert, maar we respect it. 🤓
 | `quotes/index.html` | Quotes-pagina |
 | `quotes/quotes.md` | Alle quotes (de bron), gescheiden door `---` |
 | `klantparels/index.html` | Klantparels-pagina |
+| `overzicht/index.html` | Overzicht van alle URL's |
 | `admin/index.html` | Beheer |
 | `database.rules.json` | Regels Realtime Database (stemmen, ingestuurde quotes) |
 | `firestore.rules` | Regels Firestore (klantparels, reacties) |

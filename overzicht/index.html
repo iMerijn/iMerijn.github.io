@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6KVMLB0CQ4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6KVMLB0CQ4');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overzicht — DNSSEC</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+    <style>
+        :root {
+            --bg:           #ffffff;
+            --surface:      #f7f7f7;
+            --text:         #333333;
+            --text-muted:   #888888;
+            --border:       #dddddd;
+            --shadow:       rgba(0,0,0,0.12);
+        }
+
+        [data-theme="dark"] {
+            --bg:           #1a1a1a;
+            --surface:      #252525;
+            --text:         #f0f0f0;
+            --text-muted:   #888888;
+            --border:       #3a3a3a;
+            --shadow:       rgba(0,0,0,0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Top bar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+        a.back-link, a.admin-link, #theme-toggle {
+            background: none;
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: inherit;
+            text-decoration: none;
+        }
+
+        a.back-link:hover, a.admin-link:hover, #theme-toggle:hover { opacity: 0.7; }
+
+        /* ── Inhoud ── */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px 72px;
+        }
+
+        .intro { text-align: center; margin-bottom: 36px; }
+
+        h1 { font-size: 2.5rem; margin-bottom: 8px; }
+
+        .intro p { font-size: 1.2rem; color: var(--text-muted); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            width: 100%;
+            max-width: 760px;
+        }
+
+        @keyframes regenboog {
+            from { background-position: 0 0, 0 0; }
+            to   { background-position: 0 0, -600px 0; }
+        }
+
+        a.card {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+            color: var(--text);
+            text-decoration: none;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        a.card:hover, a.card:focus-visible {
+            border-color: transparent;
+            background:
+                linear-gradient(var(--surface), var(--surface)) padding-box,
+                linear-gradient(90deg,
+                    hsl(0,   90%, 55%),
+                    hsl(60,  90%, 52%),
+                    hsl(120, 80%, 45%),
+                    hsl(180, 85%, 45%),
+                    hsl(240, 90%, 60%),
+                    hsl(300, 90%, 55%),
+                    hsl(360, 90%, 55%)
+                ) border-box;
+            background-size: auto, 600px 100%;
+            background-repeat: no-repeat, repeat-x;
+            animation: regenboog 10s linear infinite;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px var(--shadow);
+            outline: none;
+        }
+
+        .card-top { display: flex; align-items: center; gap: 16px; }
+
+        .card-emoji { font-size: 2.4rem; line-height: 1; flex-shrink: 0; }
+
+        .card-body { flex: 1; min-width: 0; }
+
+        .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 2px; }
+
+        .card-desc { font-size: 0.95rem; color: var(--text-muted); }
+
+        .card-url {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            overflow-wrap: anywhere;
+            transition: color 0.15s ease;
+        }
+
+        a.card:hover .card-url, a.card:focus-visible .card-url { color: var(--text); }
+
+        .card-arrow {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            transition: transform 0.15s ease, color 0.15s ease;
+        }
+
+        a.card:hover .card-arrow, a.card:focus-visible .card-arrow {
+            transform: translateX(4px);
+            color: var(--text);
+        }
+
+        @media (max-width: 640px) {
+            .topbar { padding: 14px; }
+
+            a.back-link, a.admin-link, #theme-toggle {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            main { justify-content: flex-start; padding-top: 16px; }
+
+            h1 { font-size: 2rem; }
+
+            .intro p { font-size: 1rem; }
+
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            a.card, .card-arrow, .card-url { transition: none; }
+            a.card:hover, a.card:focus-visible { animation: none; transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <a href="/" class="back-link">← Terug</a>
+        <div class="topbar-right">
+            <a href="/admin/" class="admin-link">🔐 Beheer</a>
+            <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+        </div>
+    </div>
+
+    <main>
+        <div class="intro">
+            <h1>Overzicht</h1>
+            <p>Alles op een rij. Kijk maar ff.</p>
+        </div>
+
+        <div class="grid">
+            <a class="card" href="/">
+                <div class="card-top">
+                    <span class="card-emoji">🚀</span>
+                    <div class="card-body">
+                        <div class="card-title">DNSSEC-check</div>
+                        <div class="card-desc">Doet de DNSSEC het nog wel?</div>
+                    </div>
+                    <span class="card-arrow">→</span>
+                </div>
+                <div class="card-url">doetdednssechetnogwel.nl</div>
+            </a>
+
+            <a class="card" href="/quotes/">
+                <div class="card-top">
+                    <span class="card-emoji">💬</span>
+                    <div class="card-body">
+                        <div class="card-title">Quotes</div>
+                        <div class="card-desc">De beste EXIT Toys quotes.</div>
+                    </div>
+                    <span class="card-arrow">→</span>
+                </div>
+                <div class="card-url">doetdednssechetnogwel.nl<wbr>/quotes</div>
+            </a>
+
+            <a class="card" href="/klantparels/">
+                <div class="card-top">
+                    <span class="card-emoji">💎</span>
+                    <div class="card-body">
+                        <div class="card-title">Klantparels</div>
+                        <div class="card-desc">De beste uitspraken van klanten.</div>
+                    </div>
+                    <span class="card-arrow">→</span>
+                </div>
+                <div class="card-url">doetdednssechetnogwel.nl<wbr>/klantparels</div>
+            </a>
+
+            <a class="card" href="https://vrijdag.doetdednssechetnogwel.nl">
+                <div class="card-top">
+                    <span class="card-emoji">🎉</span>
+                    <div class="card-body">
+                        <div class="card-title">Vrijdag</div>
+                        <div class="card-desc">Vrijdag. That's it.</div>
+                    </div>
+                    <span class="card-arrow">→</span>
+                </div>
+                <div class="card-url">vrijdag.<wbr>doetdednssechetnogwel.nl</div>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        (function initTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            if (saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-toggle').textContent = '☀️ Light';
+            }
+        })();
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn  = document.getElementById('theme-toggle');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                btn.textContent = '🌙 Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = '☀️ Light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+    </script>
+</body>
+</html>
