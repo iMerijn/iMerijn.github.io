@@ -360,8 +360,13 @@
             top: 70px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--bg-color);
-            border: 2px solid var(--input-border);
+            /* Bewegende regenboogrand + schaduw, zelfde als de kaarten op Overzicht bij hover */
+            border: var(--border-width) solid transparent;
+            background:
+                linear-gradient(var(--bg), var(--bg)) padding-box,
+                var(--rainbow) border-box;
+            background-size: auto, 600px 100%;
+            background-repeat: no-repeat, repeat-x;
             border-radius: var(--radius-pill);
             padding: 8px 14px 8px 16px;
             font-size: 0.85rem;
@@ -372,7 +377,16 @@
             box-shadow: 0 8px 24px var(--shadow);
             max-width: calc(100vw - 40px);
             white-space: nowrap;
-            animation: toastIn 0.3s ease;
+            animation: toastIn 0.3s ease, toast-regenboog 10s linear infinite;
+        }
+
+        @keyframes toast-regenboog {
+            from { background-position: 0 0, 0 0; }
+            to   { background-position: 0 0, -600px 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #new-quotes-toast { animation: none; }
         }
 
         #new-quotes-toast.visible { display: flex; }
