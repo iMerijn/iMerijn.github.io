@@ -204,15 +204,25 @@
     <script>
         let missCount = 0;
 
+        // Gekozen thema wordt gedeeld met de andere pagina's (localStorage 'theme')
+        (function initTheme() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-toggle').textContent = '☀️ Light Mode';
+            }
+        })();
+
         function toggleTheme() {
             const body = document.documentElement;
             const btn = document.getElementById('theme-toggle');
             if (body.getAttribute('data-theme') === 'dark') {
                 body.removeAttribute('data-theme');
                 btn.textContent = '🌙 Dark Mode';
+                localStorage.setItem('theme', 'light');
             } else {
                 body.setAttribute('data-theme', 'dark');
                 btn.textContent = '☀️ Light Mode';
+                localStorage.setItem('theme', 'dark');
             }
         }
 
