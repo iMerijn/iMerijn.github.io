@@ -369,6 +369,13 @@
 
         #new-quotes-toast.visible { display: flex; }
 
+        /* Uitfaden (na 8 seconden of via het kruisje) */
+        #new-quotes-toast.hiding {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-8px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
         @keyframes toastIn {
             from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
             to   { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -431,7 +438,7 @@
 
     <div id="new-quotes-toast" class="rainbow-border">
         <span id="new-quotes-msg"></span>
-        <button class="toast-close" onclick="document.getElementById('new-quotes-toast').classList.remove('visible')" title="Sluiten">✕</button>
+        <button class="toast-close" onclick="hideNewQuotesToast()" title="Sluiten">✕</button>
     </div>
 
     <!-- Bottom buttons -->
@@ -781,8 +788,34 @@
             if (count > 0) {
                 document.getElementById('new-quotes-msg').textContent =
                     `✨ ${count} nieuwe quote${count === 1 ? '' : 's'} toegevoegd in de afgelopen 48 uur`;
-                document.getElementById('new-quotes-toast').classList.add('visible');
+                showNewQuotesToast();
             }
+        }
+
+        // Melding verdwijnt vanzelf na 8 seconden. Met de muis erboven blijft hij
+        // staan; na wegbewegen nog 3 seconden. Na een refresh komt hij gewoon terug.
+        const TOAST_DUUR      = 8000;
+        const TOAST_NA_HOVER  = 3000;
+        let   toastTimer      = null;
+
+        function showNewQuotesToast() {
+            const toast = document.getElementById('new-quotes-toast');
+            toast.classList.remove('hiding');
+            toast.classList.add('visible');
+            toastTimer = setTimeout(hideNewQuotesToast, TOAST_DUUR);
+            toast.onmouseenter = () => clearTimeout(toastTimer);
+            toast.onmouseleave = () => {
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(hideNewQuotesToast, TOAST_NA_HOVER);
+            };
+        }
+
+        function hideNewQuotesToast() {
+            clearTimeout(toastTimer);
+            const toast = document.getElementById('new-quotes-toast');
+            if (!toast.classList.contains('visible')) return;
+            toast.classList.add('hiding');
+            setTimeout(() => toast.classList.remove('visible', 'hiding'), 300);
         }
 
         // ── Info tooltip (voor mobiel tap) ───────────────────────────────────
