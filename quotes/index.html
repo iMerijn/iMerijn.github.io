@@ -232,12 +232,16 @@
 
         .bottom-btn:hover { opacity: 0.7; }
 
+        /* Gecentreerd boven de knoppenrij */
         .quote-counter {
-            align-self: center;
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            text-align: center;
             color: #888;
             font-size: 0.85rem;
             white-space: nowrap;
-            margin-right: 4px;
         }
 
         @media (max-width: 480px) {
