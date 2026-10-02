@@ -206,7 +206,9 @@
 
         // Gekozen thema wordt gedeeld met de andere pagina's (localStorage 'theme')
         (function initTheme() {
-            if (localStorage.getItem('theme') === 'dark') {
+            // Geen keuze gemaakt? Volg de instelling van het apparaat (zelfde op alle pagina's)
+            const saved = (localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+            if (saved === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
                 document.getElementById('theme-toggle').textContent = '☀️ Light Mode';
             }
