@@ -233,11 +233,12 @@
         .bottom-btn:hover { opacity: 0.7; }
 
         .quote-counter {
-            cursor: default;
-            opacity: 0.75;
+            align-self: center;
+            color: #888;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            margin-right: 4px;
         }
-
-        .quote-counter:hover { opacity: 0.75; }
 
         @media (max-width: 480px) {
             .bottom-btns {
@@ -247,6 +248,7 @@
                 width: calc(100% - 32px);
             }
             .bottom-btn { padding: 5px 9px; font-size: 0.75rem; }
+            .quote-counter { font-size: 0.75rem; }
             .bottom-btns #info-tooltip { left: 0; right: 0; width: auto; }
         }
 
@@ -526,9 +528,9 @@
 
     <!-- Bottom buttons -->
     <div class="bottom-btns">
+        <span id="quote-counter" class="quote-counter" title="Aantal quotes in de database"></span>
         <button class="bottom-btn" onclick="openScoreboard()">🏆 Scoreboard</button>
         <button class="bottom-btn" onclick="openAddQuote()">📝 Quote toevoegen</button>
-        <span id="quote-counter" class="bottom-btn quote-counter" title="Aantal quotes in de database">💬 – quotes</span>
         <div id="info-wrap">
             <button id="info-btn" class="bottom-btn" onclick="toggleInfo(event)">⚠️ Belangrijk</button>
             <div id="info-tooltip">
@@ -704,7 +706,7 @@
                 .map(b => b.split('\n').map(l => l.trim()).filter(l => l).join(' '))
                 .filter(t => t.length > 0);
             document.getElementById('quote-counter').textContent =
-                `💬 ${quotes.length} quote${quotes.length === 1 ? '' : 's'}`;
+                `${quotes.length} quote${quotes.length === 1 ? '' : 's'}`;
         }
 
         function updateCrown() {
