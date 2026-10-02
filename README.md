@@ -2,6 +2,9 @@
 
 Doet de DNSSEC het nog wel? Wie zal het zeggen.
 
+## Belangrijk
+Deze website is absoluut niet bedoeld om iets of iemand belachelijk te maken of slecht te zetten. Het is een uit de hand gelopen geintje die vooral ook grappig moet blijven. Zodra ook maar iets of iemand hier onprettige of negatieve gevoelens bij heeft gaat het direct offline.
+
 ## Test de DNSSEC meteen op doetdednssechetnogwel.nl
 Vul een domein in, druk op **Yusu?** en je weet het meteen. Weet je niet wat DNSSEC is? Klik dan vooral op de "Wat is DNSSEC?" knop. **Als je kan.**
 
@@ -69,6 +72,3 @@ Voor wie toch onder de motorkap wil kijken.
 - **Config:** `klantparels/config.js` staat niet in git. Die wordt bij het deployen gegenereerd uit GitHub Secrets. Lokaal werken? Kopieer `klantparels/config.example.js` naar `config.js` en vul je eigen waarden in.
 
 Zie ook [Contributing.md](Contributing.md) en [security.md](security.md).
-
-## Belangrijk
-Deze website is absoluut niet bedoeld om iets of iemand belachelijk te maken of slecht te zetten. Het is een uit de hand gelopen geintje die vooral ook grappig moet blijven. Zodra ook maar iets of iemand hier onprettige of negatieve gevoelens bij heeft gaat het direct offline.
