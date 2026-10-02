@@ -360,13 +360,7 @@
             top: 70px;
             left: 50%;
             transform: translateX(-50%);
-            /* Bewegende regenboogrand + schaduw, zelfde als de kaarten op Overzicht bij hover */
-            border: var(--border-width) solid transparent;
-            background:
-                linear-gradient(var(--bg), var(--bg)) padding-box,
-                var(--rainbow) border-box;
-            background-size: auto, 600px 100%;
-            background-repeat: no-repeat, repeat-x;
+            /* Regenboogrand + schaduw komen uit .rainbow-border (/assets/base.css) */
             border-radius: var(--radius-pill);
             padding: 8px 14px 8px 16px;
             font-size: 0.85rem;
@@ -374,20 +368,15 @@
             display: none;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 8px 24px var(--shadow);
             max-width: calc(100vw - 40px);
             white-space: nowrap;
-            animation: toastIn 0.3s ease, toast-regenboog 10s linear infinite;
-        }
-
-        @keyframes toast-regenboog {
-            from { background-position: 0 0, 0 0; }
-            to   { background-position: 0 0, -600px 0; }
+            animation: toastIn 0.3s ease, regenboog-rand 10s linear infinite;
         }
 
         @media (prefers-reduced-motion: reduce) {
             #new-quotes-toast { animation: none; }
         }
+
 
         #new-quotes-toast.visible { display: flex; }
 
@@ -451,7 +440,7 @@
         </div>
     </nav>
 
-    <div id="new-quotes-toast">
+    <div id="new-quotes-toast" class="rainbow-border">
         <span id="new-quotes-msg"></span>
         <button class="toast-close" onclick="document.getElementById('new-quotes-toast').classList.remove('visible')" title="Sluiten">✕</button>
     </div>

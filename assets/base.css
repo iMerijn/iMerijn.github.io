@@ -51,9 +51,16 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
+/* Eén animatie voor alle regenboog-effecten: 600px per 10s, naar links.
+   De eerste laag (vulling binnen een rand) blijft staan, de laatste schuift. */
 @keyframes regenboog-btn {
     from { background-position: 0 0; }
     to   { background-position: -600px 0; }
+}
+
+@keyframes regenboog-rand {
+    from { background-position: 0 0, 0 0; }
+    to   { background-position: 0 0, -600px 0; }
 }
 
 /* Hoofdknop (één per scherm): regenboog */
@@ -76,6 +83,35 @@ body {
 .btn-rainbow:hover { filter: brightness(1.15); }
 .btn-rainbow:disabled { opacity: 0.5; cursor: not-allowed; animation: none; background: #aaa; filter: none; }
 
+/* Regenboogrand (zelfde kleuren en snelheid als .btn-rainbow), met schaduw.
+   Gebruikt door de nieuwe-quotes-melding, de Overzicht-kaarten (hover) en
+   de "Quote toevoegen"-knop op Klantparels. */
+.rainbow-border {
+    border: var(--border-width) solid transparent;
+    background:
+        linear-gradient(var(--bg), var(--bg)) padding-box,
+        var(--rainbow) border-box;
+    background-size: auto, 600px 100%;
+    background-repeat: no-repeat, repeat-x;
+    animation: regenboog-rand 10s linear infinite;
+    box-shadow: 0 8px 24px var(--shadow);
+}
+
+/* Knopvariant: tekst in de gewone tekstkleur binnen de regenboogrand */
+.btn-rainbow-border {
+    color: var(--text);
+    border-radius: var(--radius-control);
+    padding: 10px 22px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.btn-rainbow-border:hover { transform: translateY(-3px); }
+
 @media (prefers-reduced-motion: reduce) {
-    .btn-rainbow { animation: none; }
+    .btn-rainbow, .rainbow-border { animation: none; }
+    .btn-rainbow-border:hover { transform: none; }
 }

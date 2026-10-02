@@ -54,11 +54,6 @@
             max-width: 760px;
         }
 
-        @keyframes regenboog {
-            from { background-position: 0 0, 0 0; }
-            to   { background-position: 0 0, -600px 0; }
-        }
-
         a.card {
             display: flex;
             flex-direction: column;
@@ -76,18 +71,10 @@
             border-color: transparent;
             background:
                 linear-gradient(var(--surface), var(--surface)) padding-box,
-                linear-gradient(90deg,
-                    hsl(0,   90%, 55%),
-                    hsl(60,  90%, 52%),
-                    hsl(120, 80%, 45%),
-                    hsl(180, 85%, 45%),
-                    hsl(240, 90%, 60%),
-                    hsl(300, 90%, 55%),
-                    hsl(360, 90%, 55%)
-                ) border-box;
+                var(--rainbow) border-box;
             background-size: auto, 600px 100%;
             background-repeat: no-repeat, repeat-x;
-            animation: regenboog 10s linear infinite;
+            animation: regenboog-rand 10s linear infinite;
             transform: translateY(-3px);
             box-shadow: 0 8px 24px var(--shadow);
             outline: none;
