@@ -515,12 +515,17 @@
                 font-size: 0.8rem;
             }
         }
+        /* Overzicht-knop: op smalle schermen alleen het icoon */
+        @media (max-width: 480px) {
+            .nav-label { display: none; }
+        }
     </style>
 </head>
 <body>
 
     <a href="/" class="back-link">← Terug</a>
     <div class="topbar-right-wrap">
+        <a href="/overzicht/" class="admin-link" title="Overzicht" aria-label="Overzicht">🗺️<span class="nav-label"> Overzicht</span></a>
         <a href="/admin/" class="admin-link">🔐 Beheer</a>
         <button id="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
     </div>

@@ -933,6 +933,10 @@
         @media (min-width: 481px) and (max-width: 720px) {
             .wall { columns: 2; }
         }
+        /* Overzicht-knop: op smalle schermen alleen het icoon */
+        @media (max-width: 480px) {
+            .nav-label { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -943,6 +947,7 @@
             <a href="/" class="back-link">← Terug</a>
         </div>
         <div class="topbar-right">
+            <a href="/overzicht/" class="icon-btn" style="text-decoration:none" title="Overzicht" aria-label="Overzicht">🗺️<span class="nav-label"> Overzicht</span></a>
             <a href="/admin/" class="icon-btn" style="text-decoration:none">🔐 Beheer</a>
             <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
         </div>
