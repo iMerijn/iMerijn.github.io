@@ -624,16 +624,59 @@
 
         // ── Quotes loader ─────────────────────────────────────────────────────
 
-        async function loadQuotes() {
-            const response = await fetch('/quotes/quotes.md');
+        // Haalt quotes.md op. 'no-cache' = altijd bij de server checken of er een
+        // nieuwe versie is, in plaats van tot 10 minuten een oude uit de cache.
+        async function fetchQuotes() {
+            const response = await fetch('/quotes/quotes.md', { cache: 'no-cache' });
+            if (!response.ok) throw new Error('quotes.md niet bereikbaar');
             const text = await response.text();
-            quotes = text
+            return text
                 .split(/\n---\n/)
                 .map(b => b.trim()).filter(b => b.length > 0)
                 .map(b => b.split('\n').map(l => l.trim()).filter(l => l).join(' '))
                 .filter(t => t.length > 0);
+        }
+
+        function updateQuoteCounter() {
             document.getElementById('quote-counter').textContent =
                 `${quotes.length} quote${quotes.length === 1 ? '' : 's'}`;
+        }
+
+        async function loadQuotes() {
+            quotes = await fetchQuotes();
+            updateQuoteCounter();
+        }
+
+        // ── Quotes live bijhouden ─────────────────────────────────────────────
+        // Komt er een quote bij of gaat er een af in quotes.md, dan lopen de counter
+        // en de rotatie automatisch mee, zonder dat je de pagina hoeft te verversen.
+        async function refreshQuotes() {
+            let fresh;
+            try { fresh = await fetchQuotes(); } catch { return; }
+            if (fresh.length === quotes.length && fresh.every((q, i) => q === quotes[i])) return;
+
+            const currentText = currentIndex >= 0 ? quotes[currentIndex] : null;
+            quotes = fresh;
+            currentIndex = currentText !== null ? quotes.indexOf(currentText) : -1;
+            playlist = [];          // nieuwe ronde met de bijgewerkte lijst
+            playlistIndex = 0;
+            updateQuoteCounter();
+            updateCrown();
+        }
+
+        const QUOTES_POLL_MS = 60 * 1000;   // elke minuut controleren
+        setInterval(() => { if (!document.hidden) refreshQuotes(); }, QUOTES_POLL_MS);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshQuotes(); });
+
+        // Net een quote goedgekeurd in Beheer? Dan staat hij na de deploy (± 1 min)
+        // in quotes.md. Even een paar keer extra kijken zodat de counter snel bijwerkt.
+        function watchApprovals() {
+            let initial = true;
+            db.ref('approved_quotes').limitToLast(1).on('child_added', () => {
+                if (initial) return;
+                [30, 60, 90, 120].forEach(sec => setTimeout(refreshQuotes, sec * 1000));
+            });
+            db.ref('approved_quotes').limitToLast(1).once('value', () => { initial = false; });
         }
 
         function updateCrown() {
@@ -842,6 +885,7 @@
             .then(() => loadQuotes())
             .then(() => {
                 startWatchingTopQuote();
+                watchApprovals();
                 showNextQuote();
                 checkNewQuotes(); // los van de rest — mislukt stil als Firebase traag is
             })
