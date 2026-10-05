@@ -43,19 +43,18 @@ It's giving onvergetelijk.
 - **Reageren:** Naam en reactie, that's it. Spill the tea. ☕
 
 ## Vrijdagmiddag
-### vrijdag.doetdednssechetnogwel.nl: GeoGuessr, broodjes en de vrijdagvibe
-Het weekend begint hier. Eén rondje GeoGuessr, een lekker broodje en wie weet nog door naar Café de Borrel. It's giving weekend. 🌍🥪
-- **📋 Vrijdagpoll:** Doe je mee met GeoGuessr? Hoe laat kun je? Welk broodje wil je (doorgeven tot 10:30, daarna is het game over)? Vanaf hoe laat moet Radio Olympia aan? En gaan we naar Café de Borrel? Eén keer invullen en je zit erin. Iedereen met de link ziet je antwoorden, dus no cap.
-- **📊 Tussenstand:** Live zien wie er meedoet, welke tijd het populairst is en wie er mee de kroeg in gaat. Main character energy voor wie als eerste invult.
-- **🏆 GeoGuessr-ranglijst:** Winnaars per potje en een maandklassement. Wie de wereld het best kent, krijgt de bragging rights.
-- **🤖 Vrijdag-autopiloot:** Wie bestelt, wie haalt op, wie zet het spel klaar? Pak een taak en de vrijdag regelt zichzelf. Lowkey efficiënt.
-- **🥪 Broodjeslab:** Jouw afrekening, je favorieten en het broodjespaspoort. Verzamel badges als Carpaccio-conservatief of Broodjesontdekker. Of klik op "Verras me" voor een broodje buiten je comfortzone. Rizz voor je lunch.
-- **🏛️ Ministerie van Vrijdagmiddag:** Solliciteer als Minister van Broodzaken, Staatssecretaris van Geografie of Commissaris Olympia (nul salaris, wel aanzien). Dien moties in en stem mee. De sauskwestie wacht op niemand.
-- **📚 Historie:** Alle vrijdagen terugzien: gespeelde maps, winnaars, de meest bestelde broodjes en wat het allemaal kostte. Lore voor later.
-- **📺 Schermweergave:** Een volledig-scherm-versie voor op de tv. Werkt zichzelf automatisch bij. Big screen energy.
-- **⚙️ Beheer:** De vrijdag klaarzetten, broodjes beheren en winnaars invullen. Via de Beheer-knop op de pagina zelf.
+### vrijdag.doetdednssechetnogwel.nl: GeoGuessr en broodjes op vrijdag
+It's giving weekend. 🌍🥪
+- **📋 Poll:** GeoGuessr, tijd, broodje (tot 10:30), Radio Olympia en Café de Borrel. Eén keer invullen.
+- **📊 Tussenstand:** Wie doet mee en welke tijd wint.
+- **🏆 Ranglijst:** Winnaars per potje en per maand. Bragging rights.
+- **🤖 Autopiloot:** Pak een taak: bestellen, ophalen of het spel klaarzetten.
+- **🥪 Broodjeslab:** Afrekening, favorieten en broodjespaspoort. Rizz voor je lunch.
+- **🏛️ Ministerie:** Word minister (nul salaris) en stem over moties. De sauskwestie wacht.
+- **📚 Historie:** Alle vrijdagen, maps, winnaars en broodjes. Lore.
+- **📺 Scherm:** Volledig scherm voor op de tv. Big screen energy.
 
-**Let op:** de Vrijdagmiddag-pagina staat niet in deze repo. Het is een losse app op het subdomein `vrijdag.`, met een eigen code en een eigen beheer. Hij hoort wel bij de site: hij staat op de [Overzicht-pagina](https://doetdednssechetnogwel.nl/overzicht) en heeft een knop terug naar het Overzicht. Wijzigingen aan de vrijdag doe je dus niet hier. Different repo, same vibe.
+**Let op:** deze pagina staat niet in deze repo. Het is een losse app met eigen code en beheer. Different repo, same vibe.
 
 ## Beheer
 Log in op doetdednssechetnogwel.nl/admin met je GitHub Personal Access Token.
