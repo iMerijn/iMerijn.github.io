@@ -43,16 +43,16 @@ It's giving onvergetelijk.
 - **Reageren:** Naam en reactie, that's it. Spill the tea. ☕
 
 ## Vrijdagmiddag
-### vrijdag.doetdednssechetnogwel.nl: GeoGuessr en broodjes op vrijdag
-It's giving weekend. 🌍🥪
-- **📋 Poll:** GeoGuessr, tijd, broodje (tot 10:30), Radio Olympia en Café de Borrel. Eén keer invullen.
-- **📊 Tussenstand:** Wie doet mee en welke tijd wint.
-- **🏆 Ranglijst:** Winnaars per potje en per maand. Bragging rights.
-- **🤖 Autopiloot:** Pak een taak: bestellen, ophalen of het spel klaarzetten.
-- **🥪 Broodjeslab:** Afrekening, favorieten en broodjespaspoort. Rizz voor je lunch.
-- **🏛️ Ministerie:** Word minister (nul salaris) en stem over moties. De sauskwestie wacht.
-- **📚 Historie:** Alle vrijdagen, maps, winnaars en broodjes. Lore.
-- **📺 Scherm:** Volledig scherm voor op de tv. Big screen energy.
+### vrijdag.doetdednssechetnogwel.nl: waar de werkweek eindigt en de wereldreis begint
+Laptop dicht, wereldbol open. 🌍🥪
+- **📋 Poll:** Doe je mee, hoe laat, welk broodje? Broodje vóór 10:30, anders is het game over.
+- **📊 Tussenstand:** Live zien wie er komt opdagen. En wie er weer "misschien" zegt.
+- **🏆 Ranglijst:** Per potje en per maand. Eeuwige roem, geen prijzengeld.
+- **🤖 Autopiloot:** Bestellen, ophalen, spel klaarzetten. Claim je rol, wees de held.
+- **🥪 Broodjeslab:** Je eigen broodjespaspoort. Carpaccio-conservatief of Broodjesontdekker? We zien het.
+- **🏛️ Ministerie:** Minister van Broodzaken worden. Nul salaris, maximale status. De sauskwestie blijft onopgelost.
+- **📚 Historie:** Elke map, elke winnaar, elk broodje. Vrijdag-lore voor de eeuwigheid.
+- **📺 Scherm:** Hele vrijdag op de tv. Big screen energy.
 
 **Let op:** deze pagina staat niet in deze repo. Het is een losse app met eigen code en beheer. Different repo, same vibe.
 
