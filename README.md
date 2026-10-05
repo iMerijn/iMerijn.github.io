@@ -42,6 +42,21 @@ It's giving onvergetelijk.
 - **Vergroten:** Klik op foto of video. Detective mode: on. 🔍
 - **Reageren:** Naam en reactie, that's it. Spill the tea. ☕
 
+## Vrijdagmiddag
+### vrijdag.doetdednssechetnogwel.nl: GeoGuessr, broodjes en de vrijdagvibe
+Het weekend begint hier. Eén rondje GeoGuessr, een lekker broodje en wie weet nog door naar Café de Borrel. It's giving weekend. 🌍🥪
+- **📋 Vrijdagpoll:** Doe je mee met GeoGuessr? Hoe laat kun je? Welk broodje wil je (doorgeven tot 10:30, daarna is het game over)? Vanaf hoe laat moet Radio Olympia aan? En gaan we naar Café de Borrel? Eén keer invullen en je zit erin. Iedereen met de link ziet je antwoorden, dus no cap.
+- **📊 Tussenstand:** Live zien wie er meedoet, welke tijd het populairst is en wie er mee de kroeg in gaat. Main character energy voor wie als eerste invult.
+- **🏆 GeoGuessr-ranglijst:** Winnaars per potje en een maandklassement. Wie de wereld het best kent, krijgt de bragging rights.
+- **🤖 Vrijdag-autopiloot:** Wie bestelt, wie haalt op, wie zet het spel klaar? Pak een taak en de vrijdag regelt zichzelf. Lowkey efficiënt.
+- **🥪 Broodjeslab:** Jouw afrekening, je favorieten en het broodjespaspoort. Verzamel badges als Carpaccio-conservatief of Broodjesontdekker. Of klik op "Verras me" voor een broodje buiten je comfortzone. Rizz voor je lunch.
+- **🏛️ Ministerie van Vrijdagmiddag:** Solliciteer als Minister van Broodzaken, Staatssecretaris van Geografie of Commissaris Olympia (nul salaris, wel aanzien). Dien moties in en stem mee. De sauskwestie wacht op niemand.
+- **📚 Historie:** Alle vrijdagen terugzien: gespeelde maps, winnaars, de meest bestelde broodjes en wat het allemaal kostte. Lore voor later.
+- **📺 Schermweergave:** Een volledig-scherm-versie voor op de tv. Werkt zichzelf automatisch bij. Big screen energy.
+- **⚙️ Beheer:** De vrijdag klaarzetten, broodjes beheren en winnaars invullen. Via de Beheer-knop op de pagina zelf.
+
+**Let op:** de Vrijdagmiddag-pagina staat niet in deze repo. Het is een losse app op het subdomein `vrijdag.`, met een eigen code en een eigen beheer. Hij hoort wel bij de site: hij staat op de [Overzicht-pagina](https://doetdednssechetnogwel.nl/overzicht) en heeft een knop terug naar het Overzicht. Wijzigingen aan de vrijdag doe je dus niet hier. Different repo, same vibe.
+
 ## Beheer
 Log in op doetdednssechetnogwel.nl/admin met je GitHub Personal Access Token.
 
@@ -74,6 +89,7 @@ Nerd alert, maar we respect it. 🤓
 | `firestore.rules` | Regels Firestore (klantparels, reacties) |
 | `.github/workflows/deploy.yml` | Deploy naar GitHub Pages bij push naar `main` |
 
+- **Vrijdagmiddag:** `vrijdag.doetdednssechetnogwel.nl` is een aparte app en staat niet in deze repo (zie [Vrijdagmiddag](#vrijdagmiddag)).
 - **Data:** Firebase Realtime Database, Firestore en Cloudinary (media).
 - **Cache:** links naar `assets/` eindigen op `?v=dev`. Bij elke deploy wordt dat de commit-code, zodat iedereen meteen de nieuwste versie krijgt. Nieuw bestand in `assets/`? Zet er ook `?v=dev` achter. No stale vibes.
 - **Config:** `klantparels/config.js` wordt bij deploy gemaakt uit GitHub Secrets. Lokaal: kopieer `config.example.js`.
