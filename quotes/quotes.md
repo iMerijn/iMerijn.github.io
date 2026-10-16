@@ -349,3 +349,7 @@ Jij was Mister GitHub toch?
 ---
 
 Ik neem de Devices mee, maar redelijk offline overdag!
+
+---
+
+Ik neem de Devices mee, maar redelijk offline overdag!
