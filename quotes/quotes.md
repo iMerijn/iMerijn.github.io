@@ -353,3 +353,7 @@ Ik neem de Devices mee, maar redelijk offline overdag!
 ---
 
 Ik neem de Devices mee, maar redelijk offline overdag!
+
+---
+
+Wie heeft een website en een volle maan als ze bukt?
