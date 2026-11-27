@@ -381,3 +381,7 @@ CM-ass
 ---
 
 Beterschap en we zien je snel weer groen op Teams!
+
+---
+
+De eerste stoot is als een mat uit kloppen
